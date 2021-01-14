@@ -1,0 +1,147 @@
+{% extends 'elegislative/dashboard.html' %}
+{% load static %}
+{% load humanize %} 
+{% block title %}
+e-Legislative Manage Agenda
+{% endblock title%}
+<!-- CSS -->
+{% block additional_css %}
+<!-- DataTables -->
+<link rel="stylesheet" href="{% static 'bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css' %}">
+
+<style>
+    table td{
+        text-align: center; 
+        vertical-align: middle !important;
+    }
+</style>
+{% endblock additional_css %}
+
+<!-- navigation -->
+{% block nav_dashboard %}
+<li class="treeview">
+    <a href="{% url 'elegislative:dashboard_page' %}" >
+    <i class="fa fa-dashboard" ></i> <span>Dashboard</span>
+    <span class="pull-right-container">
+        <i class="fa fa-angle-left pull-right"></i>
+    </span>
+    </a>
+    <ul class="treeview-menu">
+    <li class="active"><a href="{% url 'elegislative:dashboard_page' %}"><i class="fa fa-circle-o"></i> Dashboard</a></li> 
+    </ul>
+</li>
+{% endblock nav_dashboard %}
+
+{% block nav_agenda %}
+<li class="active">
+    <a href="{% url 'elegislative:agenda_page' %}">
+    <i class="fa fa-hand-o-right"></i> <span>Agenda</span>
+    <span class="pull-right-container">
+        <small class="label pull-right bg-green">new</small>
+    </span>
+    </a>
+</li>
+{% endblock nav_agenda %}
+
+{% block main_content %} 
+
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <section class="content-header">
+        <h1>
+        Agenda
+        <small>Create and manage agenda</small>
+        </h1>
+        <ol class="breadcrumb">
+        <li><a href="{% url 'elegislative:dashboard_page' %}"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Referrals</li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Agenda Table</h3>
+                        <div class="box-tools"> 
+                            <ul class="pagination pagination-sm no-margin pull-right">
+                              <li><a id="newAdminConcern" href="{% url 'elegislative:create_agenda_page' %}" data-toggle="tooltip" title="File New Agenda Form"><i class="fa fa-fw fa-plus"></i>File New Agenda</a></li>  
+                            </ul>
+                        </div>
+                      
+                    </div>
+                    <div class="box-body">
+                        <table id="table_referrals" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th class="text-center" style="width: 10%;">ID</th> 
+                                    <th class="text-center" style="width: 10%;">No</th> 
+                                    <th class="text-center" style="width: 20%;">Title</th>
+                                    <th class="text-center" style="width: 15%;">Author</th>
+                                    <th class="text-center" style="width: 10%;">Version</th>
+                                    <th class="text-center" style="width: 10%;">Status</th>
+                                    <th class="text-center" style="width: 5%;">Signed</th>
+                                    <th class="text-center" style="width: 10%;"> Date Filed</th>                                
+                                    <th class="text-center" style="width: 10%;"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                
+                                {% for a in agenda %}
+                                <tr>
+                                    <td>{{a.id}}</td>
+                                    <td>{{a.no}}</td>
+                                    <td>{{a.title}}</td> 
+                                    <td>{{a.author}}</td>
+                                    <td>{{a.version}}</td>
+                                    <td>{{a.status}}</td>
+                                    <td> 
+                                        {% if a.is_signed %}                                        
+                                        <span class="label label-success">{{a.is_signed}}</span>
+                                        {% else %}
+                                        <span class="label label-danger">{{a.is_signed}}</span>
+                                        {% endif %} 
+                                    </td>
+                                    <td>{{a.date_filed}}</td> 
+                                    <td>
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-default btn-flat">Action</button>
+                                            <button type="button" class="btn btn-default btn-flat dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
+                                              <span class="caret"></span>
+                                              <span class="sr-only">Toggle Dropdown</span>
+                                            </button>
+                                            <ul class="dropdown-menu" role="menu">
+                                              <li><a href="{% url 'elegislative:edit_agenda_page' a.id %}">Edit</a></li>
+                                              <li><a href="{% url 'elegislative:delete_agenda_page' a.id %}" class="delete">Delete</a></li> 
+                                              <li class="divider"></li>                                                
+                                              <li><a href="{% url 'elegislative:print_agenda_page' a.id %}" target="_blank">Preview/Print</a></li>   
+                                              <li><a href="{% url 'elegislative:create_resolutions' a.id %}" >Create Resolution</a></li>   
+                                              <li><a href="{% url 'elegislative:create_ordinance_page' a.id %}">Create Ordinance</a></li>   
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>                                    
+                                {% endfor %}
+                                    
+                             
+                            </tbody> 
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+{% endblock main_content %} 
+
+<!-- Javascript -->
+   
+{% block additional_js %}
+
+<!-- DataTables -->
+<script src="{% static 'bower_components/datatables.net/js/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js' %}"></script>
+<script src="{% static 'js/agenda.js' %}"></script> 
+ 
+{% endblock additional_js %}

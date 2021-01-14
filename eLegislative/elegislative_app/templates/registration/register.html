@@ -1,0 +1,134 @@
+{% extends 'registration/registration_base.html' %}
+{% load static %}
+
+{% block body_block %}
+<div class="register-box" style="padding-bottom: 100px !important;">
+    <div class="register-logo">
+        <a href=""><b>E-Legislative </b>System</a>
+    </div>  
+    {% if form.errors %}
+    <div class="alert alert-danger alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button> 
+        <h4><i class="icon fa fa-ban"></i> Form Validation Error!</h4>  
+        {{ form.email.errors|striptags }}
+        {{ form.image.errors|striptags }}
+        {{ form.f_name.errors|striptags }}
+        {{ form.m_name.errors|striptags }}
+        {{ form.l_name.errors|striptags }}
+        {{ form.gender.errors|striptags }}
+        {{ form.dob.errors|striptags }}
+        {{ form.age.errors|striptags }}
+        {{ form.address.errors|striptags }}
+        {{ form.title.errors|striptags }} 
+    </div>
+    {% endif %} 
+    <div class="register-box-body">
+        <p class="login-box-msg">Register a new membership</p>
+
+        <form method="POST">
+            {% csrf_token %}
+            {{form.non_field_errors}}
+        
+            <!-- Email -->
+            <div class="form-group has-feedback">
+                {{form.email}}
+                <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
+            </div>
+
+            <!-- Full Name -->
+            <div class="form-group has-feedback">
+                {{form.f_name}}
+                <span class="glyphicon glyphicon-user form-control-feedback"></span>
+            </div>
+
+            
+            <div class="form-group has-feedback">
+                {{form.m_name}}
+                <span class="glyphicon glyphicon-user form-control-feedback"></span>
+            </div>
+
+            
+            <div class="form-group has-feedback">
+                {{form.l_name}}
+                <span class="glyphicon glyphicon-user form-control-feedback"></span>
+            </div>
+
+            <!-- End Full Name -->
+
+            <div class="form-group has-feedback">
+                {{form.gender}} 
+            </div>
+ 
+            <div class="form-group has-feedback" > 
+                <div class="input-group date">
+                    <div class="input-group-addon">
+                      <i class="fa fa-calendar"></i>
+                    </div>
+                    {{ form.dob }}
+                </div>
+            </div>
+
+            <div class="form-group has-feedback">
+                {{form.age}}
+                <span class="glyphicon glyphicon-calendar form-control-feedback"></span>
+            </div>
+
+            <div class="form-group has-feedback">
+                {{form.address}}
+                <span class="glyphicon glyphicon-home form-control-feedback"></span>
+            </div>
+
+
+            <div class="form-group has-feedback">
+                {{form.password1}}
+                <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+            </div>
+
+            <div class="form-group has-feedback">
+                {{form.password2}}
+                <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+            </div>
+
+            <div class="form-group has-feedback">
+                <label for="">Upload Picture:</label>
+                {{form.image}}                
+            </div>
+
+            <div class="row">
+                <div class="col-xs-8">
+                    <div class="checkbox icheck">
+                        <label>
+                            <input type="checkbox" required> I agree to the <a href="#">terms</a>
+                        </label>
+                    </div>
+                </div>
+                <!-- /.col -->
+                <div class="col-xs-4">
+                    <button type="submit" class="btn btn-primary btn-block btn-flat">Register</button>
+                </div>
+                <!-- /.col -->
+            </div>
+        </form>
+
+        <div class="social-auth-links text-center">
+            <p>- OR -</p>
+            <a href="{% url 'login' %}" class="text-center">I already have a membership</a>
+        </div>
+    </div>
+
+    
+</div>
+ 
+
+{% endblock body_block %}
+
+
+{% block rearscript %}
+  <script>
+    //Initialize Select2 Elements     
+    $('.select2').select2();
+    $('#dob').datepicker({
+        autoclose: true
+    }); 
+  </script>
+{% endblock rearscript %}
