@@ -2,7 +2,7 @@ from django.http import JsonResponse, Http404, HttpResponseRedirect, HttpRespons
 from django.urls import reverse, reverse_lazy
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-
+from django.db.models import Q
 from django.shortcuts import render, get_object_or_404
 from django.template.loader import render_to_string
 from django.conf import settings
@@ -19,7 +19,7 @@ import base64
 import logging
 import traceback  
 
-
+import json
 from functools import wraps
 # Create your views here.
 
@@ -256,42 +256,174 @@ def print_agenda_page(request, id):
 [START] -> CRUD, Manage Comments & Recommendation Features
 """
 # Proposed Ordinance & Resolution Feature
+
+# For Resolution
+@authorize
 @login_required
-def comments_and_recommendation(request):
-    """Main page, table"""
+def comments_and_recommendation(request): 
     template_name = "elegislative/comments_recommendation/comments_recommendation.html"
     user = get_object_or_404(models.User, email=request.user.email) 
+    resolutions = models.ResolutionModel.objects.all().filter(Q(is_public=True)) 
+    ordinances = models.OrdinanceModel.objects.all().filter(Q(is_public=True)) 
+
+    # combine = list(resolutions) + list(ordinances)
+
+    # # get modelname based on query
+    # # for c in combine:
+    # #     print(combine.model.__name__)
 
     context = {
         'user': user,
+        'resolutions': resolutions,
+        'ordinances': ordinances, 
     }    
     return render(request, template_name, context)
 
+@authorize
+@login_required
+def posting_resolution(request, id):
+    template_name = "elegislative/comments_recommendation/posting_resolution.html"
+    user = get_object_or_404(models.User, email=request.user.email) 
+    resolution = get_object_or_404(models.ResolutionModel, id=id)
+    com_rec = models.CommentsRecomendationResolutionModel.objects.all().filter(resolution_comments_recommendation_fk=resolution)
+    context = {
+        'user': user, 
+        'resolution': resolution,
+        'com_rec': com_rec,
+    }   
+    return render(request, template_name, context)
+
+@authorize
+@login_required
+def posting_resolution_post_comment(request, id):
+    data = dict() 
+    if request.is_ajax():
+        user = get_object_or_404(models.User, email=request.user.email) 
+        resolution = get_object_or_404(models.ResolutionModel, id=id)
+        com_rec = models.CommentsRecomendationResolutionModel.objects.all().filter(resolution_comments_recommendation_fk=resolution)
+        if resolution.is_public: 
+            if request.method == 'POST': 
+                json_obj = json.loads(request.body)
+                comment = json_obj['data'] 
+                create = models.CommentsRecomendationResolutionModel(resolution_comments_recommendation_fk=resolution, commentor_resolution=user, message=comment)
+                create.save()  
+
+                url = reverse_lazy('elegislative:posting_resolution_delete_comment', kwargs={'id':create.id, 'rid':resolution.id}) 
+                data = {
+                    'image': create.commentor_resolution.image.url,
+                    'name': f"{create.commentor_resolution.f_name} {create.commentor_resolution.l_name}",
+                    'date_filed': create.date_filed.strftime("%b. %d, %Y, %I:%M %p"),
+                    'message': create.message,
+                    'url': url,
+                    'total': com_rec.count(),
+                } 
+
+            context = {
+                'user': user, 
+                'resolution': resolution,
+            }    
+            return JsonResponse(data)
+        else:
+
+            raise Http404()
+    else:
+        raise Http404()
  
+@authorize
+@login_required
+def posting_resolution_delete_comment(request, id, rid):
+    data = dict() 
+    if request.is_ajax():
+        user = get_object_or_404(models.User, email=request.user.email) 
+        comment = get_object_or_404(models.CommentsRecomendationResolutionModel, id=id)
+        resolution = get_object_or_404(models.ResolutionModel, id=rid)
+        com_rec = models.CommentsRecomendationResolutionModel.objects.all().filter(resolution_comments_recommendation_fk=resolution)
+        if request.method == 'POST':
+            comment.delete()
+            data ={
+                'form_is_valid': True,
+                'total': com_rec.count(),
+            } 
+            return JsonResponse(data) 
+    else:
+        raise Http404()
+
+# For Ordinance
+@authorize
+@login_required
+def posting_ordinance(request, id):
+    template_name = "elegislative/comments_recommendation/posting_ordinance.html"
+    user = get_object_or_404(models.User, email=request.user.email) 
+    ordinance = get_object_or_404(models.OrdinanceModel, id=id)
+    com_rec = models.CommentsRecomendationOrdinanceModel.objects.all().filter(ordinance_comments_recomendation_fk=ordinance)
+    context = {
+        'user': user, 
+        'ordinance': ordinance,
+        'com_rec': com_rec,
+    }   
+    return render(request, template_name, context)
+
+
+@authorize
+@login_required
+def posting_ordinance_post_comment(request, id):
+    data = dict() 
+    if request.is_ajax():
+        user = get_object_or_404(models.User, email=request.user.email) 
+        ordinance = get_object_or_404(models.OrdinanceModel, id=id)
+        com_rec = models.CommentsRecomendationOrdinanceModel.objects.all().filter(ordinance_comments_recomendation_fk=ordinance)
+        if ordinance.is_public: 
+            if request.method == 'POST': 
+                json_obj = json.loads(request.body)
+                comment = json_obj['data'] 
+                create = models.CommentsRecomendationOrdinanceModel(ordinance_comments_recomendation_fk=ordinance, commentor_ordiance=user, message=comment)
+                create.save()  
+
+                url = reverse_lazy('elegislative:posting_ordinance_delete_comment', kwargs={'id':create.id, 'oid':ordinance.id}) 
+                data = {
+                    'image': create.commentor_ordiance.image.url,
+                    'name': f"{create.commentor_ordiance.f_name} {create.commentor_ordiance.l_name}",
+                    'date_filed': create.date_filed.strftime("%b. %d, %Y, %I:%M %p"),
+                    'message': create.message,
+                    'url': url,
+                    'total': com_rec.count(),
+                } 
+
+            context = {
+                'user': user, 
+                'ordinance': ordinance,
+            }    
+            return JsonResponse(data)
+        else:
+
+            raise Http404()
+    else:
+        raise Http404()
+ 
+@authorize
+@login_required
+def posting_ordinance_delete_comment(request, id, oid):
+    data = dict() 
+    if request.is_ajax():
+        user = get_object_or_404(models.User, email=request.user.email) 
+        comment = get_object_or_404(models.CommentsRecomendationOrdinanceModel, id=id)
+        ordinance = get_object_or_404(models.OrdinanceModel, id=oid)
+        com_rec = models.CommentsRecomendationOrdinanceModel.objects.all().filter(ordinance_comments_recomendation_fk=ordinance)
+        if request.method == 'POST':
+            comment.delete()
+            data ={
+                'form_is_valid': True,
+                'total': com_rec.count(),
+            } 
+            return JsonResponse(data) 
+    else:
+        raise Http404()
+
+
 """
 [END] -> CRUD, Manage Comments & Recommendation  Features
 """
-
  
-
-"""
-[START] -> Manage Comments & Recommendation Features
-"""
-
-@login_required
-def comments_and_recommendation(request):
-    # Must have and id
-    template_name = "elegislative/comments_recommendation/comments_recommendation.html"
-    user = get_object_or_404(models.User, email=request.user.email) 
-    context = {
-        'user': user,
-    }    
-    return render(request, template_name, context)
-
-
-"""
-[END] -> Manage Comments & Recommendation Features
-"""
 """
 [START] -> Manage Committee Reports Features
 """

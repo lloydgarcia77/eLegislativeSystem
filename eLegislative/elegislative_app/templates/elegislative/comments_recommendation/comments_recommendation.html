@@ -64,10 +64,100 @@ e-Legislative Manage Comments & Recommendation
             <div class="col-xs-12">
                 <div class="box">
                     <div class="box-header with-border">
-                        <h3 class="box-title">Commenets & Recommendation</h3>                      
+                        <h3 class="box-title">Resolution Table</h3>                      
                     </div>
                     <div class="box-body">
-                     
+                        <table id="table_resolution" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th class="text-center" style="width: 10%;">ID</th> 
+                                    <th class="text-center" style="width: 10%;">No</th> 
+                                    <th class="text-center" style="width: 15%;">Title</th>
+                                    <th class="text-center" style="width: 10%;">Author</th>
+                                    <th class="text-center" style="width: 10%;">Version</th>
+                                    <th class="text-center" style="width: 10%;">Status</th>
+                                    <th class="text-center" style="width: 5%;">Signed</th> 
+                                    <th class="text-center" style="width: 10%;"> Date Filed</th>                                
+                                    <th class="text-center" style="width: 5%;"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                
+                                {% for r in resolutions %}
+                                <tr>
+                                    <td>{{r.id}}</td>
+                                    <td>{{r.no}}</td>
+                                    <td>{{r.title}}</td> 
+                                    <td>{{r.author}}</td>
+                                    <td>{{r.version}}</td>
+                                    <td>{{r.status}}</td>
+                                    <td> 
+                                        {% if r.is_signed %}                                        
+                                        <span class="label label-success">{{r.is_signed}}</span>
+                                        {% else %}
+                                        <span class="label label-danger">{{r.is_signed}}</span>
+                                        {% endif %} 
+                                    </td>
+                                    <td>{{r.date_filed}}</td>  
+                                    <td> 
+                                        <a href="{% url 'elegislative:posting_resolution' r.id %}" class="btn btn-primary btn-xs" data-toggle="tooltip" title="View to Comments & Recommendation"><i class="fa fa-eye"></i></a>
+                                    </td>
+                                </tr>                                    
+                                {% endfor %}
+                                    
+                            </tbody> 
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Ordinance Table</h3>                      
+                    </div>
+                    <div class="box-body">
+                        <table id="table_ordinance" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th class="text-center" style="width: 10%;">ID</th> 
+                                    <th class="text-center" style="width: 10%;">No</th> 
+                                    <th class="text-center" style="width: 15%;">Title</th>
+                                    <th class="text-center" style="width: 10%;">Author</th>
+                                    <th class="text-center" style="width: 10%;">Version</th>
+                                    <th class="text-center" style="width: 10%;">Status</th>
+                                    <th class="text-center" style="width: 5%;">Signed</th> 
+                                    <th class="text-center" style="width: 10%;"> Date Filed</th>                                
+                                    <th class="text-center" style="width: 5%;"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                
+                                {% for o in ordinances %}
+                                <tr>
+                                    <td>{{o.id}}</td>
+                                    <td>{{o.no}}</td>
+                                    <td>{{o.title}}</td> 
+                                    <td>{{o.author}}</td>
+                                    <td>{{o.version}}</td>
+                                    <td>{{o.status}}</td>
+                                    <td> 
+                                        {% if o.is_signed %}                                        
+                                        <span class="label label-success">{{o.is_signed}}</span>
+                                        {% else %}
+                                        <span class="label label-danger">{{o.is_signed}}</span>
+                                        {% endif %} 
+                                    </td>
+                                    <td>{{o.date_filed}}</td>  
+                                    <td>
+                                        <a href="{% url 'elegislative:posting_ordinance' o.id %}" class="btn btn-primary btn-xs" data-toggle="tooltip" title="View to Comments & Recommendation"><i class="fa fa-eye"></i></a>                                                                                
+                                    </td>
+                                </tr>                                    
+                                {% endfor %}
+                                    
+                            </tbody> 
+                        </table>
                     </div>
                 </div>
             </div>
@@ -85,6 +175,22 @@ e-Legislative Manage Comments & Recommendation
 <script src="{% static 'bower_components/datatables.net/js/jquery.dataTables.min.js' %}"></script>
 <script src="{% static 'bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js' %}"></script>
 
- 
+<script>
+    $(document).ready(function () {
+        let table_resolution =  $('#table_resolution').DataTable({
+            'columnDefs': [ {
+                'targets': 8, /* column index */
+                'orderable': false, /* true or false */
+            }]
+        }); 
+        let table_ordinance =  $('#table_ordinance').DataTable({
+            'columnDefs': [ {
+                'targets': 8, /* column index */
+                'orderable': false, /* true or false */
+            }]
+        }); 
+    
+    });
+</script>
         
 {% endblock additional_js %}

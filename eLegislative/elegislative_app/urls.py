@@ -15,8 +15,12 @@ urlpatterns = [
     
     # Proposed Ordinance & Resolution
     path('comments-and-recommendation/', views.comments_and_recommendation, name="comments_and_recommendation"),
- 
- 
+    path('posting-resolution/<int:id>', views.posting_resolution, name="posting_resolution"),
+    path('posting-resolution/post-comment/<int:id>', views.posting_resolution_post_comment, name="posting_resolution_post_comment"),
+    path('posting-resolution/delete-comment/<int:id>/<int:rid>', views.posting_resolution_delete_comment, name="posting_resolution_delete_comment"),
+    path('posting-ordinance/<int:id>', views.posting_ordinance, name="posting_ordinance"),
+    path('posting-ordinance/post-comment/<int:id>', views.posting_ordinance_post_comment, name="posting_ordinance_post_comment"),
+    path('posting-ordinance/delete-comment/<int:id>/<int:oid>', views.posting_ordinance_delete_comment, name="posting_ordinance_delete_comment"),
     # Committee Reports
     path('committee-reports/', views.committee_reports, name="committee_reports"),
     path('create-committee-reports/', views.create_committee_reports, name="create_committee_reports"),

@@ -1,0 +1,159 @@
+{% extends 'elegislative/dashboard.html' %}
+{% load static %} 
+{% load custom_tags%}
+{% load humanize %} 
+{% block title %}
+e-Legislative Posting Ordinance Comments & Recommendation
+{% endblock title%}
+
+
+<!-- CSS -->
+{% block additional_css %}
+<!-- DataTables -->
+<link rel="stylesheet" href="{% static 'bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css' %}">
+
+<style>
+    table td{
+        text-align: center; 
+        vertical-align: middle !important;
+    }
+</style>
+{% endblock additional_css %}
+
+
+<!-- navigation -->
+{% block nav_dashboard %}
+<li class="treeview">
+    <a href="{% url 'elegislative:dashboard_page' %}" >
+    <i class="fa fa-dashboard" ></i> <span>Dashboard</span>
+    <span class="pull-right-container">
+        <i class="fa fa-angle-left pull-right"></i>
+    </span>
+    </a>
+    <ul class="treeview-menu">
+    <li class="active"><a href="{% url 'elegislative:dashboard_page' %}"><i class="fa fa-circle-o"></i> Dashboard</a></li> 
+    </ul>
+</li>
+{% endblock nav_dashboard %}
+
+{% block nav_com_rec %}
+<li  class="active">
+<a href="{% url 'elegislative:comments_and_recommendation' %}" data-toggle="tooltip" title="Comments & Recommendation">
+    <i class="fa fa-files-o"></i> <span>Commt & Rec.</span>
+    <span class="pull-right-container">
+    <small class="label pull-right bg-green">new</small>
+    </span>
+</a>
+</li> 
+{% endblock nav_com_rec %}
+
+
+{% block main_content %} 
+<div class="content-wrapper">
+    <section class="content-header">
+        <h1>
+        Ordinance
+        <small>Comments & Recommendation</small>
+        </h1>
+        <ol class="breadcrumb">
+        <li><a href="{% url 'elegislative:dashboard_page' %}"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li><a href="{% url 'elegislative:comments_and_recommendation' %}">Comments & Recommendation</a></li>
+        <li class="active">Ordinance</li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Comments & Recommendation for Ordinance</h3>                      
+                    </div>
+                    <div class="box-body">
+                        <div class="col-sm-6">
+                            <div class="box box-solid box-primary">
+                              <div class="box-header with-border">
+                                <h3 class="box-title text-center">{{ordinance.title}}</h3> 
+                              </div><!-- /.box-header -->
+                              <div class="box-body">
+                                <p>
+                                    
+                                    {% autoescape off %}
+                                        {{ordinance.content}}
+                                    {% endautoescape %}
+                                    
+                                </p> 
+                                <span class="pull-right text-muted">Date Filed: {{ordinance.date_filed}}</span>
+                                <span class="pull-left text-muted">Publicly Shared</span> 
+                              </div><!-- /.box-body -->
+                            </div><!-- /.box -->
+                          </div>
+                        <div class="col-sm-6">
+                            <div class="box box-solid box-success">
+                                <div class="box-header with-border">
+                                    <div class="user-block">
+                                        <span ><a href="#"><b>Comments & Recommendation Section</b></a></span> 
+                                    </div>
+                                    <!-- /.user-block -->
+                                    <div class="box-tools">
+                                
+                                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                                    </div>
+                                    <!-- /.box-tools -->
+                                </div>  
+                                <div class="box-body"> 
+                                    <span class="pull-right text-muted" id="comment_count">Total of: {{com_rec.count}} comments</span>
+                                </div>
+                                <div id="comment_section" class="box-footer box-comments">
+                                    
+                                    {% for c in com_rec %}
+                                    <div class="box-comment">
+                                        
+                                        {% if c.commentor_ordiance.image %}
+                                        <img class="img-circle img-sm" src="{{c.commentor_ordiance.image.url}}" alt="User Image">
+                                        {% else %} 
+                                        <img class="img-circle img-sm" src="{% static 'images/150x150.png' %}" alt="User Image">   
+                                        {% endif %}
+                                        <div class="comment-text">
+                                            <span class="username">
+                                                {{c.commentor_ordiance.f_name}} {{c.commentor_ordiance.l_name}}
+                                                <span class="text-muted pull-right">{% custom_data_format c.date_filed %} 
+                                                    
+                                                    {% if c.commentor_ordiance == request.user %}
+                                                    <button class="btn btn-secondary btn-xs delete" data-url="{% url 'elegislative:posting_ordinance_delete_comment' c.id ordinance.id %}"><i class="fa fa-trash"></i></button>
+                                                    {% endif %}                                                    
+                                                    
+                                                </span>                                                                                   
+                                            </span>
+                                            {{c.message}}
+                                        </div>
+                                    </div>
+                                    {% empty %}  
+                                    {% endfor %}
+                                </div>
+
+                                <div class="box-footer">  
+                                    {% if user.image %}
+                                    <img class="img-responsive img-circle img-sm" src="{{user.image.url}}" alt="Alt Text">
+                                    {% else %}
+                                    <img class="img-responsive img-circle img-sm" src="{% static 'images/150x150.png' %}" alt="Alt Text">   
+                                    {% endif %} 
+                                    <!-- .img-push is used to add margin to elements next to floating images -->
+                                    <div class="img-push">
+                                    <input type="text" id="input_comment" class="form-control input-sm" placeholder="Press enter to post comment" data-url="{% url 'elegislative:posting_ordinance_post_comment' ordinance.id %}">
+                                    </div> 
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock main_content %} 
+
+{% block additional_js %}
+<script src="{% static 'js/comments_recommendation_ordinance.js' %}"></script>
+{% endblock additional_js %}

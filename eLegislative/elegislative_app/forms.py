@@ -236,7 +236,7 @@ class ResolutionForm(forms.ModelForm):
         self.fields['no'].widget.attrs = {
             'type': 'text',
             'class': 'form-control',
-            'placeholder': 'Agenda No',
+            'placeholder': 'Resolution No',
             'required': 'required',
         }
 
@@ -278,7 +278,7 @@ class EditResolutionForm(forms.ModelForm):
         self.fields['no'].widget.attrs = {
             'type': 'text',
             'class': 'form-control',
-            'placeholder': 'Agenda No',
+            'placeholder': 'Resolution No',
             'required': 'required',
         }
 
@@ -326,7 +326,7 @@ class OrdinanceForm(forms.ModelForm):
         self.fields['no'].widget.attrs = {
             'type': 'text',
             'class': 'form-control',
-            'placeholder': 'Agenda No',
+            'placeholder': 'Resolution No',
             'required': 'required',
         }
 
@@ -368,7 +368,7 @@ class EditOrdinanceForm(forms.ModelForm):
         self.fields['no'].widget.attrs = {
             'type': 'text',
             'class': 'form-control',
-            'placeholder': 'Agenda No',
+            'placeholder': 'Resolution No',
             'required': 'required',
         }
 
