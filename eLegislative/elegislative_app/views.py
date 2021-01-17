@@ -21,6 +21,7 @@ import traceback
 
 import json
 from functools import wraps
+from itertools import chain
 # Create your views here.
 
 # key id encryption
@@ -89,6 +90,8 @@ def login_page(request):
             if user.is_active and user.is_staff and user.is_superuser: 
                 login(request, user)
                 return HttpResponseRedirect(reverse("elegislative:dashboard_page"))
+            else:
+                messages.error(request, "Your account is INVALID! please try again.")
         else:
             print("Invalid Password")
  
@@ -101,7 +104,7 @@ def register_page(request):
     if request.method == 'GET':
         form = forms.RegisterForm(request.GET or None)
     elif request.method == 'POST':
-        form = forms.RegisterForm(request.POST or None)
+        form = forms.RegisterForm(request.POST or None, request.FILES)
         if form.is_valid():
             regForm = form.save(commit=False)
             regForm.key_id =  encrypt_key(regForm.id)
@@ -427,22 +430,42 @@ def posting_ordinance_delete_comment(request, id, oid):
 """
 [START] -> Manage Committee Reports Features
 """
+@authorize
 @login_required
 def committee_reports(request):
     template_name = "elegislative/committee_reports/committee_reports.html"
     user = get_object_or_404(models.User, email=request.user.email) 
+    c_resolutions = models.CommitteeReportResolutionModel.objects.all()
+    c_ordinances = models.CommitteeReportOrdinanceModel.objects.all()
+    result_list = list(chain(c_resolutions, c_ordinances)) 
     context = {
         'user': user,
+        'result_list': result_list,
     }    
     return render(request, template_name, context)
 
 # Create committee reports
+@authorize
 @login_required
-def create_committee_reports(request):
-    template_name = "elegislative/committee_reports/create_new_committee_reports.html"
+def create_committee_resolution_reports(request, id):
+    template_name = "elegislative/committee_reports/create_committee_resolution_reports.html"
     user = get_object_or_404(models.User, email=request.user.email) 
+    resolution = get_object_or_404(models.ResolutionModel, id=id)
+
+    if request.method == 'GET':
+        form = forms.CommitteeReportResolutionForm(request.GET or None)
+    elif request.method == 'POST':
+        form = forms.CommitteeReportResolutionForm(request.POST or None) 
+        if form.is_valid():
+            instance = form.save(commit=False)
+            instance.resolution_committee_report_fk = resolution
+            instance.save()
+            return HttpResponseRedirect(reverse_lazy("elegislative:committee_reports")) 
+
     context = {
         'user': user,
+        'resolution': resolution,
+        'form': form,
     }    
     return render(request, template_name, context)
 """

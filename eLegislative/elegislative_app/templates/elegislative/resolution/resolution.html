@@ -110,7 +110,9 @@ e-Legislative Resolutions
                                                 <li><a href="{% url 'elegislative:edit_resolution' r.id %}">Edit</a></li>   
                                                 <li><a href="{% url 'elegislative:delete_resolution' r.id %}" class="delete">Delete</a></li>   
                                                 <li class="divider"></li>                                                
+                                                <li><a href="{% url 'elegislative:create_committee_resolution_reports' r.id %}">Committee Report</a></li>   
                                                 <li><a href="{% url 'elegislative:print_resolution' r.id %}" target="_blank">Preview/Print</a></li>                                                     
+
                                             </ul>
                                         </div>
                                     </td>

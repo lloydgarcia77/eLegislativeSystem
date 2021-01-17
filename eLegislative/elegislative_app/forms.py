@@ -404,3 +404,46 @@ class EditOrdinanceForm(forms.ModelForm):
             'class': 'form-control select2', 
             'style': 'width: 100%', 
         }
+
+class CommitteeReportResolutionForm(forms.ModelForm):
+    class Meta:
+        model = models.CommitteeReportResolutionModel
+        exclude = ("resolution_committee_report_fk","date_filed","status","is_signed","hard_copy")
+    
+    def __init__(self, *args, **kwargs):
+        super(CommitteeReportResolutionForm, self).__init__(*args, **kwargs)
+
+        self.fields['no'].widget.attrs = {
+            'type': 'text',
+            'class': 'form-control',
+            'placeholder': 'Committee No',
+            'required': 'required',
+        }
+
+        self.fields['title'].widget.attrs = {
+            'type': 'text',
+            'class': 'form-control',
+            'placeholder': 'Title',
+            'required': 'required',
+        }
+
+        self.fields['version'].widget.attrs = {
+            'type': 'text',
+            'class': 'form-control',
+            'placeholder': 'Version',
+            'required': 'required',
+        }
+
+        self.fields['author'].widget.attrs = {
+            'type': 'text',
+            'class': 'form-control',
+            'placeholder': 'author',
+            'required': 'required',
+        }
+
+        self.fields['content'].widget.attrs = { 
+            'id': 'compose_textarea',
+            'class': 'form-control', 
+            'style': 'height: 300px',
+            'required': 'required',
+        }
