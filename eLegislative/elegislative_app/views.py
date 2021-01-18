@@ -187,9 +187,8 @@ def create_agenda_page(request):
         form = forms.AgendaForm(request.POST or None) 
         if form.is_valid():
             form.save()
-            return HttpResponseRedirect(reverse_lazy("elegislative:agenda_page"))
-        else:
-            print("Agenda page error")
+            return HttpResponseRedirect(reverse_lazy("elegislative:agenda_page")) 
+
     context = {
         'user': user,
         'form':form,
@@ -829,13 +828,93 @@ def records(request):
 """
 [START] -> Manage Minutes of the meeting features
 """
+@authorize
 @login_required
 def minutes_of_the_meeting(request):
     template_name = "elegislative/minutes_of_the_meeting/minutes_of_the_meeting.html"
     user = get_object_or_404(models.User, email=request.user.email) 
+    mom = models.MOMModel.objects.all()
     context = {
         'user': user,
+        'mom': mom,
     }    
+    return render(request, template_name, context)
+
+
+@authorize
+@login_required
+def create_minutes_of_the_meeting(request):
+    template_name = "elegislative/minutes_of_the_meeting/create_minutes_of_the_meeting.html"
+    user = get_object_or_404(models.User, email=request.user.email) 
+    
+    if request.method == 'GET':
+        form = forms.MOMForm(request.GET or None)
+    elif request.method == 'POST':
+        form = forms.MOMForm(request.POST or None)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse_lazy("elegislative:minutes_of_the_meeting")) 
+
+    context = { 
+        'user': user,
+        'form': form,
+    }    
+    return render(request, template_name, context)
+
+@authorize
+@login_required
+def edit_minutes_of_the_meeting(request, id):
+    template_name = "elegislative/minutes_of_the_meeting/edit_minutes_of_the_meeting.html"
+    user = get_object_or_404(models.User, email=request.user.email) 
+    mom = get_object_or_404(models.MOMModel, id=id)
+    if request.method == 'GET':
+        form = forms.EditMOMForm(request.GET or None, instance=mom)
+    elif request.method == 'POST':
+        form = forms.EditMOMForm(request.POST or None, request.FILES, instance=mom)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse_lazy("elegislative:minutes_of_the_meeting")) 
+
+    context = { 
+        'user': user,
+        'form': form,
+    }    
+    return render(request, template_name, context)
+
+@authorize
+@login_required
+def delete_minutes_of_the_meeting(request, id):
+    data = dict()
+    template_name = "elegislative/minutes_of_the_meeting/delete_minutes_of_the_meeting.html"
+    user = get_object_or_404(models.User, email=request.user.email) 
+    mom = get_object_or_404(models.MOMModel, id=id)
+
+
+    if request.is_ajax():
+        if request.method == 'GET':
+            context = {
+                'mom': mom,
+            }
+            data['html_form'] = render_to_string(template_name, context, request)
+        elif request.method == 'POST':            
+            data['form_is_valid'] = True
+            mom.delete() 
+        
+        return JsonResponse(data)
+    else:
+        raise Http404()
+
+
+@authorize
+@login_required
+def print_minutes_of_the_meeting(request, id):
+    template_name = "elegislative/minutes_of_the_meeting/print_minutes_of_the_meeting.html"
+    user = get_object_or_404(models.User, email=request.user.email) 
+    mom = get_object_or_404(models.MOMModel, id=id)
+    context = {
+        'user': user,
+        'mom':mom,
+    }
     return render(request, template_name, context)
 """
 [END] -> Manage Minutes of the meeting features

@@ -2,15 +2,10 @@
 {% load static %}
 {% load humanize %} 
 {% block title %}
-e-Legislative Edit Oridnance
+e-Legislative Edit minutes of the meeting
 {% endblock title%}
 
-<!-- CSS -->
-{% block additional_css %}
-<!-- Select2 -->
-<link rel="stylesheet" href="{% static 'bower_components/select2/dist/css/select2.min.css' %}">
-<!-- daterange picker -->
-<link rel="stylesheet" href="{% static 'bower_components/bootstrap-daterangepicker/daterangepicker.css' %}">
+{% block additional_css %} 
 {% endblock additional_css %}
 
 
@@ -29,39 +24,24 @@ e-Legislative Edit Oridnance
 </li>
 {% endblock nav_dashboard %}
 
-{% block nav_oridnance %}
+
+{% block nav_mom %} 
 <li class="active">
-  <a href="{% url 'elegislative:ordinance_page' %}">
-    <i class="fa fa-balance-scale"></i> <span>Ordinances</span>
+  <a href="{% url 'elegislative:minutes_of_the_meeting' %}" data-toggle="tooltip" title="Minutes of the meeting">
+    <i class="fa fa-comments"></i> <span>Min. of the meeting</span>
     <span class="pull-right-container">
       <small class="label pull-right bg-green">new</small>
     </span>
   </a>
 </li>
-{% endblock nav_oridnance %}
-
-
+{% endblock nav_mom %}  
 
 {% block main_content %} 
-
-<!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
-    <section class="content-header">
-        <h1>
-        Edit ordinance
-        <small>Fill out the details for the ordinance</small>
-        </h1>
-        <ol class="breadcrumb">
-        <li><a href="{% url 'elegislative:dashboard_page' %}"><i class="fa fa-dashboard"></i> Dashboard</a></li>
-        <li><a href="{% url 'elegislative:ordinance_page' %}">Ordinance</a></li>
-        <li class="active">Create new ordinance</li>
-        </ol>
-    </section>
-    <section class="content">
-        <form method="POST" enctype="multipart/form-data" >
-            {% csrf_token %}
-            <div class="row">
-                <div class="col-md-12">
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-md-12">
                     {% if form.errors %}
                         <div class="callout callout-danger"> 
                             <h4>Oops! Form Error!</h4>
@@ -70,16 +50,11 @@ e-Legislative Edit Oridnance
                             {{form.errors}} 
                         </div> 
                     {% endif %}
-
                     <div class="box box-primary">
                         <div class="box-header with-border">
-                            <h3 class="box-title">Ordinance form</h3>
+                            <h3 class="box-title">Edit minutes of the meeting</h3>
                         </div>
                         <div class="box-body">
-                            <div class="callout callout-success">
-                                <h4>Agenda Reference Title:</h4>
-                                <p><strong>{{ordinance.agenda_fk.title}}</strong></p>
-                            </div>
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group"> 
@@ -88,6 +63,7 @@ e-Legislative Edit Oridnance
                                     <div class="form-group">
                                         {{form.title}}
                                     </div> 
+
                                     <div class="form-group">
                                         {{form.status}}
                                     </div>
@@ -99,22 +75,21 @@ e-Legislative Edit Oridnance
                                     <div class="form-group">
                                         {{form.author}}
                                     </div>
-                                    <div class="form-group">
-                                        {{form.veto_message}}
-                                    </div>
+                                 
                                 </div> 
                                 <div class="col-md-12"> 
                                     <div class="form-group">
                                         {{form.content}} 
                                     </div>
-                                </div>
+                                </div> 
+                                
                 
                             </div> 
                             <div class="row"> 
                                 <div class="col-md-12"> 
                                     <div class="form-group">
                                         <div class="callout callout-warning">
-                                            <h4>Upload hard copy of the ordinance</h4> 
+                                            <h4>Upload hard copy of the minutes of the meeting</h4> 
                                             <p>If it's necessary, you can upload the hard copy or scan copy of the document with .pdf format.</p>
                                             <label>Attachments: (Portable Document File):</label>
                                             {{ form.hard_copy}}
@@ -125,59 +100,35 @@ e-Legislative Edit Oridnance
                                                   <b>Is the document already signed up?</b>
                                                 </label>
                                             </div> 
-                                            <div class="checkbox" >
-                                                <label>
-                                                    {{form.is_public}}
-                                                  <b>To make the document available for comments & recommendation?</b>
-                                                </label>
-                                            </div> 
                                         </div>
                                             
                                     </div> 
                                 </div>
                             </div>
                         </div>
-                        <!-- Box Footer -->
                         <div class="box-footer">
                             <div class="pull-right"> 
                                 <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
                             </div>
-                            <a href="{% url 'elegislative:ordinance_page' %}" class="btn btn-default"><i class="fa fa-times"></i> Cancel</a> 
-                            
+                            <a href="{% url 'elegislative:minutes_of_the_meeting' %}" class="btn btn-default"><i class="fa fa-times"></i> Cancel</a> 
                         </div>
-                    </div>
-                </div>
+                    </div> 
             </div>
-        </form> 
-    </section>
+        </div>
+    </form>
 </div>
 
 {% endblock main_content %} 
 
-
+<!-- Javascript -->
    
-{% block additional_js %}
-<!-- Select2 -->
-<script src="{% static 'bower_components/select2/dist/js/select2.full.min.js' %}"></script>
-<!-- CK Editor -->
+{% block additional_js %}  
 <script src="{% static 'bower_components/ckeditor/ckeditor.js' %}"></script>
- <!-- date-range-picker -->
-<script src="{% static 'bower_components/moment/min/moment.min.js' %}"></script>
-<script src="{% static 'bower_components/bootstrap-daterangepicker/daterangepicker.js' %}"></script>
 <script>
     $(document).ready(function () {
-        $(function () {
-            //Add text editor
-            //$("#compose-textarea").wysihtml5();
-            CKEDITOR.replace('compose_textarea'); 
-            CKEDITOR.config.extraPlugins = 'justify, lineheight';
-        });
-        //Date range picker
-        $('#reservation').daterangepicker();
-        
-        //Initialize Select2 Elements
-        $('.select2').select2();
+        CKEDITOR.replace('compose_textarea');  
+        CKEDITOR.config.extraPlugins = 'justify, lineheight';
     });
+    
 </script>
-        
 {% endblock additional_js %}
