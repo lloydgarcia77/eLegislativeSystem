@@ -2,7 +2,7 @@
 {% load static %}
 {% load humanize %} 
 {% block title %}
-e-Legislative Edit Committee Resolution Report
+e-Legislative Edit Committee Ordinance Report
 {% endblock title%}
 
 <!-- CSS -->
@@ -48,7 +48,7 @@ e-Legislative Edit Committee Resolution Report
 <div class="content-wrapper">
     <section class="content-header">
         <h1>
-        Resolution
+        Ordinance
         <small>Edit committee reports</small>
         </h1>
         <ol class="breadcrumb">
@@ -72,12 +72,12 @@ e-Legislative Edit Committee Resolution Report
                 {% endif %}
                     <div class="box box-primary">
                         <div class="box-header with-border">
-                            <h3 class="box-title">Committee resolution form</h3>
+                            <h3 class="box-title">Committee ordinance form</h3>
                         </div>
                         <div class="box-body">
                             <div class="callout callout-success">
-                                <h4>Resolution Reference Title:</h4>
-                                <p><strong>{{committee_report.title}}</strong></p>
+                                <h4>Ordinance Reference Title:</h4>
+                                <p><strong>{{committee_report.ordinance_committee_report_fk.title}}</strong></p>
                             </div>
                             <div class="row">
                                 <div class="col-md-6">

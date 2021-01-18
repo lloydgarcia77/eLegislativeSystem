@@ -448,7 +448,7 @@ def committee_reports(request):
     }    
     return render(request, template_name, context)
 
-# Create committee reports
+# CRUD committee reports for resolution
 @authorize
 @login_required
 def create_committee_resolution_reports(request, id):
@@ -528,6 +528,87 @@ def print_committee_resolution_reports(request, id):
     }
     return render(request, template_name, context)
 
+# CRUD committee reports for ordinance
+@authorize
+@login_required
+def create_committee_ordinance_reports(request, id):
+    template_name = "elegislative/committee_reports/create_committee_ordinance_reports.html"
+    user = get_object_or_404(models.User, email=request.user.email) 
+    ordinance = get_object_or_404(models.OrdinanceModel, id=id)
+
+    if request.method == 'GET':
+        form = forms.CommitteeReportOrdinanceForm(request.GET or None)
+    elif request.method == 'POST':
+        form = forms.CommitteeReportOrdinanceForm(request.POST or None)
+        if form.is_valid():
+            instance = form.save(commit=False)
+            instance.ordinance_committee_report_fk = ordinance
+            instance.save()
+            return HttpResponseRedirect(reverse_lazy("elegislative:committee_reports")) 
+
+    context = {
+        'user': user,
+        'form': form,
+        'ordinance': ordinance,
+    }
+
+    return render(request, template_name, context)
+
+@authorize
+@login_required
+def edit_committee_ordinance_reports(request, id):
+    template_name = "elegislative/committee_reports/edit_committee_ordinance_reports.html"
+    user = get_object_or_404(models.User, email=request.user.email) 
+    committee_report = get_object_or_404(models.CommitteeReportOrdinanceModel, id=id) 
+
+    if request.method == 'GET':
+        form = forms.EditCommitteeReportResolutionForm(request.GET or None, instance=committee_report)
+    elif request.method == 'POST':
+        form = forms.EditCommitteeReportResolutionForm(request.POST or None, request.FILES, instance=committee_report) 
+        if form.is_valid(): 
+            form.save()
+            return HttpResponseRedirect(reverse_lazy("elegislative:committee_reports")) 
+    context = {
+        'user': user,
+        'committee_report': committee_report,      
+        'form'  : form,
+    }
+
+    return render(request, template_name, context)
+
+@authorize
+@login_required
+def delete_committee_ordinance_reports(request, id):
+    data = dict()
+    template_name = "elegislative/committee_reports/delete_committee_ordinance_reports.html"
+    user = get_object_or_404(models.User, email=request.user.email) 
+    committee_report = get_object_or_404(models.CommitteeReportOrdinanceModel, id=id) 
+
+    if request.is_ajax():
+        if request.method == 'GET':
+            context = {
+                'committee_report': committee_report,
+            }
+            data['html_form'] = render_to_string(template_name, context, request)
+        elif request.method == 'POST':
+            data['form_is_valid'] = True
+            committee_report.delete()  
+        return JsonResponse(data)
+    else:
+        raise Http404()
+    
+@authorize
+@login_required
+def print_committee_ordinance_reports(request, id):
+    template_name = "elegislative/committee_reports/print_committee_ordinance_reports.html"
+    user = get_object_or_404(models.User, email=request.user.email)
+    committee_report = get_object_or_404(models.CommitteeReportOrdinanceModel, id=id)
+
+    context = {
+        'user': user,
+        'committee_report':committee_report,
+    }
+    return render(request, template_name, context)
 """
 [END] -> Manage Committee Reports Features
 """
