@@ -52,7 +52,22 @@ e-Legislative Announcement
     <section class="content">
         <div class="row">
             <div class="col-xs-12">
-                
+                <table id="table_announcement" class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th class="text-center" style="width: 10%;">ID</th> 
+                            <th class="text-center" style="width: 10%;">Title</th> 
+                            <th class="text-center" style="width: 10%;">Subject</th> 
+                            <th class="text-center" style="width: 10%;">Content</th> 
+                            <th class="text-center" style="width: 10%;">Visible</th> 
+                            <th class="text-center" style="width: 10%;">Date Filed</th> 
+                            <th class="text-center" style="width: 10%;"></th> 
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                    </tbody>
+                </table>
             </div>
         </div>
     </section>
@@ -62,5 +77,10 @@ e-Legislative Announcement
 <!-- Javascript -->
    
 {% block additional_js %} 
+
+<!-- DataTables -->
+<script src="{% static 'bower_components/datatables.net/js/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js' %}"></script>
+<script src="{% static 'js/announcement.js' %}"></script> 
         
 {% endblock additional_js %}
