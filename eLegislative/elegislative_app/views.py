@@ -437,10 +437,14 @@ def committee_reports(request):
     user = get_object_or_404(models.User, email=request.user.email) 
     c_resolutions = models.CommitteeReportResolutionModel.objects.all()
     c_ordinances = models.CommitteeReportOrdinanceModel.objects.all()
-    result_list = list(chain(c_resolutions, c_ordinances)) 
+    # result_list = list(chain(c_resolutions, c_ordinances)) 
+    resolution = models.CommitteeReportResolutionModel.objects.all()
+    ordinance = models.CommitteeReportOrdinanceModel.objects.all()
+
     context = {
         'user': user,
-        'result_list': result_list,
+        'resolution': resolution,
+        'ordinance': ordinance,
     }    
     return render(request, template_name, context)
 
@@ -468,6 +472,29 @@ def create_committee_resolution_reports(request, id):
         'form': form,
     }    
     return render(request, template_name, context)
+
+@authorize
+@login_required
+def edit_committee_resolution_reports(request, id):
+    template_name = "elegislative/committee_reports/edit_committee_resolution_reports.html"
+    user = get_object_or_404(models.User, email=request.user.email) 
+    committee_report = get_object_or_404(models.CommitteeReportResolutionModel, id=id)
+
+    if request.method == 'GET':
+        form = forms.EditCommitteeReportResolutionForm(request.GET or None, instance=committee_report)
+    elif request.method == 'POST':
+        form = forms.EditCommitteeReportResolutionForm(request.POST or None, request.FILES, instance=committee_report) 
+        if form.is_valid(): 
+            form.save()
+            return HttpResponseRedirect(reverse_lazy("elegislative:committee_reports")) 
+    context = {
+        'user': user,
+        'committee_report': committee_report,      
+        'form'  : form,
+    }
+
+    return render(request, template_name, context)
+
 """
 [END] -> Manage Committee Reports Features
 """

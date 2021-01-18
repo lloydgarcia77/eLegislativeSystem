@@ -64,12 +64,12 @@ e-Legislative Committee Reports
             <div class="col-xs-12">
                 <div class="box">
                     <div class="box-header with-border">
-                        <h3 class="box-title">Committee Reports Table</h3>
+                        <h3 class="box-title">Committee Reports <b>Resolution</b> Table</h3>
                        
                      
                     </div>
                     <div class="box-body">
-                        <table id="table_prop_ord_res" class="table table-bordered table-striped">
+                        <table id="table_committee_report_resolution" class="table table-bordered table-striped">
                             <thead>
                                 <tr>
                                     <th class="text-center" style="width: 10%;">ID</th> 
@@ -85,21 +85,73 @@ e-Legislative Committee Reports
                             </thead>
                             <tbody>
                                 
-                                {% for rl in result_list %}
+                                {% for r in resolution %}
                                 <tr>
-                                    <td>{{rl.id}}</td>
-                                    <td>{{rl.no}}</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
-                                    <td></td>
+                                    <td>{{r.id}}</td>
+                                    <td>{{r.no}}</td>
+                                    <td>{{r.title}}</td>
+                                    <td>{{r.author}}</td>
+                                    <td>{{r.version}}</td>
+                                    <td>{{r.status}}</td>
+                                    <td>
+                                        {% if r.is_signed %}                                        
+                                        <span class="label label-success">{{r.is_signed}}</span>
+                                        {% else %}
+                                        <span class="label label-danger">{{r.is_signed}}</span>
+                                        {% endif %} 
+                                    </td>
+                                    <td>{{r.date_filed}}</td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-default btn-flat">Action</button>
+                                            <button type="button" class="btn btn-default btn-flat dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
+                                                <span class="caret"></span>
+                                                <span class="sr-only">Toggle Dropdown</span>
+                                            </button>
+                                            <ul class="dropdown-menu" role="menu">
+                                                <li><a href="{% url 'elegislative:edit_committee_resolution_reports' r.id %}">Edit</a></li>   
+                                                <li><a href="" class="delete">Delete</a></li>   
+                                                <li class="divider"></li>                          
+                                                <li><a href="" target="_blank">Preview/Print</a></li>        
+                                            </ul>
+                                        </div> 
+
+                                    </td>
                                 </tr>                                    
                                 {% endfor %}
                                     
                             
+                            </tbody> 
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Committee Reports <b>Ordinance</b> Table</h3>
+                       
+                     
+                    </div>
+                    <div class="box-body">
+                        <table id="table_committee_report_ordinance" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th class="text-center" style="width: 10%;">ID</th> 
+                                    <th class="text-center" style="width: 10%;">No</th> 
+                                    <th class="text-center" style="width: 20%;">Title</th>
+                                    <th class="text-center" style="width: 15%;">Author</th>
+                                    <th class="text-center" style="width: 10%;">Version</th>
+                                    <th class="text-center" style="width: 10%;">Status</th>
+                                    <th class="text-center" style="width: 5%;">Signed</th>
+                                    <th class="text-center" style="width: 10%;"> Date Filed</th>                                
+                                    <th class="text-center" style="width: 10%;"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                         
                             </tbody> 
                         </table>
                     </div>
@@ -120,9 +172,15 @@ e-Legislative Committee Reports
 
 <script>
     $(document).ready(function () {
-        let table =  $('#table_prop_ord_res').DataTable({
+        let table_committee_report_resolution =  $('#table_committee_report_resolution').DataTable({
             'columnDefs': [ {
-                'targets': 3, /* column index */
+                'targets': 8, /* column index */
+                'orderable': false, /* true or false */
+            }]
+        }); 
+        let table_committee_report_ordinance =  $('#table_committee_report_ordinance').DataTable({
+            'columnDefs': [ {
+                'targets': 8, /* column index */
                 'orderable': false, /* true or false */
             }]
         }); 
