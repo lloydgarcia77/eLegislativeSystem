@@ -318,7 +318,7 @@ class EditResolutionForm(forms.ModelForm):
 class OrdinanceForm(forms.ModelForm):
     class Meta:
         model = models.OrdinanceModel
-        exclude = ("agenda_fk","date_filed","status","is_signed","hard_copy")
+        exclude = ("agenda_fk","date_filed","status","is_signed","hard_copy","veto_message")
 
     def __init__(self, *args, **kwargs):
         super(OrdinanceForm, self).__init__(*args, **kwargs)
@@ -393,6 +393,13 @@ class EditOrdinanceForm(forms.ModelForm):
             'required': 'required',
         }
 
+        self.fields['veto_message'].widget.attrs = {
+            'type': 'text',
+            'class': 'form-control',
+            'placeholder': 'veto message',
+            'required': 'required',
+        }
+
         self.fields['content'].widget.attrs = { 
             'id': 'compose_textarea',
             'class': 'form-control', 
@@ -404,6 +411,8 @@ class EditOrdinanceForm(forms.ModelForm):
             'class': 'form-control select2', 
             'style': 'width: 100%', 
         }
+
+        
 
 class CommitteeReportResolutionForm(forms.ModelForm):
     class Meta:
@@ -446,4 +455,51 @@ class CommitteeReportResolutionForm(forms.ModelForm):
             'class': 'form-control', 
             'style': 'height: 300px',
             'required': 'required',
+        }
+
+class EditCommitteeReportResolutionForm(forms.ModelForm):
+    class Meta:
+        model = models.CommitteeReportResolutionModel
+        exclude = ("resolution_committee_report_fk","date_filed",)
+    def __init__(self, *args, **kwargs):
+        super(EditCommitteeReportResolutionForm, self).__init__(*args, **kwargs)
+
+        self.fields['no'].widget.attrs = {
+            'type': 'text',
+            'class': 'form-control',
+            'placeholder': 'Resolution No',
+            'required': 'required',
+        }
+
+        self.fields['title'].widget.attrs = {
+            'type': 'text',
+            'class': 'form-control',
+            'placeholder': 'Title',
+            'required': 'required',
+        }
+
+        self.fields['version'].widget.attrs = {
+            'type': 'text',
+            'class': 'form-control',
+            'placeholder': 'Version',
+            'required': 'required',
+        }
+
+        self.fields['author'].widget.attrs = {
+            'type': 'text',
+            'class': 'form-control',
+            'placeholder': 'author',
+            'required': 'required',
+        }
+
+        self.fields['content'].widget.attrs = { 
+            'id': 'compose_textarea',
+            'class': 'form-control', 
+            'style': 'height: 300px',
+            'required': 'required',
+        }
+
+        self.fields['status'].widget.attrs = { 
+            'class': 'form-control select2', 
+            'style': 'width: 100%', 
         }
