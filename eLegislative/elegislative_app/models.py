@@ -229,7 +229,6 @@ class ResolutionModel(models.Model):
     def __str__(self):
         return str(self.title)
 
-
 class CommitteeReportResolutionModel(models.Model):
     resolution_committee_report_fk = models.ForeignKey(ResolutionModel, on_delete=models.CASCADE, related_name="resolution_committee_report_fk")
     no = models.CharField(max_length=50, unique=True)
@@ -245,7 +244,6 @@ class CommitteeReportResolutionModel(models.Model):
 
     def __str__(self):
         return str(self.title)
-
 
 class CommentsRecomendationResolutionModel(models.Model):
     resolution_comments_recommendation_fk = models.ForeignKey(ResolutionModel, on_delete=models.CASCADE, related_name="resolution_comments_recommendation_fk")

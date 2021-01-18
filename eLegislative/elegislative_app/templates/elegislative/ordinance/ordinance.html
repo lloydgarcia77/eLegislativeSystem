@@ -108,6 +108,7 @@ e-Legislative Ordinance
                                                 <li><a href="{% url 'elegislative:edit_ordinance' o.id %}">Edit</a></li>   
                                                 <li><a href="{% url 'elegislative:delete_ordinance' o.id %}" class="delete">Delete</a></li>   
                                                 <li class="divider"></li>                                                
+                                                <li><a href="{% url 'elegislative:create_committee_ordinance_reports' o.id %}">Committee Report</a></li>   
                                                 <li><a href="{% url 'elegislative:print_ordinance' o.id %}" target="_blank">Preview/Print</a></li>                                                     
                                             </ul>
                                         </div>

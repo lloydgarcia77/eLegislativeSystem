@@ -131,9 +131,7 @@ e-Legislative Committee Reports
             <div class="col-xs-12">
                 <div class="box">
                     <div class="box-header with-border">
-                        <h3 class="box-title">Committee Reports <b>Ordinance</b> Table</h3>
-                       
-                     
+                        <h3 class="box-title">Committee Reports <b>Ordinance</b> Table</h3> 
                     </div>
                     <div class="box-body">
                         <table id="table_committee_report_ordinance" class="table table-bordered table-striped">
@@ -151,7 +149,42 @@ e-Legislative Committee Reports
                                 </tr>
                             </thead>
                             <tbody>
-                         
+                                
+                                {% for o in ordinance %}
+                                <tr>
+                                    <td>{{o.id}}</td>
+                                    <td>{{o.no}}</td>
+                                    <td>{{o.title}}</td>
+                                    <td>{{o.author}}</td>
+                                    <td>{{o.version}}</td>
+                                    <td>{{o.status}}</td>
+                                    <td>
+                                        {% if o.is_signed %}                                        
+                                        <span class="label label-success">{{o.is_signed}}</span>
+                                        {% else %}
+                                        <span class="label label-danger">{{o.is_signed}}</span>
+                                        {% endif %} 
+                                    </td>
+                                    <td>{{r.date_filed}}</td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-default btn-flat">Action</button>
+                                            <button type="button" class="btn btn-default btn-flat dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
+                                                <span class="caret"></span>
+                                                <span class="sr-only">Toggle Dropdown</span>
+                                            </button>
+                                            <ul class="dropdown-menu" role="menu">
+                                                <li><a href="{% url 'elegislative:edit_committee_ordinance_reports' o.id %}">Edit</a></li>   
+                                                <li><a href="{% url 'elegislative:delete_committee_ordinance_reports' o.id %}" class="delete">Delete</a></li>   
+                                                <li class="divider"></li>                          
+                                                <li><a href="{% url 'elegislative:print_committee_ordinance_reports' o.id %}" target="_blank">Preview/Print</a></li>        
+                                            </ul>
+                                        </div> 
+
+                                    </td>
+                                </tr>          
+                                {% endfor %}
+                                    
                             </tbody> 
                         </table>
                     </div>

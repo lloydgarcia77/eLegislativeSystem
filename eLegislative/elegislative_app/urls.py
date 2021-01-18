@@ -21,12 +21,17 @@ urlpatterns = [
     path('posting-ordinance/<int:id>', views.posting_ordinance, name="posting_ordinance"),
     path('posting-ordinance/post-comment/<int:id>', views.posting_ordinance_post_comment, name="posting_ordinance_post_comment"),
     path('posting-ordinance/delete-comment/<int:id>/<int:oid>', views.posting_ordinance_delete_comment, name="posting_ordinance_delete_comment"),
-    # Committee Reports
+    # Committee Reports for resolution
     path('committee-reports/', views.committee_reports, name="committee_reports"),
     path('create-committee-resolution-reports/<int:id>', views.create_committee_resolution_reports, name="create_committee_resolution_reports"),
     path('edit-committe-resolution-reports/<int:id>', views.edit_committee_resolution_reports, name="edit_committee_resolution_reports"),
     path('delete-committe-resolution-reports/<int:id>', views.delete_committee_resolution_reports, name="delete_committee_resolution_reports"),
     path('print-committe-resolution-reports/<int:id>', views.print_committee_resolution_reports, name="print_committee_resolution_reports"),
+    # Committee Reports for Ordinance
+    path('create-committee-ordinance-reports/<int:id>', views.create_committee_ordinance_reports, name="create_committee_ordinance_reports"),
+    path('edit-committe-ordinance-reports/<int:id>', views.edit_committee_ordinance_reports, name="edit_committee_ordinance_reports"),
+    path('delete-committe-ordinance-reports/<int:id>', views.delete_committee_ordinance_reports, name="delete_committee_ordinance_reports"),
+    path('print-committe-ordinance-reports/<int:id>', views.print_committee_ordinance_reports, name="print_committee_ordinance_reports"),
 
     # Resolution
     path('resolution/', views.resolution, name="resolution"),
