@@ -24,6 +24,10 @@ urlpatterns = [
     # Committee Reports
     path('committee-reports/', views.committee_reports, name="committee_reports"),
     path('create-committee-resolution-reports/<int:id>', views.create_committee_resolution_reports, name="create_committee_resolution_reports"),
+    path('edit-committe-resolution-reports/<int:id>', views.edit_committee_resolution_reports, name="edit_committee_resolution_reports"),
+    path('delete-committe-resolution-reports/<int:id>', views.delete_committee_resolution_reports, name="delete_committee_resolution_reports"),
+    path('print-committe-resolution-reports/<int:id>', views.print_committee_resolution_reports, name="print_committee_resolution_reports"),
+
     # Resolution
     path('resolution/', views.resolution, name="resolution"),
     path('create-resolution/<int:id>/', views.create_resolutions, name="create_resolutions"),

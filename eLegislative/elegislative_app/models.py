@@ -267,6 +267,7 @@ class OrdinanceModel(models.Model):
     is_public = models.BooleanField(default=False)
     hard_copy = models.FileField(upload_to='documents/%Y/%m/%d', verbose_name="hard copy", blank=True, null=True, validators=[file_validator_pdf])
     content = models.TextField()
+    veto_message = models.CharField(max_length=255, blank=True, null=True, default="None")
     date_filed = models.DateTimeField(auto_now=True)
 
     def __str__(self):
