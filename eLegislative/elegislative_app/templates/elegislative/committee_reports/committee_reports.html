@@ -110,9 +110,9 @@ e-Legislative Committee Reports
                                             </button>
                                             <ul class="dropdown-menu" role="menu">
                                                 <li><a href="{% url 'elegislative:edit_committee_resolution_reports' r.id %}">Edit</a></li>   
-                                                <li><a href="" class="delete">Delete</a></li>   
+                                                <li><a href="{% url 'elegislative:delete_committee_resolution_reports' r.id %}" class="delete">Delete</a></li>   
                                                 <li class="divider"></li>                          
-                                                <li><a href="" target="_blank">Preview/Print</a></li>        
+                                                <li><a href="{% url 'elegislative:print_committee_resolution_reports' r.id %}" target="_blank">Preview/Print</a></li>        
                                             </ul>
                                         </div> 
 
@@ -168,24 +168,8 @@ e-Legislative Committee Reports
 
 <!-- DataTables -->
 <script src="{% static 'bower_components/datatables.net/js/jquery.dataTables.min.js' %}"></script>
-<script src="{% static 'bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js' %}"></script>
-
-<script>
-    $(document).ready(function () {
-        let table_committee_report_resolution =  $('#table_committee_report_resolution').DataTable({
-            'columnDefs': [ {
-                'targets': 8, /* column index */
-                'orderable': false, /* true or false */
-            }]
-        }); 
-        let table_committee_report_ordinance =  $('#table_committee_report_ordinance').DataTable({
-            'columnDefs': [ {
-                'targets': 8, /* column index */
-                'orderable': false, /* true or false */
-            }]
-        }); 
-    
-    });
-</script>
+<script src="{% static 'bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js' %}"></script> 
+<script src="{% static 'js/committee_report_resolution.js' %}"></script>
+<script src="{% static 'js/committee_report_ordinance.js' %}"></script>
         
 {% endblock additional_js %}
