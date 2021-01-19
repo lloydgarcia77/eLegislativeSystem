@@ -6,12 +6,9 @@ from django.db.models import Q
 from django.shortcuts import render, get_object_or_404
 from django.template.loader import render_to_string
 from django.conf import settings
-from elegislative_app import forms
+from elegislative_app import forms, models, admin
 
-from django.contrib.auth.decorators import login_required
-
-# Models
-from elegislative_app import models
+from django.contrib.auth.decorators import login_required 
 
 # for encrypting of primary keys
 from cryptography.fernet import Fernet
@@ -22,6 +19,10 @@ import traceback
 import json
 from functools import wraps
 from itertools import chain
+
+# import datetime
+from datetime import timezone, datetime, timedelta  
+
 # Create your views here.
 
 # key id encryption
@@ -813,12 +814,53 @@ def print_ordinance(request, id):
 """
 [START] -> Manage Records
 """
+@authorize
 @login_required
 def records(request):
     template_name = "elegislative/records/records.html"
     user = get_object_or_404(models.User, email=request.user.email) 
+    x = 'Jan. 19, 2021, 05:08 AM'
+    x = datetime.strptime(x, '%b. %d, %Y, %I:%M %p')
+    # 2021-01-14 04:57:37.396125
+    # https://www.w3schools.com/python/python_datetime.asp 
+    b = x.strftime("%Y-%m-%d %H:%M:%S.%f") 
+    print(x)
+    print(b)
+    
+ 
+    agenda = models.AgendaModel.objects.all().filter(date_filed__range=(b, b))
+    print(agenda)
+
+
+    x = admin.AgendaAdmin.list_display
+    print('-----------------------------------------',x)
+    if request.method == 'GET': 
+        database_seletection = request.GET.get('database_seletection') 
+        report_title = request.GET.get('report_title') 
+        date_from = request.GET.get('date_from') 
+        date_to = request.GET.get('date_to') 
+        query_keyword = request.GET.get('query_keyword') 
+        header = request.GET.get('header') 
+
+         
+        if database_seletection == 'Agenda':
+            query = models.AgendaModel.objects.all()
+        elif database_seletection == 'Ordinance':
+            query = models.OrdinanceModel.objects.all()
+        elif database_seletection == 'Resolution':
+            query = models.ResolutionModel.objects.all()
+        elif database_seletection == 'Committee Reports (Resolution)':
+            query = models.CommitteeReportResolutionModel.objects.all()
+        elif database_seletection == 'Committee Reports (Ordinance)':
+            query = models.CommitteeReportOrdinanceModel.objects.all()
+        elif database_seletection == 'Minutes of the meeting':
+            query = models.MOMModel.objects.all() 
+        else:
+            query = False
+ 
     context = {
         'user': user,
+        'query': query,
     }    
     return render(request, template_name, context)
 """
