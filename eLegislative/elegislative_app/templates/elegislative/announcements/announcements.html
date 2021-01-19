@@ -1,5 +1,6 @@
 {% extends 'elegislative/dashboard.html' %}
-{% load static %}
+{% load static %} 
+{% load custom_tags%}
 {% load humanize %} 
 {% block title %}
 e-Legislative Announcement
@@ -7,7 +8,15 @@ e-Legislative Announcement
 
 <!-- CSS -->
 {% block additional_css %} 
+<!-- DataTables -->
+<link rel="stylesheet" href="{% static 'bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css' %}">
 
+<style>
+    table td{
+        text-align: center; 
+        vertical-align: middle !important;
+    }
+</style>
 {% endblock additional_css %}
 
 <!-- navigation -->
@@ -52,7 +61,66 @@ e-Legislative Announcement
     <section class="content">
         <div class="row">
             <div class="col-xs-12">
-                
+                <div class="box">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">Announcement Table</h3>
+                        <div class="box-tools"> 
+                            <ul class="pagination pagination-sm no-margin pull-right">
+                              <li><a id="create-announcement" href="{% url 'elegislative:create_announcements' %}" data-toggle="tooltip" title="File New Announcement"><i class="fa fa-fw fa-plus"></i>File New Announcement</a></li>  
+                            </ul>
+                        </div> 
+                    </div>
+                    <div class="box-body">
+                        <table id="table_announcement" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th class="text-center" style="width: 10%;">ID</th> 
+                                    <th class="text-center" style="width: 10%;">Title</th> 
+                                    <th class="text-center" style="width: 10%;">Subject</th> 
+                                    <th class="text-center" style="width: 10%;">Content</th> 
+                                    <th class="text-center" style="width: 10%;">Visible</th> 
+                                    <th class="text-center" style="width: 10%;">Date Filed</th> 
+                                    <th class="text-center" style="width: 10%;"></th> 
+                                </tr>
+                            </thead>
+                            <tbody>
+                                
+                                {% for a in announcements %}
+                                    <tr>
+                                        <td>{{a.id}}</td>
+                                        <td>{{a.title}}</td>
+                                        <td>{{a.subject}}</td>
+                                        <td>{{a.content}}</td>
+                                        <td>
+                                            {% if a.visible %}                                        
+                                            <span class="label label-success">{{a.visible}}</span>
+                                            {% else %}
+                                            <span class="label label-danger">{{a.visible}}</span>
+                                            {% endif %}  
+                                        </td>
+                                        <td>{% custom_data_format a.date_filed %}</td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <button type="button" class="btn btn-default btn-flat">Action</button>
+                                                <button type="button" class="btn btn-default btn-flat dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
+                                                  <span class="caret"></span>
+                                                  <span class="sr-only">Toggle Dropdown</span>
+                                                </button>
+                                                <ul class="dropdown-menu" role="menu">
+                                                  <li><a href="{% url 'elegislative:edit_announcements' a.id %}" class="edit">Edit</a></li>
+                                                  <li><a href="{% url 'elegislative:delete_announcements' a.id %}" class="delete">Delete</a></li>              
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                    
+            
+        
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -62,5 +130,10 @@ e-Legislative Announcement
 <!-- Javascript -->
    
 {% block additional_js %} 
+
+<!-- DataTables -->
+<script src="{% static 'bower_components/datatables.net/js/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js' %}"></script>
+<script src="{% static 'js/announcement.js' %}"></script> 
         
 {% endblock additional_js %}

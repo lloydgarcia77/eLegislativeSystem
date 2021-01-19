@@ -54,7 +54,9 @@ urlpatterns = [
     path('delete-minutes-of-the-meeting/<int:id>', views.delete_minutes_of_the_meeting, name="delete_minutes_of_the_meeting"), 
     path('print-minutes-of-the-meeting/<int:id>', views.print_minutes_of_the_meeting, name="print_minutes_of_the_meeting"), 
 
-  
     # Annoucements
     path('announcements/', views.announcements, name="announcements"),    
+    path('create-announcements/', views.create_announcements, name="create_announcements"),    
+    path('edit-announcements/<int:id>', views.edit_announcements, name="edit_announcements"),    
+    path('delete-announcements/<int:id>', views.delete_announcements, name="delete_announcements"),    
 ]

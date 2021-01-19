@@ -314,6 +314,7 @@ class AnnouncementModel(models.Model):
     title = models.CharField(max_length=250)
     subject = models.CharField(max_length=250)
     content = models.CharField(max_length=250)
+    visible = models.BooleanField(default=False)
     date_filed = models.DateTimeField(auto_now=True)
 
     def __str__(self):

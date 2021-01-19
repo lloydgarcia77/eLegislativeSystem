@@ -682,3 +682,35 @@ class EditMOMForm(forms.ModelForm):
             'class': 'form-control select2', 
             'style': 'width: 100%', 
         }
+
+
+class AnnouncementForm(forms.ModelForm):
+    class Meta:
+        model = models.AnnouncementModel
+        exclude = ("date_filed",)
+    
+    def __init__(self, *args, **kwargs):
+        super(AnnouncementForm, self).__init__(*args, **kwargs)
+
+        self.fields['title'].widget.attrs = {
+            'type': 'text',
+            'class': 'form-control',
+            'placeholder': 'Title',
+            'required': 'required',
+        }
+
+        self.fields['subject'].widget.attrs = {
+            'type': 'text',
+            'class': 'form-control',
+            'placeholder': 'Subject',
+            'required': 'required',
+        }
+
+        self.fields['content'].widget.attrs = {
+            'type': 'text',
+            'class': 'form-control',
+            'placeholder': 'Context',
+            'required': 'required',
+        }
+ 
+
