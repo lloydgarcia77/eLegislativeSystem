@@ -923,14 +923,113 @@ def print_minutes_of_the_meeting(request, id):
 """
 [START] -> Manage announcement features
 """
+@authorize
 @login_required
 def announcements(request):
     template_name = "elegislative/announcements/announcements.html"
     user = get_object_or_404(models.User, email=request.user.email) 
+    announcements = models.AnnouncementModel.objects.all() 
     context = {
         'user': user,
+        'announcements': announcements,
     }    
     return render(request, template_name, context)
+
+@authorize
+@login_required
+def create_announcements(request):
+    data = dict()
+    template_name = "elegislative/announcements/create_announcement.html"
+    user = get_object_or_404(models.User, email=request.user.email) 
+    if request.is_ajax():
+        if request.method == 'GET':
+            form = forms.AnnouncementForm(request.GET or None)
+        elif request.method == 'POST':
+            form = forms.AnnouncementForm(request.POST or None)
+            if form.is_valid():
+                instance = form.save(commit=False)
+                instance.save()  
+                a_response = {
+                    'aid': instance.id,
+                    'title' : instance.title,
+                    'subject' : instance.subject,
+                    'content' : instance.content,
+                    'visible' : instance.visible,
+                    'date_filed' : instance.date_filed.strftime("%b. %d, %Y, %I:%M %p"),
+                    'edit_url': reverse_lazy('elegislative:edit_announcements', kwargs={'id':instance.id}),
+                    'delete_url':reverse_lazy('elegislative:delete_announcements', kwargs={'id':instance.id}),
+                }
+                data['a_response'] = a_response
+                data['form_is_valid'] = True           
+
+        context = {
+            'user': user,
+            'form': form,
+        }
+        data['html_form'] = render_to_string(template_name, context, request)
+        return JsonResponse(data)
+    else:
+        raise Http404()
+
+
+@authorize
+@login_required
+def edit_announcements(request, id):
+    data = dict()
+    template_name = "elegislative/announcements/edit_announcement.html"
+    user = get_object_or_404(models.User, email=request.user.email)  
+    announcement = get_object_or_404(models.AnnouncementModel, id=id)
+    if request.is_ajax(): 
+        if request.method == 'GET':
+            form = forms.AnnouncementForm(request.GET or None, instance=announcement)
+        elif request.method == 'POST':
+            form = forms.AnnouncementForm(request.POST or None, instance=announcement)
+            if form.is_valid():
+                instance = form.save(commit=False)
+                instance.save()  
+                a_response = { 
+                    'title' : instance.title,
+                    'subject' : instance.subject,
+                    'content' : instance.content,
+                    'visible' : instance.visible 
+                }
+                data['a_response'] = a_response
+                data['form_is_valid'] = True          
+
+        context = {
+            'user': user,
+            'form': form,
+            'announcement': announcement,
+        }
+        data['html_form'] = render_to_string(template_name, context, request)
+        return JsonResponse(data)        
+    else:
+        raise Http404()
+
+
+@authorize
+@login_required
+def delete_announcements(request, id):
+    data = dict()
+    template_name = "elegislative/announcements/delete_announcement.html"
+    user = get_object_or_404(models.User, email=request.user.email) 
+    announcement = get_object_or_404(models.AnnouncementModel, id=id)
+
+    if request.is_ajax(): 
+        if request.method == 'GET':
+            context = {
+                'user': user,
+                'announcement': announcement,        
+            }
+            data['html_form'] = render_to_string(template_name, context, request) 
+        elif request.method == 'POST':
+            announcement.delete()
+            data['form_is_valid'] = True
+        
+        return JsonResponse(data)         
+    else:
+        raise Http404()
+
 """
 [END] -> Manage announcement features
 """
