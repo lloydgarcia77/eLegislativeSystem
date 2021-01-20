@@ -1,5 +1,6 @@
 {% extends 'elegislative/dashboard.html' %}
 {% load static %}
+{% load custom_tags %}
 {% load humanize %} 
 {% block title %}
 e-Legislative Manage Agenda
@@ -102,7 +103,9 @@ e-Legislative Manage Agenda
                                         <span class="label label-danger">{{a.is_signed}}</span>
                                         {% endif %} 
                                     </td>
-                                    <td>{{a.date_filed}}</td> 
+                                    <td>
+                                        {% custom_data_format a.date_filed%}
+                                    </td> 
                                     <td>
                                         <div class="btn-group">
                                             <button type="button" class="btn btn-default btn-flat">Action</button>

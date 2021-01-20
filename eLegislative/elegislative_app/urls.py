@@ -47,6 +47,7 @@ urlpatterns = [
     path('print-ordinance/<int:id>', views.print_ordinance, name="print_ordinance"),
     # Records
     path('records/', views.records, name="records"),
+    path('print-records/', views.print_records, name="print_records"),
     # Minutes of the meeing
     path('minutes-of-the-meeting/', views.minutes_of_the_meeting, name="minutes_of_the_meeting"),    
     path('create-minutes-of-the-meeting/', views.create_minutes_of_the_meeting, name="create_minutes_of_the_meeting"), 

@@ -1,0 +1,132 @@
+{% load static %}
+<!DOCTYPE html> 
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Print Form</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1"> 
+        <style>  
+            @page {
+                size: auto; 
+                margin: 0; 
+            } 
+            .container{
+                font-family: "Times New Roman", Times, serif;
+                display: flex;
+                align-items:center; 
+                justify-content: center;  
+                margin-right: 10%;
+                padding: 2%;
+            }
+            h2{ 
+                text-justify: inter-word;  
+                text-align: center;
+                max-width: 80%;
+                margin: 0 auto ;
+                
+            }
+            .header_p{ 
+                text-justify: inter-word;
+                text-align: center; 
+            }
+            img{
+                width: 125px;
+                height: 125px;  
+                text-align: center;
+                margin-left: 10%;
+            } 
+
+            hr{
+                border: 1px solid black; 
+                margin-right: 5%;
+                margin-left: 5%;
+            }
+            .body{
+                padding-left: 2%;
+                padding-right: 2%;
+            }
+
+            table, td, th {  
+                border: 1px solid black;
+                text-align: center;
+            }
+            
+            table {
+                font-family: "Arial";
+                border-collapse: collapse;
+                width: 100%;
+            }
+            
+            th, td {
+            padding: 9px;
+            }
+        </style>
+    </head> 
+    <body onload="window.print();"> 
+        
+        {% if request.GET.header %}
+        <div class="container"> 
+            <img src="{% static 'images/sp_batangas_city_logo.png' %}" alt="">
+            <span>
+                <p class="header_p">Republic of the Philippines</p>
+                <h2>BATANGAS CITY OFFICE OF THE SANGGUNIANG PANLUNGSOD</h2>
+                <p class="header_p">Tel. No. 723-2175</p>
+            </span> 
+        </div>
+        <hr> 
+        {% endif %}
+            
+      
+        <div class="body">
+            <table>
+                <thead>
+                    <tr>
+                        <td><b>Table source:</b></td>
+                        <td>{{request.GET.database_seletection}}</td>
+                        <td><b>Report Title:</b></td>
+                        <td colspan="3">{{request.GET.report_title}}</td> 
+                        <td><b>Date Printed:</b></td>
+                        <td>{{date_today}}</td>
+                    </tr>
+                    <tr class="text-center"> 
+                        {% if cols %} 
+                            {% for c in cols %}
+                                <td><b>{{c}}</b></td>
+                            {% endfor %}                               
+                        {% endif %} 
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if query %}
+                        {% for q in query %}
+                            <tr class="text-center">
+                                <td>{{q.id}}</td>
+                                <td>{{q.no}}</td>
+                                <td style="max-width: 150px;">{{q.title}}</td>
+                                <td>{{q.version}}</td>
+                                <td>{{q.author}}</td>
+                                <td>{{q.status}}</td>
+                                <td>{{q.is_signed}}</td>
+                                <td>{{q.date_filed}}</td>
+                            </tr>
+                        {% endfor %}  
+                    {% else %}
+                        <tr class="text-center">
+                            <td colspan="8">No Records Found!</td>
+                        </tr>
+                    {% endif %}
+
+                    <tr>
+                        <td>Total Records:</td>
+                        <td colspan="7"><b>{{query.count}}</b></td>
+                    </tr>
+                </tbody>
+              
+            </table>
+        
+        </div>
+
+    </body>
+</html>

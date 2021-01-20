@@ -7,15 +7,10 @@ e-Legislative Records
 
 
 <!-- CSS -->
-{% block additional_css %}
-<!-- DataTables -->
-<link rel="stylesheet" href="{% static 'bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css' %}">
-<style>
-    table td{
-        text-align: center; 
-        vertical-align: middle !important;
-    }
-</style>
+{% block additional_css %} 
+<link rel="stylesheet" href="{% static 'bower_components/select2/dist/css/select2.min.css' %}">
+  <!-- bootstrap datepicker -->
+  <link rel="stylesheet" href="{% static 'bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css' %}">
 {% endblock additional_css %}
 
 
@@ -64,54 +59,145 @@ e-Legislative Records
             <div class="col-xs-12">
                 <div class="box">
                     <div class="box-header with-border">
-                        <h3 class="box-title">Records table </h3> 
+                        <h3 class="box-title">Records Table Generator </h3> 
                     </div>
                     <div class="box-body">
-                        <table id="table_prop_ord_res" class="table table-bordered table-striped">
-                            <thead>
-                                <tr>
-                                    <th style="width: 5%">ID</th> 
-                                    <th class="text-left">Title</th> 
-                                    <th class="text-left">Scaned file</th> 
-                                    <th class="text-left">Category</th>
-                                    <th class="text-left">Referral #</th>                                    
-                                    <th class="text-left" style="width: 10%;">Date Created</th>       
-                                    <th class="text-center" style="width: 15%"></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        ORDINANCE NO. 11
-                                    </td>
-                                    <td style="word-wrap: break-word; width: 30%;">
-                                        AN ORDINANCE ESTABLISHING AND ADOPTING MEASURES AND SYSTEMS
-                                        TO ENSURE EFFICIENT IMPLEMENTATION OF THE LOCAL TB CONTROL PROGRAM
-                                        OF THE PROVINCE OF MALINAO
-                                    </td>
-                                    <td>
-                                        <u>sample_ordinance.pdf</u>
-                                    </td>
-                                    <td>
-                                        ORDINANCE
-                                    </td>
-                                    <td>
-                                        1100-85323
-                                    </td>
-                                    <td>
-                                        12/12/2020
-                                    </td> 
-                                    <td>
-                                        <div class="btn-group"> 
-                                            <button type="button" class="btn btn-warning btn-flat" data-toggle="tooltip" title="Preview"><i class="fa fa-eye"></i></button>
-                                            <button type="button" class="btn btn-danger btn-flat" data-toggle="tooltip" title="Delete"><i class="fa fa-trash"></i></button> 
-                                            <button type="button" class="btn btn-success btn-flat" data-toggle="tooltip" title="Upload Scan Copy"><i class="fa fa-cloud-upload"></i></button> 
-                                          </div>
-                                    </td>
-                                </tr>
-                            </tbody> 
-                        </table>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <form method="GET" id="filter-settings-form" data-url="{% url 'elegislative:print_records' %}"> 
+                                    <div class="box box-solid box-info">                                    
+                                        <div class="box-header">
+                                            <h3 class="box-title">Filter Settings</h3>
+                                        </div>
+                                        <div class="box-body">
+                                            <div class="alert alert-warning alert-dismissible">
+                                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                                                <h4><i class="icon fa fa-warning"></i> Note!</h4>
+                                                Filtered records are by default sorted by id from latest to older.
+                                              </div>
+                                            <div class="form-group">
+                                                <label>Database Tables</label>
+                                                <select class="form-control select2" style="width: 100%;" name="database_seletection">                                               
+                                                    <option selected="selected">Choose a table</option>
+                                                    <option {% if request.GET.database_seletection == 'Agenda' %}selected="selected"{% endif %}>Agenda</option>
+                                                    <option {% if request.GET.database_seletection == 'Ordinance' %}selected="selected"{% endif %}>Ordinance</option>
+                                                    <option {% if request.GET.database_seletection == 'Resolution' %}selected="selected"{% endif %}>Resolution</option>
+                                                    <option {% if request.GET.database_seletection == 'Committee Reports (Resolution)' %}selected="selected"{% endif %}>Committee Reports (Resolution)</option>
+                                                    <option {% if request.GET.database_seletection == 'Committee Reports (Ordinance)' %}selected="selected"{% endif %}>Committee Reports (Ordinance)</option>
+                                                    <option {% if request.GET.database_seletection == 'Minutes of the meeting' %}selected="selected"{% endif %}>Minutes of the meeting</option>                                                                                                             
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Report Title</label>
+                                                <input name="report_title" type="text" class="form-control" id="" placeholder="Report Title" value="{{request.GET.report_title}}" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Date From:</label>
+                                
+                                                <div class="input-group date">
+                                                <div class="input-group-addon">
+                                                    <i class="fa fa-calendar"></i>
+                                                </div>
+                                                <input name="date_from" type="text" class="form-control pull-right datepicker" id="datepickerfrom" value="{{request.GET.date_from}}" readonly>
+                                                </div>
+                                                <!-- /.input group -->
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Date To:</label>
+                                
+                                                <div class="input-group date">
+                                                <div class="input-group-addon">
+                                                    <i class="fa fa-calendar"></i>
+                                                </div>
+                                                <input name="date_to" type="text" class="form-control pull-right datepicker" id="datepickerto" value="{{request.GET.date_to}}" readonly>
+                                                </div>
+                                                <!-- /.input group -->
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Query keyword:</label>
+                                                <input name="query_keyword" type="text" class="form-control" id="" value="{{request.GET.query_keyword}}" placeholder="Enter query keyword to filter">                             
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Signed Documents:</label>
+                                                <select class="form-control select2" style="width: 100%;" name="signed_document">
+                                                    <option selected="selected">All</option>
+                                                    <option {% if request.GET.signed_document == 'Signed Only' %}selected="selected"{% endif %}>Signed Only</option>
+                                                    <option {% if request.GET.signed_document == 'Unsigned Only' %}selected="selected"{% endif %}>Unsigned Only</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="checkbox">
+                                                <label>                                                                                                     
+                                                    {% if request.GET.header %}
+                                                    <input name="header" type="checkbox" checked>
+                                                    {% else %}
+                                                    <input name="header" type="checkbox">
+                                                    {% endif %}
+                                                    With Header
+                                                </label>
+                                                </div> 
+                                            </div> 
+                                        </div>
+                                        <div class="box-footer">
+                                            <button type="submit" class="btn btn-primary pull-right">
+                                                <i class="fa fa-gears"></i>
+                                                Generate</button>
+                                        </div>
+                                    </div>
+                                </form>
+                                 
+                            </div>
+                            <div class="col-md-9">
+                                <div class="box box-solid box-success">
+                                    <div class="box-header">
+                                      <h3 class="box-title">Table results for database: <b>({{request.GET.database_seletection}})</b> </h3>
+                                    </div>                                    
+                                    <div class="box-body no-padding">
+                                        <table class="table table-striped">
+                                            <tbody>
+                                            <tr class="text-center"> 
+                                                {% if cols %} 
+                                                    {% for c in cols %}
+                                                        <td><b>{{c}}</b></td>
+                                                    {% endfor %}                               
+                                                {% endif %} 
+                                            </tr>
+                                            
+                                            {% if query %}
+                                                {% for q in query %}
+                                                    <tr class="text-center">
+                                                        <td>{{q.id}}</td>
+                                                        <td>{{q.no}}</td>
+                                                        <td style="max-width: 150px;">{{q.title}}</td>
+                                                        <td>{{q.version}}</td>
+                                                        <td>{{q.author}}</td>
+                                                        <td>{{q.status}}</td>
+                                                        <td>{{q.is_signed}}</td>
+                                                        <td>{{q.date_filed}}</td>
+                                                    </tr>
+                                                {% endfor %} 
+                                                <tr>
+                                                    <td>Total Records:</td>
+                                                    <td colspan="7"><b>{{query.count}}</b></td>
+                                                </tr>
+                                            {% else %}
+                                                <tr class="text-center">
+                                                    <td colspan="8">No Records Found!</td>
+                                                </tr>
+                                            {% endif %}
+                                        </tbody>
+                                        </table>
+                                    </div>
+                                 
+                                  </div>
+                            </div>
+                        </div>
                     </div>
+                    <div class="box-footer">  
+                        <button id="btn-print" type="button" class="btn btn-info pull-right">
+                            <i class="fa fa-print"></i>
+                            Print</button>
+                      </div>
                 </div>
             </div>
         </div>
@@ -119,24 +205,32 @@ e-Legislative Records
 </div>
 {% endblock main_content %} 
 
+
 <!-- Javascript -->
    
 {% block additional_js %}
-
-<!-- DataTables -->
-<script src="{% static 'bower_components/datatables.net/js/jquery.dataTables.min.js' %}"></script>
-<script src="{% static 'bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js' %}"></script>
-
+<!-- Select2 -->
+<script src="{% static 'bower_components/select2/dist/js/select2.full.min.js' %}"></script>
+<!-- bootstrap datepicker -->
+<script src="{% static 'bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js' %}"></script>
 <script>
-    $(document).ready(function () {
-        let table =  $('#table_prop_ord_res').DataTable({
-            'columnDefs': [ {
-                'targets': 3, /* column index */
-                'orderable': false, /* true or false */
-            }]
-        }); 
-    
+    $(function () {
+        //Initialize Select2 Elements
+        $('.select2').select2();
+
+        //Date picker
+        $('.datepicker').datepicker({
+            autoclose: true
+        })
+        
+        $("#btn-print").click(function(e){
+            e.preventDefault();
+            let form = $("#filter-settings-form"); 
+            window.open(form.attr("data-url")+"?"+form.serialize()); 
+            return false;
+        });
     });
 </script>
+ 
         
 {% endblock additional_js %}

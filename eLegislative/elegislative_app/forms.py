@@ -326,7 +326,7 @@ class OrdinanceForm(forms.ModelForm):
         self.fields['no'].widget.attrs = {
             'type': 'text',
             'class': 'form-control',
-            'placeholder': 'Resolution No',
+            'placeholder': 'Ordinance No',
             'required': 'required',
         }
 
