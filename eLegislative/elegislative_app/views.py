@@ -17,11 +17,16 @@ import logging
 import traceback  
 
 import json
-from functools import wraps
+
+# Complex Query
+from functools import wraps, reduce
+import operator
 from itertools import chain
 
 # import datetime
 from datetime import timezone, datetime, timedelta  
+
+
 
 # Create your views here.
 
@@ -814,53 +819,447 @@ def print_ordinance(request, id):
 """
 [START] -> Manage Records
 """
-@authorize
-@login_required
-def records(request):
-    template_name = "elegislative/records/records.html"
-    user = get_object_or_404(models.User, email=request.user.email) 
-    x = 'Jan. 19, 2021, 05:08 AM'
-    x = datetime.strptime(x, '%b. %d, %Y, %I:%M %p')
+def date_formatter(date_parse, date_format, date):
+    # x = 'Jan. 19, 2021, 05:08 AM'
+    # x = datetime.strptime(x, '%b. %d, %Y, %I:%M %p')
     # 2021-01-14 04:57:37.396125
     # https://www.w3schools.com/python/python_datetime.asp 
-    b = x.strftime("%Y-%m-%d %H:%M:%S.%f") 
-    print(x)
-    print(b)
+    # b = x.strftime("%Y-%m-%d %H:%M:%S.%f") 
+    # agenda = models.AgendaModel.objects.all().filter(date_filed__range=(b, b))
+    dp = datetime.strptime(date, date_parse)
+    df = dp.strftime(date_format)
     
+    return df
+
+def report_generator(database_name, date_from, date_to, keyword, signature):
+    
+    query, cols = False, False
+
+    if database_name == 'Agenda':
+        
+        if date_from and date_to and keyword and signature:             
+            date_from = date_formatter('%m/%d/%Y','%Y-%m-%d %H:%M:%S.%f',date_from)
+            date_to = date_formatter('%m/%d/%Y','%Y-%m-%d %H:%M:%S.%f',date_to)  
+            filters = Q(Q(date_filed__range=(date_from, date_to)) & 
+                        Q(Q(id__icontains=keyword) | 
+                        Q(no__icontains=keyword) | 
+                        Q(title__icontains=keyword) | 
+                        Q(author__icontains=keyword) |
+                        Q(date_filed__icontains=keyword)))
+            if signature == 'Signed Only':
+                filters = Q(Q(date_filed__range=(date_from, date_to)) & 
+                            Q(Q(id__icontains=keyword) | 
+                            Q(no__icontains=keyword) | 
+                            Q(title__icontains=keyword) | 
+                            Q(author__icontains=keyword) |
+                            Q(date_filed__icontains=keyword)) &
+                            Q(is_signed=True)
+                            )
+            elif signature == 'Unsigned Only':
+                filters = Q(Q(date_filed__range=(date_from, date_to)) & 
+                            Q(Q(id__icontains=keyword) | 
+                            Q(no__icontains=keyword) | 
+                            Q(title__icontains=keyword) | 
+                            Q(author__icontains=keyword) |
+                            Q(date_filed__icontains=keyword)) &
+                            Q(is_signed=False)
+                            )
+            query = models.AgendaModel.objects.all().filter(filters).order_by('-id') 
+              
+        elif date_from and date_to:
+            date_from = date_formatter('%m/%d/%Y','%Y-%m-%d %H:%M:%S.%f',date_from)
+            date_to = date_formatter('%m/%d/%Y','%Y-%m-%d %H:%M:%S.%f',date_to)  
+            query = models.AgendaModel.objects.all().filter(Q(date_filed__range=(date_from, date_to))).order_by('-id')                    
+        
+        elif keyword:
+            filters = Q(
+                Q(id__icontains=keyword) | 
+                Q(no__icontains=keyword) | 
+                Q(title__icontains=keyword) | 
+                Q(author__icontains=keyword) |
+                Q(date_filed__icontains=keyword)
+                )
+            query = models.AgendaModel.objects.all().filter(filters).order_by('-id')
  
-    agenda = models.AgendaModel.objects.all().filter(date_filed__range=(b, b))
-    print(agenda)
+        elif signature: 
+            if signature == 'Signed Only': 
+                query = models.AgendaModel.objects.all().filter(Q(is_signed=True)).order_by('-id')    
+            elif signature == 'Unsigned Only':      
+                query = models.AgendaModel.objects.all().filter(Q(is_signed=False)).order_by('-id')    
+            else:
+                query = models.AgendaModel.objects.all() 
+        else:
+            query = models.AgendaModel.objects.all() 
 
+        cols = admin.AgendaAdmin.list_display
+        cols = list(cols)
+        cols.remove('content')
+        cols.remove('hard_copy')
+        cols = [c.replace("_"," ").upper() for c in cols]      
+                
+    elif database_name == 'Ordinance':
+        if date_from and date_to and keyword and signature:             
+            date_from = date_formatter('%m/%d/%Y','%Y-%m-%d %H:%M:%S.%f',date_from)
+            date_to = date_formatter('%m/%d/%Y','%Y-%m-%d %H:%M:%S.%f',date_to)  
+            filters = Q(Q(date_filed__range=(date_from, date_to)) & 
+                        Q(Q(id__icontains=keyword) | 
+                        Q(no__icontains=keyword) | 
+                        Q(title__icontains=keyword) | 
+                        Q(author__icontains=keyword) |
+                        Q(date_filed__icontains=keyword)))
+            if signature == 'Signed Only':
+                filters = Q(Q(date_filed__range=(date_from, date_to)) & 
+                            Q(Q(id__icontains=keyword) | 
+                            Q(no__icontains=keyword) | 
+                            Q(title__icontains=keyword) | 
+                            Q(author__icontains=keyword) |
+                            Q(date_filed__icontains=keyword)) &
+                            Q(is_signed=True)
+                            )
+            elif signature == 'Unsigned Only':
+                filters = Q(Q(date_filed__range=(date_from, date_to)) & 
+                            Q(Q(id__icontains=keyword) | 
+                            Q(no__icontains=keyword) | 
+                            Q(title__icontains=keyword) | 
+                            Q(author__icontains=keyword) |
+                            Q(date_filed__icontains=keyword)) &
+                            Q(is_signed=False)
+                            )
+            query = models.OrdinanceModel.objects.all().filter(filters).order_by('-id') 
+              
+        elif date_from and date_to:
+            date_from = date_formatter('%m/%d/%Y','%Y-%m-%d %H:%M:%S.%f',date_from)
+            date_to = date_formatter('%m/%d/%Y','%Y-%m-%d %H:%M:%S.%f',date_to)  
+            query = models.OrdinanceModel.objects.all().filter(Q(date_filed__range=(date_from, date_to))).order_by('-id')                    
+        
+        elif keyword:
+            filters = Q(
+                Q(id__icontains=keyword) | 
+                Q(no__icontains=keyword) | 
+                Q(title__icontains=keyword) | 
+                Q(author__icontains=keyword) |
+                Q(date_filed__icontains=keyword)
+                )
+            query = models.OrdinanceModel.objects.all().filter(filters).order_by('-id')
+ 
+        elif signature: 
+            if signature == 'Signed Only': 
+                query = models.OrdinanceModel.objects.all().filter(Q(is_signed=True)).order_by('-id')    
+            elif signature == 'Unsigned Only':      
+                query = models.OrdinanceModel.objects.all().filter(Q(is_signed=False)).order_by('-id')    
+            else:
+                query = models.OrdinanceModel.objects.all()       
+        
+        else:
+            query = models.OrdinanceModel.objects.all() 
+        cols = admin.OrdinanceAdmin.list_display
+        cols = list(cols)
+        cols.remove('content')
+        cols.remove('hard_copy')
+        cols.remove('agenda_fk')
+        cols.remove('is_public')
+        cols = [c.replace("_"," ").upper() for c in cols]  
+    
+    elif database_name == 'Resolution':
+        if date_from and date_to and keyword and signature:             
+            date_from = date_formatter('%m/%d/%Y','%Y-%m-%d %H:%M:%S.%f',date_from)
+            date_to = date_formatter('%m/%d/%Y','%Y-%m-%d %H:%M:%S.%f',date_to)  
+            filters = Q(Q(date_filed__range=(date_from, date_to)) & 
+                        Q(Q(id__icontains=keyword) | 
+                        Q(no__icontains=keyword) | 
+                        Q(title__icontains=keyword) | 
+                        Q(author__icontains=keyword) |
+                        Q(date_filed__icontains=keyword)))
+            if signature == 'Signed Only':
+                filters = Q(Q(date_filed__range=(date_from, date_to)) & 
+                            Q(Q(id__icontains=keyword) | 
+                            Q(no__icontains=keyword) | 
+                            Q(title__icontains=keyword) | 
+                            Q(author__icontains=keyword) |
+                            Q(date_filed__icontains=keyword)) &
+                            Q(is_signed=True)
+                            )
+            elif signature == 'Unsigned Only':
+                filters = Q(Q(date_filed__range=(date_from, date_to)) & 
+                            Q(Q(id__icontains=keyword) | 
+                            Q(no__icontains=keyword) | 
+                            Q(title__icontains=keyword) | 
+                            Q(author__icontains=keyword) |
+                            Q(date_filed__icontains=keyword)) &
+                            Q(is_signed=False)
+                            )
+            query = models.ResolutionModel.objects.all().filter(filters).order_by('-id') 
+              
+        elif date_from and date_to:
+            date_from = date_formatter('%m/%d/%Y','%Y-%m-%d %H:%M:%S.%f',date_from)
+            date_to = date_formatter('%m/%d/%Y','%Y-%m-%d %H:%M:%S.%f',date_to)  
+            query = models.ResolutionModel.objects.all().filter(Q(date_filed__range=(date_from, date_to))).order_by('-id')                    
+        
+        elif keyword:
+            filters = Q(
+                Q(id__icontains=keyword) | 
+                Q(no__icontains=keyword) | 
+                Q(title__icontains=keyword) | 
+                Q(author__icontains=keyword) |
+                Q(date_filed__icontains=keyword)
+                )
+            query = models.ResolutionModel.objects.all().filter(filters).order_by('-id')
+ 
+        elif signature: 
+            if signature == 'Signed Only': 
+                query = models.ResolutionModel.objects.all().filter(Q(is_signed=True)).order_by('-id')    
+            elif signature == 'Unsigned Only':      
+                query = models.ResolutionModel.objects.all().filter(Q(is_signed=False)).order_by('-id')    
+            else:
+                query = models.ResolutionModel.objects.all()       
+        
+        else:
+            query = models.ResolutionModel.objects.all() 
+        cols = admin.ResolutionAdmin.list_display
+        cols = list(cols)
+        cols.remove('content')
+        cols.remove('hard_copy')
+        cols.remove('agenda_fk')
+        cols.remove('is_public')
+        cols = [c.replace("_"," ").upper() for c in cols]  
+     
+    elif database_name == 'Committee Reports (Resolution)':
+        if date_from and date_to and keyword and signature:             
+            date_from = date_formatter('%m/%d/%Y','%Y-%m-%d %H:%M:%S.%f',date_from)
+            date_to = date_formatter('%m/%d/%Y','%Y-%m-%d %H:%M:%S.%f',date_to)  
+            filters = Q(Q(date_filed__range=(date_from, date_to)) & 
+                        Q(Q(id__icontains=keyword) | 
+                        Q(no__icontains=keyword) | 
+                        Q(title__icontains=keyword) | 
+                        Q(author__icontains=keyword) |
+                        Q(date_filed__icontains=keyword)))
+            if signature == 'Signed Only':
+                filters = Q(Q(date_filed__range=(date_from, date_to)) & 
+                            Q(Q(id__icontains=keyword) | 
+                            Q(no__icontains=keyword) | 
+                            Q(title__icontains=keyword) | 
+                            Q(author__icontains=keyword) |
+                            Q(date_filed__icontains=keyword)) &
+                            Q(is_signed=True)
+                            )
+            elif signature == 'Unsigned Only':
+                filters = Q(Q(date_filed__range=(date_from, date_to)) & 
+                            Q(Q(id__icontains=keyword) | 
+                            Q(no__icontains=keyword) | 
+                            Q(title__icontains=keyword) | 
+                            Q(author__icontains=keyword) |
+                            Q(date_filed__icontains=keyword)) &
+                            Q(is_signed=False)
+                            )
+            query = models.CommitteeReportResolutionModel.objects.all().filter(filters).order_by('-id') 
+              
+        elif date_from and date_to:
+            date_from = date_formatter('%m/%d/%Y','%Y-%m-%d %H:%M:%S.%f',date_from)
+            date_to = date_formatter('%m/%d/%Y','%Y-%m-%d %H:%M:%S.%f',date_to)  
+            query = models.CommitteeReportResolutionModel.objects.all().filter(Q(date_filed__range=(date_from, date_to))).order_by('-id')                    
+        
+        elif keyword:
+            filters = Q(
+                Q(id__icontains=keyword) | 
+                Q(no__icontains=keyword) | 
+                Q(title__icontains=keyword) | 
+                Q(author__icontains=keyword) |
+                Q(date_filed__icontains=keyword)
+                )
+            query = models.CommitteeReportResolutionModel.objects.all().filter(filters).order_by('-id')
+ 
+        elif signature: 
+            if signature == 'Signed Only': 
+                query = models.CommitteeReportResolutionModel.objects.all().filter(Q(is_signed=True)).order_by('-id')    
+            elif signature == 'Unsigned Only':      
+                query = models.CommitteeReportResolutionModel.objects.all().filter(Q(is_signed=False)).order_by('-id')    
+            else:
+                query = models.CommitteeReportResolutionModel.objects.all()       
+        
+        else:
+            query = models.CommitteeReportResolutionModel.objects.all() 
+        cols = admin.CommitteeReportResolutionAdmin.list_display
+        cols = list(cols)
+        cols.remove('content')
+        cols.remove('hard_copy')
+        cols.remove('resolution_committee_report_fk') 
+        cols = [c.replace("_"," ").upper() for c in cols]   
+    
+    elif database_name == 'Committee Reports (Ordinance)':
 
-    x = admin.AgendaAdmin.list_display
-    print('-----------------------------------------',x)
+        if date_from and date_to and keyword and signature:             
+            date_from = date_formatter('%m/%d/%Y','%Y-%m-%d %H:%M:%S.%f',date_from)
+            date_to = date_formatter('%m/%d/%Y','%Y-%m-%d %H:%M:%S.%f',date_to)  
+            filters = Q(Q(date_filed__range=(date_from, date_to)) & 
+                        Q(Q(id__icontains=keyword) | 
+                        Q(no__icontains=keyword) | 
+                        Q(title__icontains=keyword) | 
+                        Q(author__icontains=keyword) |
+                        Q(date_filed__icontains=keyword)))
+            if signature == 'Signed Only':
+                filters = Q(Q(date_filed__range=(date_from, date_to)) & 
+                            Q(Q(id__icontains=keyword) | 
+                            Q(no__icontains=keyword) | 
+                            Q(title__icontains=keyword) | 
+                            Q(author__icontains=keyword) |
+                            Q(date_filed__icontains=keyword)) &
+                            Q(is_signed=True)
+                            )
+            elif signature == 'Unsigned Only':
+                filters = Q(Q(date_filed__range=(date_from, date_to)) & 
+                            Q(Q(id__icontains=keyword) | 
+                            Q(no__icontains=keyword) | 
+                            Q(title__icontains=keyword) | 
+                            Q(author__icontains=keyword) |
+                            Q(date_filed__icontains=keyword)) &
+                            Q(is_signed=False)
+                            )
+            query = models.CommitteeReportOrdinanceModel.objects.all().filter(filters).order_by('-id') 
+              
+        elif date_from and date_to:
+            date_from = date_formatter('%m/%d/%Y','%Y-%m-%d %H:%M:%S.%f',date_from)
+            date_to = date_formatter('%m/%d/%Y','%Y-%m-%d %H:%M:%S.%f',date_to)  
+            query = models.CommitteeReportOrdinanceModel.objects.all().filter(Q(date_filed__range=(date_from, date_to))).order_by('-id')                    
+        
+        elif keyword:
+            filters = Q(
+                Q(id__icontains=keyword) | 
+                Q(no__icontains=keyword) | 
+                Q(title__icontains=keyword) | 
+                Q(author__icontains=keyword) |
+                Q(date_filed__icontains=keyword)
+                )
+            query = models.CommitteeReportOrdinanceModel.objects.all().filter(filters).order_by('-id')
+ 
+        elif signature: 
+            if signature == 'Signed Only': 
+                query = models.CommitteeReportOrdinanceModel.objects.all().filter(Q(is_signed=True)).order_by('-id')    
+            elif signature == 'Unsigned Only':      
+                query = models.CommitteeReportOrdinanceModel.objects.all().filter(Q(is_signed=False)).order_by('-id')    
+            else:
+                query = models.CommitteeReportOrdinanceModel.objects.all()       
+        
+        else:
+            query = models.CommitteeReportOrdinanceModel.objects.all() 
+        cols = admin.CommitteeReportOrdinanceAdmin.list_display
+        cols = list(cols)
+        cols.remove('content')
+        cols.remove('hard_copy')
+        cols.remove('ordinance_committee_report_fk') 
+        cols = [c.replace("_"," ").upper() for c in cols]    
+    
+    elif database_name == 'Minutes of the meeting':
+
+        if date_from and date_to and keyword and signature:             
+            date_from = date_formatter('%m/%d/%Y','%Y-%m-%d %H:%M:%S.%f',date_from)
+            date_to = date_formatter('%m/%d/%Y','%Y-%m-%d %H:%M:%S.%f',date_to)  
+            filters = Q(Q(date_filed__range=(date_from, date_to)) & 
+                        Q(Q(id__icontains=keyword) | 
+                        Q(no__icontains=keyword) | 
+                        Q(title__icontains=keyword) | 
+                        Q(author__icontains=keyword) |
+                        Q(date_filed__icontains=keyword)))
+            if signature == 'Signed Only':
+                filters = Q(Q(date_filed__range=(date_from, date_to)) & 
+                            Q(Q(id__icontains=keyword) | 
+                            Q(no__icontains=keyword) | 
+                            Q(title__icontains=keyword) | 
+                            Q(author__icontains=keyword) |
+                            Q(date_filed__icontains=keyword)) &
+                            Q(is_signed=True)
+                            )
+            elif signature == 'Unsigned Only':
+                filters = Q(Q(date_filed__range=(date_from, date_to)) & 
+                            Q(Q(id__icontains=keyword) | 
+                            Q(no__icontains=keyword) | 
+                            Q(title__icontains=keyword) | 
+                            Q(author__icontains=keyword) |
+                            Q(date_filed__icontains=keyword)) &
+                            Q(is_signed=False)
+                            )
+            query = models.MOMModel.objects.all().filter(filters).order_by('-id') 
+              
+        elif date_from and date_to:
+            date_from = date_formatter('%m/%d/%Y','%Y-%m-%d %H:%M:%S.%f',date_from)
+            date_to = date_formatter('%m/%d/%Y','%Y-%m-%d %H:%M:%S.%f',date_to)  
+            query = models.MOMModel.objects.all().filter(Q(date_filed__range=(date_from, date_to))).order_by('-id')                    
+        
+        elif keyword:
+            filters = Q(
+                Q(id__icontains=keyword) | 
+                Q(no__icontains=keyword) | 
+                Q(title__icontains=keyword) | 
+                Q(author__icontains=keyword) |
+                Q(date_filed__icontains=keyword)
+                )
+            query = models.MOMModel.objects.all().filter(filters).order_by('-id')
+ 
+        elif signature: 
+            if signature == 'Signed Only': 
+                query = models.MOMModel.objects.all().filter(Q(is_signed=True)).order_by('-id')    
+            elif signature == 'Unsigned Only':      
+                query = models.MOMModel.objects.all().filter(Q(is_signed=False)).order_by('-id')    
+            else:
+                query = models.MOMModel.objects.all()       
+        
+        else:
+            query = models.MOMModel.objects.all() 
+        cols = admin.MOMAdmin.list_display
+        cols = list(cols)
+        cols.remove('content')
+        cols.remove('hard_copy') 
+        cols = [c.replace("_"," ").upper() for c in cols]    
+    
+    return query, cols
+    
+@authorize
+@login_required
+def records(request): 
+    template_name = "elegislative/records/records.html"
+    user = get_object_or_404(models.User, email=request.user.email) 
+
     if request.method == 'GET': 
-        database_seletection = request.GET.get('database_seletection') 
+        database_selection = request.GET.get('database_seletection') 
         report_title = request.GET.get('report_title') 
         date_from = request.GET.get('date_from') 
         date_to = request.GET.get('date_to') 
         query_keyword = request.GET.get('query_keyword') 
         header = request.GET.get('header') 
-
-         
-        if database_seletection == 'Agenda':
-            query = models.AgendaModel.objects.all()
-        elif database_seletection == 'Ordinance':
-            query = models.OrdinanceModel.objects.all()
-        elif database_seletection == 'Resolution':
-            query = models.ResolutionModel.objects.all()
-        elif database_seletection == 'Committee Reports (Resolution)':
-            query = models.CommitteeReportResolutionModel.objects.all()
-        elif database_seletection == 'Committee Reports (Ordinance)':
-            query = models.CommitteeReportOrdinanceModel.objects.all()
-        elif database_seletection == 'Minutes of the meeting':
-            query = models.MOMModel.objects.all() 
-        else:
-            query = False
+        signature = request.GET.get('signed_document')
+        query, cols = report_generator(database_selection, date_from, date_to, query_keyword, signature) 
  
     context = {
         'user': user,
         'query': query,
+        'cols': cols,
+    }    
+    return render(request, template_name, context)
+
+    
+@authorize
+@login_required
+def print_records(request):
+    template_name = "elegislative/records/print_records.html"
+    user = get_object_or_404(models.User, email=request.user.email) 
+
+    
+    if request.method == 'GET': 
+        database_selection = request.GET.get('database_seletection') 
+        report_title = request.GET.get('report_title') 
+        date_from = request.GET.get('date_from') 
+        date_to = request.GET.get('date_to') 
+        query_keyword = request.GET.get('query_keyword') 
+        header = request.GET.get('header') 
+        signature = request.GET.get('signed_document')
+        query, cols = report_generator(database_selection, date_from, date_to, query_keyword, signature) 
+
+    date_today = datetime.now()
+    date_today = date_today.strftime('%m/%d/%Y') 
+    context = {
+        'user': user, 
+        'query': query,
+        'cols': cols,
+        'date_today': date_today,
     }    
     return render(request, template_name, context)
 """

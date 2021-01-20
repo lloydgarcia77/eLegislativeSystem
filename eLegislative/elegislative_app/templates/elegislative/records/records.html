@@ -64,26 +64,27 @@ e-Legislative Records
                     <div class="box-body">
                         <div class="row">
                             <div class="col-md-3">
-                                <form method="GET"> 
+                                <form method="GET" id="filter-settings-form" data-url="{% url 'elegislative:print_records' %}"> 
                                     <div class="box box-solid box-info">                                    
                                         <div class="box-header">
                                             <h3 class="box-title">Filter Settings</h3>
                                         </div>
                                         <div class="box-body">
+                                            <div class="alert alert-warning alert-dismissible">
+                                                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                                                <h4><i class="icon fa fa-warning"></i> Note!</h4>
+                                                Filtered records are by default sorted by id from latest to older.
+                                              </div>
                                             <div class="form-group">
                                                 <label>Database Tables</label>
-                                                <select class="form-control select2" style="width: 100%;" name="database_seletection">
-                                               
-
+                                                <select class="form-control select2" style="width: 100%;" name="database_seletection">                                               
                                                     <option selected="selected">Choose a table</option>
-                                                    <option>Agenda</option>
-                                                    <option>Ordinance</option>
-                                                    <option>Resolution</option>
-                                                    <option>Committee Reports (Resolution)</option>
-                                                    <option>Committee Reports (Ordinance)</option>
-                                                    <option>Minutes of the meeting</option> 
-                                                        
-                                                    
+                                                    <option {% if request.GET.database_seletection == 'Agenda' %}selected="selected"{% endif %}>Agenda</option>
+                                                    <option {% if request.GET.database_seletection == 'Ordinance' %}selected="selected"{% endif %}>Ordinance</option>
+                                                    <option {% if request.GET.database_seletection == 'Resolution' %}selected="selected"{% endif %}>Resolution</option>
+                                                    <option {% if request.GET.database_seletection == 'Committee Reports (Resolution)' %}selected="selected"{% endif %}>Committee Reports (Resolution)</option>
+                                                    <option {% if request.GET.database_seletection == 'Committee Reports (Ordinance)' %}selected="selected"{% endif %}>Committee Reports (Ordinance)</option>
+                                                    <option {% if request.GET.database_seletection == 'Minutes of the meeting' %}selected="selected"{% endif %}>Minutes of the meeting</option>                                                                                                             
                                                 </select>
                                             </div>
                                             <div class="form-group">
@@ -117,6 +118,14 @@ e-Legislative Records
                                                 <input name="query_keyword" type="text" class="form-control" id="" value="{{request.GET.query_keyword}}" placeholder="Enter query keyword to filter">                             
                                             </div>
                                             <div class="form-group">
+                                                <label>Signed Documents:</label>
+                                                <select class="form-control select2" style="width: 100%;" name="signed_document">
+                                                    <option selected="selected">All</option>
+                                                    <option {% if request.GET.signed_document == 'Signed Only' %}selected="selected"{% endif %}>Signed Only</option>
+                                                    <option {% if request.GET.signed_document == 'Unsigned Only' %}selected="selected"{% endif %}>Unsigned Only</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
                                                 <div class="checkbox">
                                                 <label>                                                                                                     
                                                     {% if request.GET.header %}
@@ -139,35 +148,43 @@ e-Legislative Records
                                  
                             </div>
                             <div class="col-md-9">
-                                <div class="box box-solid box-warning">
+                                <div class="box box-solid box-success">
                                     <div class="box-header">
                                       <h3 class="box-title">Table results for database: <b>({{request.GET.database_seletection}})</b> </h3>
                                     </div>                                    
                                     <div class="box-body no-padding">
                                         <table class="table table-striped">
                                             <tbody>
-                                                <tr>
-                                                    <th style="width: 10px">#</th>
-                                                    <th>Task</th>
-                                                    <th>Progress</th>
-                                                    <th style="width: 40px">Label</th>
-                                                </tr>
+                                            <tr class="text-center"> 
+                                                {% if cols %} 
+                                                    {% for c in cols %}
+                                                        <td><b>{{c}}</b></td>
+                                                    {% endfor %}                               
+                                                {% endif %} 
+                                            </tr>
                                             
                                             {% if query %}
                                                 {% for q in query %}
-                                                    <tr>
-                                                        <td>x</td>
+                                                    <tr class="text-center">
+                                                        <td>{{q.id}}</td>
+                                                        <td>{{q.no}}</td>
+                                                        <td style="max-width: 150px;">{{q.title}}</td>
+                                                        <td>{{q.version}}</td>
+                                                        <td>{{q.author}}</td>
+                                                        <td>{{q.status}}</td>
+                                                        <td>{{q.is_signed}}</td>
+                                                        <td>{{q.date_filed}}</td>
                                                     </tr>
                                                 {% endfor %} 
-                                            {% else %}
                                                 <tr>
-                                                    <td colspan="4">No Records</td>
+                                                    <td>Total Records:</td>
+                                                    <td colspan="7"><b>{{query.count}}</b></td>
+                                                </tr>
+                                            {% else %}
+                                                <tr class="text-center">
+                                                    <td colspan="8">No Records Found!</td>
                                                 </tr>
                                             {% endif %}
-                                                
-                                                
-                                                
-                                             
                                         </tbody>
                                         </table>
                                     </div>
@@ -177,7 +194,7 @@ e-Legislative Records
                         </div>
                     </div>
                     <div class="box-footer">  
-                        <button type="submit" class="btn btn-info pull-right">
+                        <button id="btn-print" type="button" class="btn btn-info pull-right">
                             <i class="fa fa-print"></i>
                             Print</button>
                       </div>
@@ -205,6 +222,13 @@ e-Legislative Records
         $('.datepicker').datepicker({
             autoclose: true
         })
+        
+        $("#btn-print").click(function(e){
+            e.preventDefault();
+            let form = $("#filter-settings-form"); 
+            window.open(form.attr("data-url")+"?"+form.serialize()); 
+            return false;
+        });
     });
 </script>
  
