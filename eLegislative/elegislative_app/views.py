@@ -265,7 +265,7 @@ def search(request):
             
     page = request.GET.get('page', 1)
 
-    paginator = Paginator(records_filtered, 5)
+    paginator = Paginator(records_filtered, 10)
     try:
         query_records = paginator.page(page)
     except PageNotAnInteger:
@@ -275,7 +275,7 @@ def search(request):
     
 
     base_url = request.path + f'?q={search_term}'
-    
+
     context = {
         'records_filtered': records_filtered,
         'query_records': query_records,
