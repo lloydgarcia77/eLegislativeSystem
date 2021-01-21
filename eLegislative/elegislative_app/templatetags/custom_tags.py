@@ -9,3 +9,8 @@ register = template.Library()
 def custom_data_format(date):  
     new_date = date.strftime("%b. %d, %Y, %I:%M %p")
     return new_date
+
+@register.simple_tag 
+def custom_date_format_simple(date):
+    new_date = date.strftime("%m/%d/%Y")
+    return new_date

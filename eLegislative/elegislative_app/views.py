@@ -25,7 +25,10 @@ from itertools import chain
 
 # import datetime
 from datetime import timezone, datetime, timedelta  
+from django.core.exceptions import FieldDoesNotExist, FieldError
 
+# Pagination
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
 # Create your views here.
@@ -153,16 +156,124 @@ def authorize(function):
             # return HttpResponseRedirect('/')
     return wrap
 
+def text(function):
+    @wraps(function)
+    def wrap(request, *args, **kwargs):
+        print('---------------------------------------------')
+        notifications = models.NotificationsModel.objects.all()
+        return function(request, *args, notifications=notifications)
+    return wrap
+
+@text
+@authorize
 @login_required
-def dashboard_page(request):
+def dashboard_page(request, *args, **kwargs):
     template_name = "elegislative/dashboard.html"
     user = get_object_or_404(models.User, email=request.user.email)
- 
+    agenda = models.AgendaModel.objects.all()
+    resolution = models.ResolutionModel.objects.all()
+    ordinance = models.OrdinanceModel.objects.all()
+    mom = models.MOMModel.objects.all()
+    cr_ord = models.CommitteeReportOrdinanceModel.objects.all()
+    cr_res = models.CommitteeReportResolutionModel.objects.all()
+    announcement = models.AnnouncementModel.objects.all()
+    com_rec_res = models.CommentsRecomendationResolutionModel.objects.all() 
+    com_rec_ord = models.CommentsRecomendationOrdinanceModel.objects.all() 
+    com_rec_total = int(com_rec_res.count()) + int(com_rec_ord.count()) 
+    announcement_display = models.AnnouncementModel.objects.all().filter(Q(visible=True))
     context = {
         'user': user,
+        'agenda': agenda,
+        'resolution': resolution,
+        'ordinance': ordinance,
+        'mom': mom,
+        'cr_ord': cr_ord,
+        'cr_res': cr_res,
+        'announcement': announcement,
+        'com_rec_total': com_rec_total, 
+        'announcement_display': announcement_display,
     }
+    print('--------------------------->',kwargs)
+
+
     return render(request, template_name, context)
 
+@authorize
+@login_required
+def search(request):
+    template_name = "elegislative/search/search_results.html"
+    user = get_object_or_404(models.User, email=request.user.email)
+    if request.method == 'GET':
+        search_term = request.GET.get('q')
+        model_list = [
+            models.AgendaModel,
+            models.ResolutionModel,
+            models.CommitteeReportResolutionModel,
+            # models.CommentsRecomendationResolutionModel,
+            models.OrdinanceModel,
+            models.CommitteeReportOrdinanceModel,
+            # models.CommentsRecomendationOrdinanceModel,
+            models.MOMModel,
+            models.AnnouncementModel,
+        ]
+        excluded_fields = [
+            'id',
+            'resolution_fk',
+            'ordinance_fk',
+            'is_signed',
+            'hard_copy',
+            'resolution_committee_report_fk',
+            'resolution_comments_recommendation_fk',
+            'agenda_fk',
+            'resolution_comments_recommendation_fk',
+            'commentor_resolution',
+            'ordinance_committee_report_fk',
+            'ordinance_comments_recomendation_fk',
+            'is_public',
+            'visible',
+            'commentor_ordiance',
+        ]
+        queryset = []
+        for ml in model_list:
+            
+            
+            # https://treyhunner.com/2018/10/asterisks-in-python-what-they-are-and-how-to-use-them/
+            # https://stackoverflow.com/questions/9122169/calling-filter-with-a-variable-for-field-name
+            # https://stackoverflow.com/questions/852414/how-to-dynamically-compose-an-or-query-filter-in-django
+            try: 
+                fn = [field for field in [field.name for field in ml._meta.get_fields()] if field not in excluded_fields]  
+                queries = [Q(**{f+"__icontains":search_term}) for f in fn]  
+                que = queries.pop() 
+            
+                for q in queries: 
+                    que |= q 
+                
+                query = ml.objects.all().filter(que)   
+                if query:
+                    queryset.append(query)
+            except FieldError:
+                continue
+        
+        # for a in queryset:
+        #     print(a.model.__name__)
+        
+        # filter the query on each model
+        page = request.GET.get('page', 1)
+
+        paginator = Paginator(queryset, 10)
+        try:
+            queryset = paginator.page(page)
+        except PageNotAnInteger:
+            queryset = paginator.page(1)
+        except EmptyPage:
+            queryset = paginator.page(paginator.num_pages)
+        print(queryset)
+
+    context = {
+        'queryset': queryset,
+    }
+
+    return render(request, template_name, context)
 
 """
 [START] -> CRUD, Manage Agenda Features

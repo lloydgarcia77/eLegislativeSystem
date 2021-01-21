@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'elegislative_app',
     'import_export',
-    'django_cleanup',
+    'django_cleanup', 
 ]
 
 MIDDLEWARE = [

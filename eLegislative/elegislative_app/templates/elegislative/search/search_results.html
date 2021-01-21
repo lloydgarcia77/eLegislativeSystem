@@ -1,0 +1,88 @@
+{% extends 'elegislative/dashboard.html' %}
+{% load static %}
+{% load humanize %} 
+{% load custom_tags %}
+{% block title %}
+e-Legislative Search Results
+{% endblock title%}
+
+
+<!-- CSS -->
+{% block additional_css %}
+
+{% endblock additional_css %}
+
+
+<!-- navigation -->
+{% block nav_dashboard %}
+<li class="treeview">
+    <a href="{% url 'elegislative:dashboard_page' %}" >
+    <i class="fa fa-dashboard" ></i> <span>Dashboard</span>
+    <span class="pull-right-container">
+        <i class="fa fa-angle-left pull-right"></i>
+    </span>
+    </a>
+    <ul class="treeview-menu">
+    <li class="active"><a href="{% url 'elegislative:dashboard_page' %}"><i class="fa fa-circle-o"></i> Dashboard</a></li> 
+    </ul>
+</li>
+{% endblock nav_dashboard %}
+
+{% block main_content %} 
+
+<div class="content-wrapper">
+    <section class="content-header">
+        <h1>
+        Search
+        <small>results</small>
+        </h1> 
+    </section>
+    <section class="content">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-primary">
+                    <div class="box-header with-border">
+                      <h3 class="box-title">Search results for: "{{request.GET.q}}" </h3>
+        
+                      <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                        </button>
+                        <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                      </div>
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                      <ul class="products-list product-list-in-box">                         
+                        {% for a in queryset %}  
+                            {% for b in a %}
+                            <li class="item">
+                                <a href="javascript:void(0)" class="product-title">
+                                    {{b.title}} | {{b.no}} {{b.subject}}
+                                <span class="label label-warning pull-right">{% custom_date_format_simple b.date_filed %}</span></a>
+                                <span class="product-description">
+                                    {{b.content|striptags }}  
+                                    </span>
+                                <a class="btn btn-primary btn-xs">Read more</a>
+                            </li>   
+                            {% endfor %} 
+                        {% endfor %}  
+                      </ul>
+                    </div>
+                    <!-- /.box-body -->
+                    <div class="box-footer text-center">
+                      <a href="javascript:void(0)" class="uppercase">View All Products</a>
+                    </div>
+                    <!-- /.box-footer -->
+                </div>
+            </div> 
+        </div>
+    </section>
+</div>
+
+{% endblock main_content %} 
+
+<!-- Javascript -->
+   
+{% block additional_js %}
+
+{% endblock additional_js %}
