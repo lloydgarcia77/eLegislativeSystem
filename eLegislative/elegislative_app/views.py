@@ -202,75 +202,84 @@ def dashboard_page(request, *args, **kwargs):
 @login_required
 def search(request):
     template_name = "elegislative/search/search_results.html"
-    user = get_object_or_404(models.User, email=request.user.email)
-    if request.method == 'GET':
-        search_term = request.GET.get('q')
-        model_list = [
-            models.AgendaModel,
-            models.ResolutionModel,
-            models.CommitteeReportResolutionModel,
-            # models.CommentsRecomendationResolutionModel,
-            models.OrdinanceModel,
-            models.CommitteeReportOrdinanceModel,
-            # models.CommentsRecomendationOrdinanceModel,
-            models.MOMModel,
-            models.AnnouncementModel,
-        ]
-        excluded_fields = [
-            'id',
-            'resolution_fk',
-            'ordinance_fk',
-            'is_signed',
-            'hard_copy',
-            'resolution_committee_report_fk',
-            'resolution_comments_recommendation_fk',
-            'agenda_fk',
-            'resolution_comments_recommendation_fk',
-            'commentor_resolution',
-            'ordinance_committee_report_fk',
-            'ordinance_comments_recomendation_fk',
-            'is_public',
-            'visible',
-            'commentor_ordiance',
-        ]
-        queryset = []
-        for ml in model_list:
-            
-            
-            # https://treyhunner.com/2018/10/asterisks-in-python-what-they-are-and-how-to-use-them/
-            # https://stackoverflow.com/questions/9122169/calling-filter-with-a-variable-for-field-name
-            # https://stackoverflow.com/questions/852414/how-to-dynamically-compose-an-or-query-filter-in-django
-            try: 
-                fn = [field for field in [field.name for field in ml._meta.get_fields()] if field not in excluded_fields]  
-                queries = [Q(**{f+"__icontains":search_term}) for f in fn]  
-                que = queries.pop() 
-            
-                for q in queries: 
-                    que |= q 
-                
-                query = ml.objects.all().filter(que)   
-                if query:
-                    queryset.append(query)
-            except FieldError:
-                continue
+    user = get_object_or_404(models.User, email=request.user.email) 
+    
+    search_term = request.GET.get('q')
+    model_list = [
+        models.AgendaModel,
+        models.ResolutionModel,
+        models.CommitteeReportResolutionModel,
+        # models.CommentsRecomendationResolutionModel,
+        models.OrdinanceModel,
+        models.CommitteeReportOrdinanceModel,
+        # models.CommentsRecomendationOrdinanceModel,
+        models.MOMModel,
+        models.AnnouncementModel,
+    ]
+    excluded_fields = [
+        'id',
+        'resolution_fk',
+        'ordinance_fk',
+        'is_signed',
+        'hard_copy',
+        'resolution_committee_report_fk',
+        'resolution_comments_recommendation_fk',
+        'agenda_fk',
+        'resolution_comments_recommendation_fk',
+        'commentor_resolution',
+        'ordinance_committee_report_fk',
+        'ordinance_comments_recomendation_fk',
+        'is_public',
+        'visible',
+        'commentor_ordiance',
+    ]
+    queryset = []
+    for ml in model_list:
         
-        # for a in queryset:
-        #     print(a.model.__name__)
         
-        # filter the query on each model
-        page = request.GET.get('page', 1)
+        # https://treyhunner.com/2018/10/asterisks-in-python-what-they-are-and-how-to-use-them/
+        # https://stackoverflow.com/questions/9122169/calling-filter-with-a-variable-for-field-name
+        # https://stackoverflow.com/questions/852414/how-to-dynamically-compose-an-or-query-filter-in-django
+        try: 
+            fn = [field for field in [field.name for field in ml._meta.get_fields()] if field not in excluded_fields]  
+            queries = [Q(**{f+"__icontains":search_term}) for f in fn]  
+            que = queries.pop() 
+        
+            for q in queries: 
+                que |= q 
+            
+            query = ml.objects.all().filter(que)   
+            if query:
+                queryset.append(query)
+        except FieldError:
+            continue
+    
+    # for a in queryset:
+    #     print(a.model.__name__)
+    
+    # filter the query on each model 
+    records_filtered = []
+    for qs in queryset: 
+        for q in qs: 
+            records_filtered.append(q)
+            
+    page = request.GET.get('page', 1)
 
-        paginator = Paginator(queryset, 10)
-        try:
-            queryset = paginator.page(page)
-        except PageNotAnInteger:
-            queryset = paginator.page(1)
-        except EmptyPage:
-            queryset = paginator.page(paginator.num_pages)
-        print(queryset)
+    paginator = Paginator(records_filtered, 5)
+    try:
+        query_records = paginator.page(page)
+    except PageNotAnInteger:
+        query_records = paginator.page(1)
+    except EmptyPage:
+        query_records = paginator.page(paginator.num_pages)
+    
 
+    base_url = request.path + f'?q={search_term}'
+    
     context = {
-        'queryset': queryset,
+        'records_filtered': records_filtered,
+        'query_records': query_records,
+        'base_url': base_url,
     }
 
     return render(request, template_name, context)

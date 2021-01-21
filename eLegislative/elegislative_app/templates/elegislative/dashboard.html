@@ -135,7 +135,7 @@ e-Legislative Dashboard
       </div>
     </div>
     <!-- search form -->
-    <form action="{% url 'elegislative:search' %}" method="GET" class="sidebar-form">
+    <form action="{% url 'elegislative:search' %}" method="GET" class="sidebar-form"> 
       <div class="input-group">
         <input type="text" name="q" class="form-control" placeholder="Search..." value="{{request.GET.q}}">
         <span class="input-group-btn">

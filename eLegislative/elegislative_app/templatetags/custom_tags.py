@@ -14,3 +14,8 @@ def custom_data_format(date):
 def custom_date_format_simple(date):
     new_date = date.strftime("%m/%d/%Y")
     return new_date
+
+@register.filter
+def model_name(value):
+    value = value.__class__.__name__
+    return value
