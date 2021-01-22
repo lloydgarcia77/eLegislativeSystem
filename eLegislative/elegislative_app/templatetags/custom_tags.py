@@ -19,3 +19,25 @@ def custom_date_format_simple(date):
 def model_name(value):
     value = value.__class__.__name__
     return value
+
+
+@register.simple_tag 
+def compute_percentage(*args):
+    if args is None:
+        return False
+    x = args[0]
+    y = 0
+
+    # for a in list(args)[1:]:
+    for a in list(args): 
+        y += a
+    
+    # (5 / 30) * 100
+    #  
+    
+    total = (x / y) * 100
+    
+    return round(total,2)
+
+
+ 

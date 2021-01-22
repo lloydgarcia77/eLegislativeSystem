@@ -10,6 +10,10 @@ urlpatterns = [
     # search
     path('search/', views.search, name="search"),
     
+    # Delete Notification
+    path('delete-notification/<int:id>', views.delete_notification, name="delete_notification"),
+    path('delete-all-notifications/', views.delete_all_notifications, name="delete_all_notifications"),
+
     # agenda
     path('agenda/', views.agenda_page, name="agenda_page"),
     path('create-agenda/', views.create_agenda_page, name="create_agenda_page"),

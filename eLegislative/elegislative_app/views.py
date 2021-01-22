@@ -156,17 +156,81 @@ def authorize(function):
             # return HttpResponseRedirect('/')
     return wrap
 
-def text(function):
+def get_notification(function):
     @wraps(function)
     def wrap(request, *args, **kwargs):
-        print('---------------------------------------------')
-        notifications = models.NotificationsModel.objects.all()
+        user = get_object_or_404(models.User, email=request.user.email)
+        notifications = models.NotificationsModel.objects.all().filter(Q(receiver=user)).order_by('-id')
         return function(request, *args, notifications=notifications)
     return wrap
 
-@text
+# https://stackoverflow.com/questions/9030255/django-add-optional-arguments-to-decorator
+def create_notification(url_target, message, tags): 
+    def _method_wrapper(view_method): 
+        def _arguments_wrapper(request, *args, **kwargs) :
+            """
+            Wrapper with arguments to invoke the method
+            """ 
+            user = get_object_or_404(models.User, email=request.user.email) 
+
+            users = models.User.objects.all()
+ 
+            url = reverse_lazy(url_target) 
+           
+            for u in users:
+                models.NotificationsModel.objects.create(
+                    sender=user,
+                    receiver=u,
+                    message=message,
+                    tags=tags,
+                    url=url,
+                ) 
+
+            return view_method(request, *args, **kwargs) 
+        return _arguments_wrapper 
+    return _method_wrapper
+
+def add_notification(request, url_target, message, tags):
+    user = get_object_or_404(models.User, email=request.user.email) 
+
+    users = models.User.objects.all()
+
+    url = reverse_lazy(url_target) 
+    
+    for u in users:
+        models.NotificationsModel.objects.create(
+            sender=user,
+            receiver=u,
+            message=message,
+            tags=tags,
+            url=url,
+        ) 
+
+def delete_notification(request, id):
+    data = dict()
+    if request.is_ajax():
+        notification = get_object_or_404(models.NotificationsModel,id=id)
+        if request.method == 'POST':
+            notification.delete()
+            data['status'] = True
+            return JsonResponse(data)
+    else:
+        raise Http404()
+
+def delete_all_notifications(request):
+    data = dict()
+    if request.is_ajax(): 
+        if request.method == 'POST':
+            user = get_object_or_404(models.User, email=request.user.email)  
+            models.NotificationsModel.objects.all().filter(Q(receiver=user)).delete()
+            data['status'] = True
+            return JsonResponse(data)
+    else:
+        raise Http404()
+# @create_notification('elegislative:agenda_page', "Agenda has been created!", settings.NOTIFICATION_TAGS[1][0])
+@login_required  #iuna to 
+@get_notification 
 @authorize
-@login_required
 def dashboard_page(request, *args, **kwargs):
     template_name = "elegislative/dashboard.html"
     user = get_object_or_404(models.User, email=request.user.email)
@@ -181,6 +245,27 @@ def dashboard_page(request, *args, **kwargs):
     com_rec_ord = models.CommentsRecomendationOrdinanceModel.objects.all() 
     com_rec_total = int(com_rec_res.count()) + int(com_rec_ord.count()) 
     announcement_display = models.AnnouncementModel.objects.all().filter(Q(visible=True))
+
+
+    model_list = [
+        models.AgendaModel,
+        models.ResolutionModel,
+        models.CommitteeReportResolutionModel, 
+        models.OrdinanceModel,
+        models.CommitteeReportOrdinanceModel, 
+        models.MOMModel, 
+    ]
+
+    signed, unsigned, approved, denied, pending, uncategorized = 0,0,0,0,0,0
+
+    for m in model_list:
+        signed += m.objects.all().filter(Q(is_signed=True)).count()
+        unsigned += m.objects.all().filter(Q(is_signed=False)).count()
+        approved += m.objects.all().filter(Q(status='Approved')).count()
+        denied += m.objects.all().filter(Q(status='Denied')).count()
+        pending += m.objects.all().filter(Q(status='Pending')).count()
+        uncategorized += m.objects.all().filter(Q(status='None')).count()
+        
     context = {
         'user': user,
         'agenda': agenda,
@@ -192,15 +277,20 @@ def dashboard_page(request, *args, **kwargs):
         'announcement': announcement,
         'com_rec_total': com_rec_total, 
         'announcement_display': announcement_display,
-    }
-    print('--------------------------->',kwargs)
-
-
+        'notifications':kwargs['notifications'],
+        'signed':signed,
+        'unsigned':unsigned,
+        'approved':approved,
+        'denied':denied,
+        'pending':pending,
+        'uncategorized':uncategorized,
+    } 
     return render(request, template_name, context)
 
+@get_notification
 @authorize
 @login_required
-def search(request):
+def search(request, *args, **kwargs):
     template_name = "elegislative/search/search_results.html"
     user = get_object_or_404(models.User, email=request.user.email) 
     
@@ -280,30 +370,36 @@ def search(request):
         'records_filtered': records_filtered,
         'query_records': query_records,
         'base_url': base_url,
+        'notifications':kwargs['notifications'],
     }
 
     return render(request, template_name, context)
+
 
 """
 [START] -> CRUD, Manage Agenda Features
 """
 
 # Agenda Feature 
+@get_notification
 @authorize
 @login_required
-def agenda_page(request):
+def agenda_page(request, *args, **kwargs):
     template_name = "elegislative/agenda/agenda.html" 
     user = get_object_or_404(models.User, email=request.user.email) 
     agenda = models.AgendaModel.objects.all()
     context = {
         'user': user,
         'agenda': agenda,
+        'notifications':kwargs['notifications'],
     }
     return render(request, template_name, context)
 
+@get_notification
+# @create_notification('elegislative:agenda_page', "Agenda has been created!", settings.NOTIFICATION_TAGS[1][0])
 @authorize
 @login_required
-def create_agenda_page(request):
+def create_agenda_page(request, *args, **kwargs):
     template_name = "elegislative/agenda/create_new_agenda.html"
     user = get_object_or_404(models.User, email=request.user.email)  
 
@@ -312,12 +408,15 @@ def create_agenda_page(request):
     elif request.method == 'POST':
         form = forms.AgendaForm(request.POST or None) 
         if form.is_valid():
-            form.save()
+            instance = form.save(commit=False)
+            instance.save()
+            add_notification(request,'elegislative:agenda_page', f"Agenda ({instance.no}) has been created!", settings.NOTIFICATION_TAGS[1][0])
             return HttpResponseRedirect(reverse_lazy("elegislative:agenda_page")) 
 
     context = {
         'user': user,
         'form':form,
+        'notifications':kwargs['notifications'],
     }
     return render(request, template_name, context)
 

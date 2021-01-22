@@ -194,3 +194,17 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 # from cryptography.fernet import Fernet
 # Fernet.generate_key()
 ENCRYPT_KEY = b'xlNVkz4loCnsQWGmKEMjj7De5fj0d_N0_yeKxGJxDSk='
+
+
+NOTIFICATION_TAGS = (
+    ('None','None'),
+    ('Agenda','Agenda'),
+    ('Resolution','Resolution'),
+    ('Ordinance','Ordinance'),
+    ('MOM','MOM'),
+    ('CRO','CRO'),
+    ('CRR','CRR'),
+    ('CMRO','CMRO'),
+    ('CMRR','CMRR'),
+    ('Announcement','Announcement'),
+)

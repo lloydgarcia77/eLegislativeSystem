@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load humanize %} 
+{% load custom_tags %}
 {% block title %}
 e-Legislative Dashboard
 {% endblock title%}
@@ -23,49 +24,47 @@ e-Legislative Dashboard
 
       <div class="navbar-custom-menu">
         <ul class="nav navbar-nav">
-       
-          <!-- Notifications: style can be found in dropdown.less -->
-          <li class="dropdown notifications-menu">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+      
+          <li class="dropdown messages-menu">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
               <i class="fa fa-bell-o"></i>
-              <span class="label label-warning">10</span>
+              {% if notifications %}
+              <span class="label label-warning">
+              {{notifications.count}}
+              </span>
+              {% endif %} 
             </a>
             <ul class="dropdown-menu">
-              <li class="header">You have 10 notifications</li>
+              <li class="header">You have {{notifications.count}} notifications</li>
               <li>
                 <!-- inner menu: contains the actual data -->
                 <ul class="menu">
-                  <li>
-                    <a href="#">
-                      <i class="fa fa-users text-aqua"></i> 5 new members joined today
+                  <li> 
+                    {% for n in notifications %}
+                    <a href="{{n.url}}" data-url="{% url 'elegislative:delete_notification' n.id %}">
+                      <div class="pull-left">
+                        {% if n.sender.image %}
+                        <img src="{{ n.sender.image.url }}" class="img-circle" alt="User Image">
+                        {% else %}
+                        <img src="{% static 'images/150x150.png' %}" class="img-circle" alt="User Image">  
+                        {% endif %}  
+                      </div>
+                      <h4>
+                        {{n.sender.f_name}} {{n.sender.l_name}}
+                        <small><i class="fa fa-clock-o"></i> {% custom_date_format_simple n.date_filed %}</small>
+                      </h4>
+                      <p>{{n.message}}</p>
                     </a>
+                    {% endfor %} 
                   </li>
-                  <li>
-                    <a href="#">
-                      <i class="fa fa-warning text-yellow"></i> Very long description here that may not fit into the
-                      page and may cause design problems
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#">
-                      <i class="fa fa-users text-red"></i> 5 new members joined
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#">
-                      <i class="fa fa-shopping-cart text-green"></i> 25 sales made
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#">
-                      <i class="fa fa-user text-red"></i> You changed your username
-                    </a>
-                  </li>
+        
                 </ul>
               </li>
-              <li class="footer"><a href="#">View all</a></li>
+              <li class="footer"><a href="{% url 'elegislative:delete_all_notifications' %}">See All Messages</a></li>
             </ul>
           </li>
+          
+
      
           <!-- User Account: style can be found in dropdown.less -->
           <li class="dropdown user user-menu">
@@ -332,6 +331,123 @@ e-Legislative Dashboard
       </div>
       <!-- /.col -->
     </div>
+
+    <div class="row">
+        <div class="col-md-4 col-sm-6 col-xs-12">
+          <div class="info-box bg-yellow">
+            <span class="info-box-icon"><i class="fa fa-check"></i></span>
+
+            <div class="info-box-content">
+              <span class="info-box-text">Signed Documents</span>
+              <span class="info-box-number">{{signed|intcomma}}</span>               
+             
+              <div class="progress">
+                <div class="progress-bar" style="width: {% compute_percentage signed unsigned %}%"></div>
+              </div>
+              <span class="progress-description">
+                {% compute_percentage signed unsigned%}% of overall documents
+                  </span>
+            </div>
+            <!-- /.info-box-content -->
+          </div>
+        </div>
+        <!-- /.col -->
+        <div class="col-md-4 col-sm-6 col-xs-12">
+            <div class="info-box bg-green">
+              <span class="info-box-icon"><i class="fa fa-times"></i></span>
+
+              <div class="info-box-content">
+                <span class="info-box-text">Unsigned Documents</span>
+                <span class="info-box-number">{{unsigned|intcomma}}</span>
+
+                <div class="progress">
+                  <div class="progress-bar" style="width: {% compute_percentage unsigned signed %}%"></div>
+                </div>
+                <span class="progress-description">
+                  {% compute_percentage unsigned signed %}% of overall documents
+                    </span>
+              </div>
+              <!-- /.info-box-content -->
+            </div>
+        </div>
+        <!-- /.col -->
+        <div class="col-md-4 col-sm-6 col-xs-12">
+            <div class="info-box bg-red">
+              <span class="info-box-icon"><i class="fa fa-thumbs-o-up"></i></span>
+
+              <div class="info-box-content">
+                <span class="info-box-text">Approved Documents</span>
+                <span class="info-box-number">{{approved|intcomma}}</span>
+
+                <div class="progress">
+                  <div class="progress-bar" style="width: {% compute_percentage approved denied pending uncategorized%}%"></div>
+                </div>
+                <span class="progress-description">
+                  {% compute_percentage approved denied pending uncategorized%}% of overall documents
+                    </span>
+              </div>
+              <!-- /.info-box-content -->
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 col-sm-6 col-xs-12">
+          <div class="info-box bg-aqua">
+            <span class="info-box-icon"><i class="fa fa-thumbs-o-down"></i></span>
+
+            <div class="info-box-content">
+              <span class="info-box-text">Denied Documents</span>
+              <span class="info-box-number">{{denied|intcomma}}</span>
+
+              <div class="progress">
+                <div class="progress-bar" style="width: {% compute_percentage denied approved pending uncategorized%}%"></div>
+              </div>
+              <span class="progress-description">
+                {% compute_percentage denied approved pending uncategorized%}% of overall documents
+                  </span>
+            </div>
+            <!-- /.info-box-content -->
+          </div>
+        </div>
+        <div class="col-md-4 col-sm-6 col-xs-12">
+          <div class="info-box bg-navy">
+            <span class="info-box-icon"><i class="fa fa-files-o"></i></span>
+
+            <div class="info-box-content">
+              <span class="info-box-text">Pending Documents</span>
+              <span class="info-box-number">{{pending|intcomma}}</span>
+
+              <div class="progress">
+                <div class="progress-bar" style="width: {% compute_percentage pending denied approved uncategorized%}%"></div>
+              </div>
+              <span class="progress-description">
+                {% compute_percentage pending denied approved uncategorized%}% of overall documents
+                  </span>
+            </div>
+            <!-- /.info-box-content -->
+          </div>
+        </div>
+        <div class="col-md-4 col-sm-6 col-xs-12">
+          <div class="info-box bg-purple">
+            <span class="info-box-icon"><i class="fa fa-question"></i></span>
+
+            <div class="info-box-content">
+              <span class="info-box-text">Uncategorized Documents</span>
+              <span class="info-box-number">{{uncategorized|intcomma}}</span>
+
+              <div class="progress">
+                <div class="progress-bar" style="width: {% compute_percentage uncategorized pending denied approved %}%"></div>
+              </div>
+              <span class="progress-description">
+                  {% compute_percentage uncategorized pending denied approved %}% of overall documents
+              </span>
+            </div>
+            <!-- /.info-box-content -->
+          </div>
+        </div>
+    </div>
+    
     
     <!-- Small boxes (Stat box) -->
     <div class="row">
@@ -427,13 +543,13 @@ e-Legislative Dashboard
 </div>
 {% endblock main_content %}
   <!-- /.content-wrapper -->
-<footer class="main-footer">
-  <div class="pull-right hidden-xs">
-    <b>Version</b> 0.0.1
-  </div>
-  <strong>Copyright &copy; 2014-2019 <a href="#">e-Legislative System</a>.</strong> All rights
-  reserved.
-</footer>
+  <footer class="main-footer">
+    <div class="pull-right hidden-xs">
+      <b>Version</b> 0.0.1
+    </div>
+    <strong>Copyright &copy; 2014-2019 <a href="#">e-Legislative System</a>.</strong> All rights
+    reserved.
+  </footer>
 
    <!-- Control Sidebar -->
    <aside class="control-sidebar control-sidebar-dark" style="display: none;">
@@ -625,30 +741,27 @@ e-Legislative Dashboard
     </div>
   </aside>
 
-  
-
-
-<!-- Modals -->
-<div class="modal fade" id="modal-default">
-  <div class="modal-dialog">
-      <div class="modal-content">
-          <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span></button>
-              <h4 class="modal-title">Loading Form Modal&hellip;</h4>
-          </div>
-          <div class="modal-body">
-              <p>Loading Content&hellip;</p>
-          </div>
-          <!-- <div class="modal-footer">
-              <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
-              <button type="button" class="btn btn-primary">Save changes</button>
-          </div> -->
-      </div>
-      <!-- /.modal-content -->
+  <!-- Modals -->
+  <div class="modal fade" id="modal-default">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Loading Form Modal&hellip;</h4>
+            </div>
+            <div class="modal-body">
+                <p>Loading Content&hellip;</p>
+            </div>
+            <!-- <div class="modal-footer">
+                <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div> -->
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
   </div>
-  <!-- /.modal-dialog -->
-</div>
 <!-- /.modal -->
 {% endblock body_block %}  
 
