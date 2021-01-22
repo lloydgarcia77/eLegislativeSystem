@@ -40,19 +40,19 @@ $(document).ready(function () {
 
         }); 
         return false;
-    });
-    $(".navbar-custom-menu .messages-menu .dropdown-menu .footer a").on("click",function(e){
+    }); 
+    $(".navbar-custom-menu .messages-menu .dropdown-menu .footer a").on("click",function(e){ 
+        let url = $(this).attr('data-url');   
         e.preventDefault();
-        let url = $(this).attr('href'); 
-
+         
+         
         $.ajax({
             // https://docs.djangoproject.com/en/2.2/ref/csrf/
             headers: { "X-CSRFToken": getCookie("csrftoken") },
             type: 'POST', // must be in POST
             url: url, 
-            dataType: 'url',
+            dataType: 'json',
             success: (data) => {
-                alert("asd");
                 if(data.status){
                     location.reload();
                 }
