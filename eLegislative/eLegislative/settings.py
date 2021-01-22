@@ -194,3 +194,22 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 # from cryptography.fernet import Fernet
 # Fernet.generate_key()
 ENCRYPT_KEY = b'xlNVkz4loCnsQWGmKEMjj7De5fj0d_N0_yeKxGJxDSk='
+
+
+NOTIFICATION_TAGS = (
+    ('None','None'),
+    ('Agenda','Agenda'),
+    ('Resolution','Resolution'),
+    ('Ordinance','Ordinance'),
+    ('MOM','MOM'),
+    ('CRO','CRO'),
+    ('CRR','CRR'),
+    ('CMRO','CMRO'),
+    ('CMRR','CMRR'),
+    ('Announcement','Announcement'),
+)
+
+
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_COOKIE_AGE = 600 # set just 10 seconds to test
+SESSION_SAVE_EVERY_REQUEST = True

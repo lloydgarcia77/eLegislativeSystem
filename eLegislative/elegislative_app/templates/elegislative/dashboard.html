@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load humanize %} 
+{% load custom_tags %}
 {% block title %}
 e-Legislative Dashboard
 {% endblock title%}
@@ -23,49 +24,47 @@ e-Legislative Dashboard
 
       <div class="navbar-custom-menu">
         <ul class="nav navbar-nav">
-       
-          <!-- Notifications: style can be found in dropdown.less -->
-          <li class="dropdown notifications-menu">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+      
+          <li class="dropdown messages-menu">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
               <i class="fa fa-bell-o"></i>
-              <span class="label label-warning">10</span>
+              {% if notifications %}
+              <span class="label label-warning">
+              {{notifications.count}}
+              </span>
+              {% endif %} 
             </a>
             <ul class="dropdown-menu">
-              <li class="header">You have 10 notifications</li>
+              <li class="header">You have {{notifications.count}} notifications</li>
               <li>
                 <!-- inner menu: contains the actual data -->
                 <ul class="menu">
-                  <li>
-                    <a href="#">
-                      <i class="fa fa-users text-aqua"></i> 5 new members joined today
+                  <li> 
+                    {% for n in notifications %}
+                    <a href="{{n.url}}" data-url="{% url 'elegislative:delete_notification' n.id %}">
+                      <div class="pull-left">
+                        {% if n.sender.image %}
+                        <img src="{{ n.sender.image.url }}" class="img-circle" alt="User Image">
+                        {% else %}
+                        <img src="{% static 'images/150x150.png' %}" class="img-circle" alt="User Image">  
+                        {% endif %}  
+                      </div>
+                      <h4>
+                        {{n.sender.f_name}} {{n.sender.l_name}}
+                        <small><i class="fa fa-clock-o"></i> {% custom_date_format_simple n.date_filed %}</small>
+                      </h4>
+                      <p style="overflow: hidden; text-overflow: ellipsis;">{{n.message}}</p>
                     </a>
+                    {% endfor %} 
                   </li>
-                  <li>
-                    <a href="#">
-                      <i class="fa fa-warning text-yellow"></i> Very long description here that may not fit into the
-                      page and may cause design problems
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#">
-                      <i class="fa fa-users text-red"></i> 5 new members joined
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#">
-                      <i class="fa fa-shopping-cart text-green"></i> 25 sales made
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#">
-                      <i class="fa fa-user text-red"></i> You changed your username
-                    </a>
-                  </li>
+        
                 </ul>
               </li>
-              <li class="footer"><a href="#">View all</a></li>
+              <li class="footer"><a data-url="{% url 'elegislative:delete_all_notifications' %}" id="see-all-messages">See All Messages</a></li>
             </ul>
           </li>
+          
+
      
           <!-- User Account: style can be found in dropdown.less -->
           <li class="dropdown user user-menu">
@@ -168,7 +167,7 @@ e-Legislative Dashboard
         <a href="{% url 'elegislative:agenda_page' %}">
           <i class="fa fa-hand-o-right"></i> <span>Agenda</span>
           <span class="pull-right-container">
-            <small class="label pull-right bg-green">new</small>
+            <small class="label pull-right bg-green"></small>
           </span>
         </a>
       </li>
@@ -180,7 +179,7 @@ e-Legislative Dashboard
         <a href="{% url 'elegislative:resolution' %}">
           <i class="fa fa-hand-rock-o"></i> <span>Resolution</span>
           <span class="pull-right-container">
-            <small class="label pull-right bg-green">new</small>
+            <small class="label pull-right bg-green"></small>
           </span>
         </a>
       </li>
@@ -191,7 +190,7 @@ e-Legislative Dashboard
         <a href="{% url 'elegislative:ordinance_page' %}">
           <i class="fa fa-balance-scale"></i> <span>Ordinances</span>
           <span class="pull-right-container">
-            <small class="label pull-right bg-green">new</small>
+            <small class="label pull-right bg-green"></small>
           </span>
         </a>
       </li>
@@ -202,7 +201,7 @@ e-Legislative Dashboard
         <a href="{% url 'elegislative:minutes_of_the_meeting' %}" data-toggle="tooltip" title="Minutes of the meeting">
           <i class="fa fa-comments"></i> <span>Min. of the meeting</span>
           <span class="pull-right-container">
-            <small class="label pull-right bg-green">new</small>
+            <small class="label pull-right bg-green"></small>
           </span>
         </a>
       </li>
@@ -214,7 +213,7 @@ e-Legislative Dashboard
         <a href="{% url 'elegislative:comments_and_recommendation' %}" data-toggle="tooltip" title="Comments & Recommendation">
           <i class="fa fa-files-o"></i> <span>Commt & Rec.</span>
           <span class="pull-right-container">
-            <small class="label pull-right bg-green">new</small>
+            <small class="label pull-right bg-green"></small>
           </span>
         </a>
       </li> 
@@ -227,7 +226,7 @@ e-Legislative Dashboard
         <a href="{% url 'elegislative:committee_reports' %}">
           <i class="fa fa-file-text-o"></i> <span>Commitee Reports</span>
           <span class="pull-right-container">
-            <small class="label pull-right bg-green">new</small>
+            <small class="label pull-right bg-green"></small>
           </span>
         </a>
       </li>
@@ -238,7 +237,7 @@ e-Legislative Dashboard
         <a href="{% url 'elegislative:records' %}" data-toggle="tooltip" title="Records">
           <i class="fa fa-gavel"></i> <span>Records</span>
           <span class="pull-right-container">
-            <small class="label pull-right bg-green">new</small>
+            <small class="label pull-right bg-green"></small>
           </span>
         </a>
       </li>
@@ -250,7 +249,7 @@ e-Legislative Dashboard
         <a href="{% url 'elegislative:announcements' %}" data-toggle="tooltip" title="Announcement">
           <i class="fa fa-volume-up"></i> <span>Announcements</span>
           <span class="pull-right-container">
-            <small class="label pull-right bg-green">new</small>
+            <small class="label pull-right bg-green"></small>
           </span>
         </a>
       </li>
@@ -332,6 +331,123 @@ e-Legislative Dashboard
       </div>
       <!-- /.col -->
     </div>
+
+    <div class="row">
+        <div class="col-md-4 col-sm-6 col-xs-12">
+          <div class="info-box bg-yellow">
+            <span class="info-box-icon"><i class="fa fa-check"></i></span>
+
+            <div class="info-box-content">
+              <span class="info-box-text">Signed Documents</span>
+              <span class="info-box-number">{{signed|intcomma}}</span>               
+             
+              <div class="progress">
+                <div class="progress-bar" style="width: {% compute_percentage signed unsigned %}%"></div>
+              </div>
+              <span class="progress-description">
+                {% compute_percentage signed unsigned%}% of overall documents
+                  </span>
+            </div>
+            <!-- /.info-box-content -->
+          </div>
+        </div>
+        <!-- /.col -->
+        <div class="col-md-4 col-sm-6 col-xs-12">
+            <div class="info-box bg-green">
+              <span class="info-box-icon"><i class="fa fa-times"></i></span>
+
+              <div class="info-box-content">
+                <span class="info-box-text">Unsigned Documents</span>
+                <span class="info-box-number">{{unsigned|intcomma}}</span>
+
+                <div class="progress">
+                  <div class="progress-bar" style="width: {% compute_percentage unsigned signed %}%"></div>
+                </div>
+                <span class="progress-description">
+                  {% compute_percentage unsigned signed %}% of overall documents
+                    </span>
+              </div>
+              <!-- /.info-box-content -->
+            </div>
+        </div>
+        <!-- /.col -->
+        <div class="col-md-4 col-sm-6 col-xs-12">
+            <div class="info-box bg-red">
+              <span class="info-box-icon"><i class="fa fa-thumbs-o-up"></i></span>
+
+              <div class="info-box-content">
+                <span class="info-box-text">Approved Documents</span>
+                <span class="info-box-number">{{approved|intcomma}}</span>
+
+                <div class="progress">
+                  <div class="progress-bar" style="width: {% compute_percentage approved denied pending uncategorized%}%"></div>
+                </div>
+                <span class="progress-description">
+                  {% compute_percentage approved denied pending uncategorized%}% of overall documents
+                    </span>
+              </div>
+              <!-- /.info-box-content -->
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 col-sm-6 col-xs-12">
+          <div class="info-box bg-aqua">
+            <span class="info-box-icon"><i class="fa fa-thumbs-o-down"></i></span>
+
+            <div class="info-box-content">
+              <span class="info-box-text">Denied Documents</span>
+              <span class="info-box-number">{{denied|intcomma}}</span>
+
+              <div class="progress">
+                <div class="progress-bar" style="width: {% compute_percentage denied approved pending uncategorized%}%"></div>
+              </div>
+              <span class="progress-description">
+                {% compute_percentage denied approved pending uncategorized%}% of overall documents
+                  </span>
+            </div>
+            <!-- /.info-box-content -->
+          </div>
+        </div>
+        <div class="col-md-4 col-sm-6 col-xs-12">
+          <div class="info-box bg-navy">
+            <span class="info-box-icon"><i class="fa fa-files-o"></i></span>
+
+            <div class="info-box-content">
+              <span class="info-box-text">Pending Documents</span>
+              <span class="info-box-number">{{pending|intcomma}}</span>
+
+              <div class="progress">
+                <div class="progress-bar" style="width: {% compute_percentage pending denied approved uncategorized%}%"></div>
+              </div>
+              <span class="progress-description">
+                {% compute_percentage pending denied approved uncategorized%}% of overall documents
+                  </span>
+            </div>
+            <!-- /.info-box-content -->
+          </div>
+        </div>
+        <div class="col-md-4 col-sm-6 col-xs-12">
+          <div class="info-box bg-purple">
+            <span class="info-box-icon"><i class="fa fa-question"></i></span>
+
+            <div class="info-box-content">
+              <span class="info-box-text">Uncategorized Documents</span>
+              <span class="info-box-number">{{uncategorized|intcomma}}</span>
+
+              <div class="progress">
+                <div class="progress-bar" style="width: {% compute_percentage uncategorized pending denied approved %}%"></div>
+              </div>
+              <span class="progress-description">
+                  {% compute_percentage uncategorized pending denied approved %}% of overall documents
+              </span>
+            </div>
+            <!-- /.info-box-content -->
+          </div>
+        </div>
+    </div>
+    
     
     <!-- Small boxes (Stat box) -->
     <div class="row">
@@ -427,228 +543,125 @@ e-Legislative Dashboard
 </div>
 {% endblock main_content %}
   <!-- /.content-wrapper -->
-<footer class="main-footer">
-  <div class="pull-right hidden-xs">
-    <b>Version</b> 0.0.1
-  </div>
-  <strong>Copyright &copy; 2014-2019 <a href="#">e-Legislative System</a>.</strong> All rights
-  reserved.
-</footer>
+  <footer class="main-footer">
+    <div class="pull-right hidden-xs">
+      <b>Version</b> 0.0.1
+    </div>
+    <strong>Copyright &copy; 2014-2019 <a href="#">e-Legislative System</a>.</strong> All rights
+    reserved.
+  </footer>
 
    <!-- Control Sidebar -->
    <aside class="control-sidebar control-sidebar-dark" style="display: none;">
     <!-- Create the tabs -->
-    <ul class="nav nav-tabs nav-justified control-sidebar-tabs">
-      <li><a href="#control-sidebar-home-tab" data-toggle="tab"><i class="fa fa-home"></i></a></li>
-      <li><a href="#control-sidebar-settings-tab" data-toggle="tab"><i class="fa fa-gears"></i></a></li>
-    </ul>
-    <!-- Tab panes -->
-    <div class="tab-content">
-      <!-- Home tab content -->
-      <div class="tab-pane" id="control-sidebar-home-tab">
-        <h3 class="control-sidebar-heading">Recent Activity</h3>
-        <ul class="control-sidebar-menu">
-          <li>
-            <a href="javascript:void(0)">
-              <i class="menu-icon fa fa-birthday-cake bg-red"></i>
+      <ul class="nav nav-tabs nav-justified control-sidebar-tabs">
+        <li><a href="#control-sidebar-home-tab" data-toggle="tab"><i class="fa fa-home"></i></a></li>
+        <li><a href="#control-sidebar-settings-tab" data-toggle="tab"><i class="fa fa-gears"></i></a></li>
+      </ul>
+      <!-- Tab panes -->
+      <div class="tab-content">
+        <!-- Home tab content -->
+        <div class="tab-pane" id="control-sidebar-home-tab">
+          
 
-              <div class="menu-info">
-                <h4 class="control-sidebar-subheading">Langdon's Birthday</h4>
+        </div>
+        <!-- /.tab-pane -->
+        <!-- Stats tab content -->
+        <div class="tab-pane" id="control-sidebar-stats-tab">Stats Tab Content</div>
+        <!-- /.tab-pane -->
+        <!-- Settings tab content -->
+        <div class="tab-pane" id="control-sidebar-settings-tab">
+          <form method="post">
+            <h3 class="control-sidebar-heading">General Settings</h3>
 
-                <p>Will be 23 on April 24th</p>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a href="javascript:void(0)">
-              <i class="menu-icon fa fa-user bg-yellow"></i>
+            <div class="form-group">
+              <label class="control-sidebar-subheading">
+                Report panel usage
+                <input type="checkbox" class="pull-right" checked>
+              </label>
 
-              <div class="menu-info">
-                <h4 class="control-sidebar-subheading">Frodo Updated His Profile</h4>
+              <p>
+                Some information about this general settings option
+              </p>
+            </div>
+            <!-- /.form-group -->
 
-                <p>New phone +1(800)555-1234</p>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a href="javascript:void(0)">
-              <i class="menu-icon fa fa-envelope-o bg-light-blue"></i>
+            <div class="form-group">
+              <label class="control-sidebar-subheading">
+                Allow mail redirect
+                <input type="checkbox" class="pull-right" checked>
+              </label>
 
-              <div class="menu-info">
-                <h4 class="control-sidebar-subheading">Nora Joined Mailing List</h4>
+              <p>
+                Other sets of options are available
+              </p>
+            </div>
+            <!-- /.form-group -->
 
-                <p>nora@example.com</p>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a href="javascript:void(0)">
-              <i class="menu-icon fa fa-file-code-o bg-green"></i>
+            <div class="form-group">
+              <label class="control-sidebar-subheading">
+                Expose author name in posts
+                <input type="checkbox" class="pull-right" checked>
+              </label>
 
-              <div class="menu-info">
-                <h4 class="control-sidebar-subheading">Cron Job 254 Executed</h4>
+              <p>
+                Allow the user to show his name in blog posts
+              </p>
+            </div>
+            <!-- /.form-group -->
 
-                <p>Execution time 5 seconds</p>
-              </div>
-            </a>
-          </li>
-        </ul>
-        <!-- /.control-sidebar-menu -->
+            <h3 class="control-sidebar-heading">Chat Settings</h3>
 
-        <h3 class="control-sidebar-heading">Tasks Progress</h3>
-        <ul class="control-sidebar-menu">
-          <li>
-            <a href="javascript:void(0)">
-              <h4 class="control-sidebar-subheading">
-                Custom Template Design
-                <span class="label label-danger pull-right">70%</span>
-              </h4>
+            <div class="form-group">
+              <label class="control-sidebar-subheading">
+                Show me as online
+                <input type="checkbox" class="pull-right" checked>
+              </label>
+            </div>
+            <!-- /.form-group -->
 
-              <div class="progress progress-xxs">
-                <div class="progress-bar progress-bar-danger" style="width: 70%"></div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a href="javascript:void(0)">
-              <h4 class="control-sidebar-subheading">
-                Update Resume
-                <span class="label label-success pull-right">95%</span>
-              </h4>
+            <div class="form-group">
+              <label class="control-sidebar-subheading">
+                Turn off notifications
+                <input type="checkbox" class="pull-right">
+              </label>
+            </div>
+            <!-- /.form-group -->
 
-              <div class="progress progress-xxs">
-                <div class="progress-bar progress-bar-success" style="width: 95%"></div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a href="javascript:void(0)">
-              <h4 class="control-sidebar-subheading">
-                Laravel Integration
-                <span class="label label-warning pull-right">50%</span>
-              </h4>
-
-              <div class="progress progress-xxs">
-                <div class="progress-bar progress-bar-warning" style="width: 50%"></div>
-              </div>
-            </a>
-          </li>
-          <li>
-            <a href="javascript:void(0)">
-              <h4 class="control-sidebar-subheading">
-                Back End Framework
-                <span class="label label-primary pull-right">68%</span>
-              </h4>
-
-              <div class="progress progress-xxs">
-                <div class="progress-bar progress-bar-primary" style="width: 68%"></div>
-              </div>
-            </a>
-          </li>
-        </ul>
-        <!-- /.control-sidebar-menu -->
-
+            <div class="form-group">
+              <label class="control-sidebar-subheading">
+                Delete chat history
+                <a href="javascript:void(0)" class="text-red pull-right"><i class="fa fa-trash-o"></i></a>
+              </label>
+            </div>
+            <!-- /.form-group -->
+          </form>
+        </div>
+        <!-- /.tab-pane -->
       </div>
-      <!-- /.tab-pane -->
-      <!-- Stats tab content -->
-      <div class="tab-pane" id="control-sidebar-stats-tab">Stats Tab Content</div>
-      <!-- /.tab-pane -->
-      <!-- Settings tab content -->
-      <div class="tab-pane" id="control-sidebar-settings-tab">
-        <form method="post">
-          <h3 class="control-sidebar-heading">General Settings</h3>
+    </aside>
 
-          <div class="form-group">
-            <label class="control-sidebar-subheading">
-              Report panel usage
-              <input type="checkbox" class="pull-right" checked>
-            </label>
-
-            <p>
-              Some information about this general settings option
-            </p>
-          </div>
-          <!-- /.form-group -->
-
-          <div class="form-group">
-            <label class="control-sidebar-subheading">
-              Allow mail redirect
-              <input type="checkbox" class="pull-right" checked>
-            </label>
-
-            <p>
-              Other sets of options are available
-            </p>
-          </div>
-          <!-- /.form-group -->
-
-          <div class="form-group">
-            <label class="control-sidebar-subheading">
-              Expose author name in posts
-              <input type="checkbox" class="pull-right" checked>
-            </label>
-
-            <p>
-              Allow the user to show his name in blog posts
-            </p>
-          </div>
-          <!-- /.form-group -->
-
-          <h3 class="control-sidebar-heading">Chat Settings</h3>
-
-          <div class="form-group">
-            <label class="control-sidebar-subheading">
-              Show me as online
-              <input type="checkbox" class="pull-right" checked>
-            </label>
-          </div>
-          <!-- /.form-group -->
-
-          <div class="form-group">
-            <label class="control-sidebar-subheading">
-              Turn off notifications
-              <input type="checkbox" class="pull-right">
-            </label>
-          </div>
-          <!-- /.form-group -->
-
-          <div class="form-group">
-            <label class="control-sidebar-subheading">
-              Delete chat history
-              <a href="javascript:void(0)" class="text-red pull-right"><i class="fa fa-trash-o"></i></a>
-            </label>
-          </div>
-          <!-- /.form-group -->
-        </form>
-      </div>
-      <!-- /.tab-pane -->
+  <!-- Modals -->
+  <div class="modal fade" id="modal-default">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Loading Form Modal&hellip;</h4>
+            </div>
+            <div class="modal-body">
+                <p>Loading Content&hellip;</p>
+            </div>
+            <!-- <div class="modal-footer">
+                <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div> -->
+        </div>
+        <!-- /.modal-content -->
     </div>
-  </aside>
-
-  
-
-
-<!-- Modals -->
-<div class="modal fade" id="modal-default">
-  <div class="modal-dialog">
-      <div class="modal-content">
-          <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span></button>
-              <h4 class="modal-title">Loading Form Modal&hellip;</h4>
-          </div>
-          <div class="modal-body">
-              <p>Loading Content&hellip;</p>
-          </div>
-          <!-- <div class="modal-footer">
-              <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
-              <button type="button" class="btn btn-primary">Save changes</button>
-          </div> -->
-      </div>
-      <!-- /.modal-content -->
+    <!-- /.modal-dialog -->
   </div>
-  <!-- /.modal-dialog -->
-</div>
 <!-- /.modal -->
 {% endblock body_block %}  
 

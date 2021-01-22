@@ -324,6 +324,8 @@ class NotificationsModel(models.Model):
     sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="sender_fk")
     receiver = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="receiver_fk")
     message = models.CharField(max_length=200)
+    tags = models.CharField(max_length=250, choices=settings.NOTIFICATION_TAGS, default=settings.NOTIFICATION_TAGS[0][0])
+    url = models.URLField(max_length=250, default="")
     is_read = models.BooleanField(default=False)
     date_filed = models.DateTimeField(auto_now=True)
 

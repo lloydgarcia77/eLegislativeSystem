@@ -98,11 +98,11 @@ class AnnouncementAdmin(ImportExportModelAdmin):
 admin.site.register(models.AnnouncementModel, AnnouncementAdmin)
 
 class NotificationsAdmin(ImportExportModelAdmin):
-    list_display = ("id","sender","receiver","message","is_read","date_filed")
-    list_editable = ("sender","receiver","message","is_read",)
+    list_display = ("id","sender","receiver","message","is_read","tags","url","date_filed")
+    list_editable = ("sender","receiver","message","is_read","tags","url",)
     list_per_page = 10
-    search_fields = ("id","sender","receiver","message","date_filed")
-    list_filter = ("sender","receiver","date_filed",)
+    search_fields = ("id","sender","receiver","message","date_filed","tags",)
+    list_filter = ("sender","receiver","date_filed","tags",)
 
 
 admin.site.register(models.NotificationsModel, NotificationsAdmin)

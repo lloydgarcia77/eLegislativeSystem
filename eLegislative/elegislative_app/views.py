@@ -156,17 +156,82 @@ def authorize(function):
             # return HttpResponseRedirect('/')
     return wrap
 
-def text(function):
+def get_notification(function):
     @wraps(function)
     def wrap(request, *args, **kwargs):
-        print('---------------------------------------------')
-        notifications = models.NotificationsModel.objects.all()
-        return function(request, *args, notifications=notifications)
+        user = get_object_or_404(models.User, email=request.user.email)
+        notifications = models.NotificationsModel.objects.all().filter(Q(receiver=user)).order_by('-id') 
+        kwargs['notifications'] = notifications
+        return function(request, *args, **kwargs)
     return wrap
 
-@text
-@authorize
-@login_required
+# https://stackoverflow.com/questions/9030255/django-add-optional-arguments-to-decorator
+def create_notification(url_target, message, tags): 
+    def _method_wrapper(view_method): 
+        def _arguments_wrapper(request, *args, **kwargs) :
+            """
+            Wrapper with arguments to invoke the method
+            """ 
+            user = get_object_or_404(models.User, email=request.user.email) 
+
+            users = models.User.objects.all()
+ 
+            url = reverse_lazy(url_target) 
+           
+            for u in users:
+                models.NotificationsModel.objects.create(
+                    sender=user,
+                    receiver=u,
+                    message=message,
+                    tags=tags,
+                    url=url,
+                ) 
+
+            return view_method(request, *args, **kwargs) 
+        return _arguments_wrapper 
+    return _method_wrapper
+
+def add_notification(request, url_target, message, tags):
+    user = get_object_or_404(models.User, email=request.user.email) 
+
+    users = models.User.objects.all()
+
+    url = reverse_lazy(url_target) 
+    
+    for u in users:
+        models.NotificationsModel.objects.create(
+            sender=user,
+            receiver=u,
+            message=message,
+            tags=tags,
+            url=url,
+        ) 
+
+def delete_notification(request, id):
+    data = dict()
+    if request.is_ajax():
+        notification = get_object_or_404(models.NotificationsModel,id=id)
+        if request.method == 'POST':
+            notification.delete()
+            data['status'] = True
+        return JsonResponse(data)
+    else:
+        raise Http404()
+
+def delete_all_notifications(request):
+    data = dict()
+    if request.is_ajax(): 
+        if request.method == 'POST': 
+            user = get_object_or_404(models.User, email=request.user.email)  
+            models.NotificationsModel.objects.all().filter(Q(receiver=user)).delete() 
+            data['status'] = True
+        return JsonResponse(data)
+    else:
+        raise Http404()
+# @create_notification('elegislative:agenda_page', "Agenda has been created!", settings.NOTIFICATION_TAGS[1][0])
+@login_required   
+@authorize 
+@get_notification 
 def dashboard_page(request, *args, **kwargs):
     template_name = "elegislative/dashboard.html"
     user = get_object_or_404(models.User, email=request.user.email)
@@ -181,6 +246,27 @@ def dashboard_page(request, *args, **kwargs):
     com_rec_ord = models.CommentsRecomendationOrdinanceModel.objects.all() 
     com_rec_total = int(com_rec_res.count()) + int(com_rec_ord.count()) 
     announcement_display = models.AnnouncementModel.objects.all().filter(Q(visible=True))
+
+
+    model_list = [
+        models.AgendaModel,
+        models.ResolutionModel,
+        models.CommitteeReportResolutionModel, 
+        models.OrdinanceModel,
+        models.CommitteeReportOrdinanceModel, 
+        models.MOMModel, 
+    ]
+
+    signed, unsigned, approved, denied, pending, uncategorized = 0,0,0,0,0,0
+
+    for m in model_list:
+        signed += m.objects.all().filter(Q(is_signed=True)).count()
+        unsigned += m.objects.all().filter(Q(is_signed=False)).count()
+        approved += m.objects.all().filter(Q(status='Approved')).count()
+        denied += m.objects.all().filter(Q(status='Denied')).count()
+        pending += m.objects.all().filter(Q(status='Pending')).count()
+        uncategorized += m.objects.all().filter(Q(status='None')).count()
+        
     context = {
         'user': user,
         'agenda': agenda,
@@ -192,15 +278,20 @@ def dashboard_page(request, *args, **kwargs):
         'announcement': announcement,
         'com_rec_total': com_rec_total, 
         'announcement_display': announcement_display,
-    }
-    print('--------------------------->',kwargs)
-
-
+        'notifications':kwargs['notifications'],
+        'signed':signed,
+        'unsigned':unsigned,
+        'approved':approved,
+        'denied':denied,
+        'pending':pending,
+        'uncategorized':uncategorized,
+    } 
     return render(request, template_name, context)
 
-@authorize
 @login_required
-def search(request):
+@authorize
+@get_notification
+def search(request, *args, **kwargs):
     template_name = "elegislative/search/search_results.html"
     user = get_object_or_404(models.User, email=request.user.email) 
     
@@ -280,30 +371,36 @@ def search(request):
         'records_filtered': records_filtered,
         'query_records': query_records,
         'base_url': base_url,
+        'notifications':kwargs['notifications'],
     }
 
     return render(request, template_name, context)
+
 
 """
 [START] -> CRUD, Manage Agenda Features
 """
 
-# Agenda Feature 
+# Agenda Feature
+@login_required 
 @authorize
-@login_required
-def agenda_page(request):
+@get_notification
+def agenda_page(request, *args, **kwargs):
     template_name = "elegislative/agenda/agenda.html" 
     user = get_object_or_404(models.User, email=request.user.email) 
     agenda = models.AgendaModel.objects.all()
     context = {
         'user': user,
         'agenda': agenda,
+        'notifications':kwargs['notifications'],
     }
     return render(request, template_name, context)
 
-@authorize
+# @create_notification('elegislative:agenda_page', "Agenda has been created!", settings.NOTIFICATION_TAGS[1][0])
 @login_required
-def create_agenda_page(request):
+@authorize
+@get_notification
+def create_agenda_page(request, *args, **kwargs):
     template_name = "elegislative/agenda/create_new_agenda.html"
     user = get_object_or_404(models.User, email=request.user.email)  
 
@@ -312,21 +409,25 @@ def create_agenda_page(request):
     elif request.method == 'POST':
         form = forms.AgendaForm(request.POST or None) 
         if form.is_valid():
-            form.save()
+            instance = form.save(commit=False)
+            instance.save()
+            add_notification(request,'elegislative:agenda_page', f"Agenda ({instance.no}) has been created!", settings.NOTIFICATION_TAGS[1][0])
             return HttpResponseRedirect(reverse_lazy("elegislative:agenda_page")) 
 
     context = {
         'user': user,
         'form':form,
+        'notifications':kwargs['notifications'],
     }
     return render(request, template_name, context)
 
-@authorize
 @login_required
-def edit_agenda_page(request, id): 
-    template_name = "elegislative/agenda/edit_agenda.html"    
+@authorize
+@get_notification
+def edit_agenda_page(request, *args, **kwargs): 
+    template_name = "elegislative/agenda/edit_agenda.html"      
     user = get_object_or_404(models.User, email=request.user.email)
-    agenda = get_object_or_404(models.AgendaModel, id=id)
+    agenda = get_object_or_404(models.AgendaModel, id=kwargs['id'])
 
     if request.method == 'GET':
         form = forms.EditAgendaForm(request.GET or None, instance=agenda)
@@ -338,6 +439,7 @@ def edit_agenda_page(request, id):
     context = {
         'user': user,
         'form':form,
+        'notifications':kwargs['notifications'],
     }
     return render(request, template_name, context)
 
@@ -386,9 +488,10 @@ def print_agenda_page(request, id):
 # Proposed Ordinance & Resolution Feature
 
 # For Resolution
-@authorize
 @login_required
-def comments_and_recommendation(request): 
+@authorize
+@get_notification
+def comments_and_recommendation(request, *args, **kwargs): 
     template_name = "elegislative/comments_recommendation/comments_recommendation.html"
     user = get_object_or_404(models.User, email=request.user.email) 
     resolutions = models.ResolutionModel.objects.all().filter(Q(is_public=True)) 
@@ -404,25 +507,28 @@ def comments_and_recommendation(request):
         'user': user,
         'resolutions': resolutions,
         'ordinances': ordinances, 
+        'notifications':kwargs['notifications'],
     }    
     return render(request, template_name, context)
 
-@authorize
 @login_required
-def posting_resolution(request, id):
+@authorize
+@get_notification
+def posting_resolution(request, *args, **kwargs):
     template_name = "elegislative/comments_recommendation/posting_resolution.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    resolution = get_object_or_404(models.ResolutionModel, id=id)
+    resolution = get_object_or_404(models.ResolutionModel, id=kwargs['id'])
     com_rec = models.CommentsRecomendationResolutionModel.objects.all().filter(resolution_comments_recommendation_fk=resolution)
     context = {
         'user': user, 
         'resolution': resolution,
+        'notifications':kwargs['notifications'],
         'com_rec': com_rec,
     }   
     return render(request, template_name, context)
 
-@authorize
 @login_required
+@authorize
 def posting_resolution_post_comment(request, id):
     data = dict() 
     if request.is_ajax():
@@ -457,8 +563,8 @@ def posting_resolution_post_comment(request, id):
     else:
         raise Http404()
  
-@authorize
 @login_required
+@authorize
 def posting_resolution_delete_comment(request, id, rid):
     data = dict() 
     if request.is_ajax():
@@ -477,23 +583,24 @@ def posting_resolution_delete_comment(request, id, rid):
         raise Http404()
 
 # For Ordinance
-@authorize
 @login_required
-def posting_ordinance(request, id):
+@authorize
+@get_notification
+def posting_ordinance(request, *args, **kwargs):
     template_name = "elegislative/comments_recommendation/posting_ordinance.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    ordinance = get_object_or_404(models.OrdinanceModel, id=id)
+    ordinance = get_object_or_404(models.OrdinanceModel, id=kwargs['id'])
     com_rec = models.CommentsRecomendationOrdinanceModel.objects.all().filter(ordinance_comments_recomendation_fk=ordinance)
     context = {
         'user': user, 
         'ordinance': ordinance,
         'com_rec': com_rec,
+        'notifications':kwargs['notifications'],
     }   
     return render(request, template_name, context)
 
-
-@authorize
 @login_required
+@authorize
 def posting_ordinance_post_comment(request, id):
     data = dict() 
     if request.is_ajax():
@@ -528,8 +635,8 @@ def posting_ordinance_post_comment(request, id):
     else:
         raise Http404()
  
-@authorize
 @login_required
+@authorize
 def posting_ordinance_delete_comment(request, id, oid):
     data = dict() 
     if request.is_ajax():
@@ -555,9 +662,10 @@ def posting_ordinance_delete_comment(request, id, oid):
 """
 [START] -> Manage Committee Reports Features
 """
-@authorize
 @login_required
-def committee_reports(request):
+@authorize
+@get_notification
+def committee_reports(request, *args, **kwargs):
     template_name = "elegislative/committee_reports/committee_reports.html"
     user = get_object_or_404(models.User, email=request.user.email) 
     c_resolutions = models.CommitteeReportResolutionModel.objects.all()
@@ -570,16 +678,18 @@ def committee_reports(request):
         'user': user,
         'resolution': resolution,
         'ordinance': ordinance,
+        'notifications':kwargs['notifications'],
     }    
     return render(request, template_name, context)
 
 # CRUD committee reports for resolution
-@authorize
 @login_required
-def create_committee_resolution_reports(request, id):
+@authorize
+@get_notification
+def create_committee_resolution_reports(request, *args, **kwargs):
     template_name = "elegislative/committee_reports/create_committee_resolution_reports.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    resolution = get_object_or_404(models.ResolutionModel, id=id)
+    resolution = get_object_or_404(models.ResolutionModel, id=kwargs['id'])
 
     if request.method == 'GET':
         form = forms.CommitteeReportResolutionForm(request.GET or None)
@@ -589,21 +699,24 @@ def create_committee_resolution_reports(request, id):
             instance = form.save(commit=False)
             instance.resolution_committee_report_fk = resolution
             instance.save()
+            add_notification(request,'elegislative:committee_reports', f"Com. Rep. Res ({instance.no}) has been created!", settings.NOTIFICATION_TAGS[6][0])
             return HttpResponseRedirect(reverse_lazy("elegislative:committee_reports")) 
 
     context = {
         'user': user,
         'resolution': resolution,
         'form': form,
+        'notifications':kwargs['notifications'],
     }    
     return render(request, template_name, context)
 
-@authorize
 @login_required
-def edit_committee_resolution_reports(request, id):
+@authorize
+@get_notification
+def edit_committee_resolution_reports(request, *args, **kwargs):
     template_name = "elegislative/committee_reports/edit_committee_resolution_reports.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    committee_report = get_object_or_404(models.CommitteeReportResolutionModel, id=id)
+    committee_report = get_object_or_404(models.CommitteeReportResolutionModel, id=kwargs['id'])
 
     if request.method == 'GET':
         form = forms.EditCommitteeReportResolutionForm(request.GET or None, instance=committee_report)
@@ -616,12 +729,13 @@ def edit_committee_resolution_reports(request, id):
         'user': user,
         'committee_report': committee_report,      
         'form'  : form,
+        'notifications':kwargs['notifications'],
     }
 
     return render(request, template_name, context)
 
-@authorize
 @login_required
+@authorize
 def delete_committee_resolution_reports(request, id):
     data = dict()
     template_name = "elegislative/committee_reports/delete_committee_resolution_reports.html"
@@ -640,8 +754,8 @@ def delete_committee_resolution_reports(request, id):
     else:
         raise Http404
 
-@authorize
 @login_required
+@authorize
 def print_committee_resolution_reports(request, id):
     template_name = "elegislative/committee_reports/print_committee_resolution_reports.html"
     user = get_object_or_404(models.User, email=request.user.email)
@@ -654,12 +768,13 @@ def print_committee_resolution_reports(request, id):
     return render(request, template_name, context)
 
 # CRUD committee reports for ordinance
-@authorize
 @login_required
-def create_committee_ordinance_reports(request, id):
+@authorize
+@get_notification
+def create_committee_ordinance_reports(request, *args, **kwargs):
     template_name = "elegislative/committee_reports/create_committee_ordinance_reports.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    ordinance = get_object_or_404(models.OrdinanceModel, id=id)
+    ordinance = get_object_or_404(models.OrdinanceModel, id=kwargs['id'])
 
     if request.method == 'GET':
         form = forms.CommitteeReportOrdinanceForm(request.GET or None)
@@ -669,22 +784,25 @@ def create_committee_ordinance_reports(request, id):
             instance = form.save(commit=False)
             instance.ordinance_committee_report_fk = ordinance
             instance.save()
+            add_notification(request,'elegislative:committee_reports', f"Com. Rep. Ord ({instance.no}) has been created!", settings.NOTIFICATION_TAGS[6][0])
             return HttpResponseRedirect(reverse_lazy("elegislative:committee_reports")) 
 
     context = {
         'user': user,
         'form': form,
         'ordinance': ordinance,
+        'notifications':kwargs['notifications'],
     }
 
     return render(request, template_name, context)
 
-@authorize
 @login_required
-def edit_committee_ordinance_reports(request, id):
+@authorize
+@get_notification
+def edit_committee_ordinance_reports(request, *args, **kwargs):
     template_name = "elegislative/committee_reports/edit_committee_ordinance_reports.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    committee_report = get_object_or_404(models.CommitteeReportOrdinanceModel, id=id) 
+    committee_report = get_object_or_404(models.CommitteeReportOrdinanceModel, id=kwargs['id']) 
 
     if request.method == 'GET':
         form = forms.EditCommitteeReportResolutionForm(request.GET or None, instance=committee_report)
@@ -697,12 +815,13 @@ def edit_committee_ordinance_reports(request, id):
         'user': user,
         'committee_report': committee_report,      
         'form'  : form,
+        'notifications':kwargs['notifications'],
     }
 
     return render(request, template_name, context)
 
-@authorize
 @login_required
+@authorize
 def delete_committee_ordinance_reports(request, id):
     data = dict()
     template_name = "elegislative/committee_reports/delete_committee_ordinance_reports.html"
@@ -722,8 +841,8 @@ def delete_committee_ordinance_reports(request, id):
     else:
         raise Http404()
     
-@authorize
 @login_required
+@authorize
 def print_committee_ordinance_reports(request, id):
     template_name = "elegislative/committee_reports/print_committee_ordinance_reports.html"
     user = get_object_or_404(models.User, email=request.user.email)
@@ -742,25 +861,27 @@ def print_committee_ordinance_reports(request, id):
 """
 [START] -> Manage Resolution Features
 """ 
-@authorize
 @login_required
-def resolution(request):
+@authorize
+@get_notification
+def resolution(request, *args, **kwargs):
     template_name = "elegislative/resolution/resolution.html"
     user = get_object_or_404(models.User, email=request.user.email) 
     resolutions = models.ResolutionModel.objects.all()
     context = {
         'user': user,
         'resolutions': resolutions,
+        'notifications':kwargs['notifications'],
     }    
     return render(request, template_name, context)
 
-
-@authorize
 @login_required
-def create_resolutions(request, id):
+@authorize
+@get_notification
+def create_resolutions(request, *args, **kwargs):
     template_name = "elegislative/resolution/create_resolution.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    agenda = get_object_or_404(models.AgendaModel, id=id)
+    agenda = get_object_or_404(models.AgendaModel, id=kwargs['id'])
 
     if request.method == 'GET':
         form = forms.ResolutionForm(request.GET or None)
@@ -770,21 +891,24 @@ def create_resolutions(request, id):
             instance = form.save(commit=False)
             instance.agenda_fk = agenda
             instance.save()
+            add_notification(request,'elegislative:resolution', f"Resolution ({instance.no}) has been created!", settings.NOTIFICATION_TAGS[2][0])
             return HttpResponseRedirect(reverse_lazy("elegislative:resolution")) 
 
     context = {
         'user': user,
         'form': form,
         'agenda': agenda,
+        'notifications':kwargs['notifications'],
     }    
     return render(request, template_name, context)
 
-@authorize
 @login_required
-def edit_resolution(request, id):
+@authorize
+@get_notification
+def edit_resolution(request, *args, **kwargs):
     template_name = "elegislative/resolution/edit_resolution.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    resolution = get_object_or_404(models.ResolutionModel, id=id)
+    resolution = get_object_or_404(models.ResolutionModel, id=kwargs['id'])
 
     if request.method == 'GET':
         form = forms.EditResolutionForm(request.GET or None, instance=resolution)
@@ -798,6 +922,7 @@ def edit_resolution(request, id):
         'user': user,
         'form': form,
         'resolution': resolution,
+        'notifications':kwargs['notifications'],
     }    
     return render(request, template_name, context)
 
@@ -845,21 +970,26 @@ def print_resolution(request, id):
 [START] -> Manage Ordinance features
 """
 @login_required
-def ordinance(request):
+@authorize
+@get_notification
+def ordinance(request, *args, **kwargs):
     template_name = "elegislative/ordinance/ordinance.html"
     user = get_object_or_404(models.User, email=request.user.email) 
     ordinance = models.OrdinanceModel.objects.all()
     context = {
         'user': user,
         'ordinance': ordinance,
+        'notifications':kwargs['notifications'],
     }    
     return render(request, template_name, context)
 
 @login_required
-def create_ordinance(request, id):
+@authorize
+@get_notification
+def create_ordinance(request, *args, **kwargs):
     template_name = "elegislative/ordinance/create_ordinance.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    agenda = get_object_or_404(models.AgendaModel, id=id)
+    agenda = get_object_or_404(models.AgendaModel, id=kwargs['id'])
     if request.method == 'GET':
         form = forms.OrdinanceForm(request.GET or None)
     elif request.method == 'POST':
@@ -868,21 +998,24 @@ def create_ordinance(request, id):
             instance = form.save(commit=False)
             instance.agenda_fk = agenda
             instance.save()
+            add_notification(request,'elegislative:ordinance_page', f"Ordinance ({instance.no}) has been created!", settings.NOTIFICATION_TAGS[3][0])
             return HttpResponseRedirect(reverse_lazy("elegislative:ordinance_page")) 
 
     context = {
         'user': user,
         'form': form,
         'agenda': agenda,
+        'notifications':kwargs['notifications'],
     }    
     return render(request, template_name, context)
 
-@authorize
 @login_required
-def edit_ordinance(request, id):
+@authorize
+@get_notification
+def edit_ordinance(request, *args, **kwargs):
     template_name = "elegislative/ordinance/edit_ordinance.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    ordinance = get_object_or_404(models.OrdinanceModel, id=id)
+    ordinance = get_object_or_404(models.OrdinanceModel, id=kwargs['id'])
 
     if request.method == 'GET':
         form = forms.EditOrdinanceForm(request.GET or None, instance=ordinance)
@@ -896,12 +1029,12 @@ def edit_ordinance(request, id):
         'user': user,
         'form': form,
         'ordinance': ordinance,
+        'notifications':kwargs['notifications'],
     }    
     return render(request, template_name, context)
 
-
-@authorize
 @login_required
+@authorize
 def delete_ordinance(request, id):
     data = dict()
     template_name = "elegislative/ordinance/delete_ordinance.html"    
@@ -921,8 +1054,8 @@ def delete_ordinance(request, id):
     else: 
         raise Http404()
 
-@authorize
 @login_required
+@authorize
 def print_ordinance(request, id):
     template_name = "elegislative/ordinance/print_ordinance.html"  
     user = get_object_or_404(models.User, email=request.user.email)
@@ -1331,10 +1464,11 @@ def report_generator(database_name, date_from, date_to, keyword, signature):
         cols = [c.replace("_"," ").upper() for c in cols]    
     
     return query, cols
-    
-@authorize
+
 @login_required
-def records(request): 
+@authorize
+@get_notification
+def records(request, *args, **kwargs): 
     template_name = "elegislative/records/records.html"
     user = get_object_or_404(models.User, email=request.user.email) 
 
@@ -1352,12 +1486,12 @@ def records(request):
         'user': user,
         'query': query,
         'cols': cols,
+        'notifications':kwargs['notifications'],
     }    
     return render(request, template_name, context)
 
-    
-@authorize
 @login_required
+@authorize
 def print_records(request):
     template_name = "elegislative/records/print_records.html"
     user = get_object_or_404(models.User, email=request.user.email) 
@@ -1389,22 +1523,24 @@ def print_records(request):
 """
 [START] -> Manage Minutes of the meeting features
 """
-@authorize
 @login_required
-def minutes_of_the_meeting(request):
+@authorize
+@get_notification
+def minutes_of_the_meeting(request, *args, **kwargs):
     template_name = "elegislative/minutes_of_the_meeting/minutes_of_the_meeting.html"
     user = get_object_or_404(models.User, email=request.user.email) 
     mom = models.MOMModel.objects.all()
     context = {
         'user': user,
         'mom': mom,
+        'notifications':kwargs['notifications'],
     }    
     return render(request, template_name, context)
 
-
-@authorize
 @login_required
-def create_minutes_of_the_meeting(request):
+@authorize
+@get_notification
+def create_minutes_of_the_meeting(request, *args, **kwargs):
     template_name = "elegislative/minutes_of_the_meeting/create_minutes_of_the_meeting.html"
     user = get_object_or_404(models.User, email=request.user.email) 
     
@@ -1413,21 +1549,25 @@ def create_minutes_of_the_meeting(request):
     elif request.method == 'POST':
         form = forms.MOMForm(request.POST or None)
         if form.is_valid():
-            form.save()
+            instance = form.save(commit=False)
+            instance.save() 
+            add_notification(request,'elegislative:minutes_of_the_meeting', f"MoM ({instance.no}) has been created!", settings.NOTIFICATION_TAGS[4][0])
             return HttpResponseRedirect(reverse_lazy("elegislative:minutes_of_the_meeting")) 
 
     context = { 
         'user': user,
         'form': form,
+        'notifications':kwargs['notifications'],
     }    
     return render(request, template_name, context)
 
-@authorize
 @login_required
-def edit_minutes_of_the_meeting(request, id):
+@authorize
+@get_notification
+def edit_minutes_of_the_meeting(request, *args, **kwargs):
     template_name = "elegislative/minutes_of_the_meeting/edit_minutes_of_the_meeting.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    mom = get_object_or_404(models.MOMModel, id=id)
+    mom = get_object_or_404(models.MOMModel, id=kwargs['id'])
     if request.method == 'GET':
         form = forms.EditMOMForm(request.GET or None, instance=mom)
     elif request.method == 'POST':
@@ -1439,11 +1579,12 @@ def edit_minutes_of_the_meeting(request, id):
     context = { 
         'user': user,
         'form': form,
+        'notifications':kwargs['notifications'],
     }    
     return render(request, template_name, context)
 
-@authorize
 @login_required
+@authorize
 def delete_minutes_of_the_meeting(request, id):
     data = dict()
     template_name = "elegislative/minutes_of_the_meeting/delete_minutes_of_the_meeting.html"
@@ -1465,9 +1606,8 @@ def delete_minutes_of_the_meeting(request, id):
     else:
         raise Http404()
 
-
-@authorize
 @login_required
+@authorize
 def print_minutes_of_the_meeting(request, id):
     template_name = "elegislative/minutes_of_the_meeting/print_minutes_of_the_meeting.html"
     user = get_object_or_404(models.User, email=request.user.email) 
@@ -1484,20 +1624,22 @@ def print_minutes_of_the_meeting(request, id):
 """
 [START] -> Manage announcement features
 """
-@authorize
 @login_required
-def announcements(request):
+@authorize
+@get_notification
+def announcements(request, *args, **kwargs):
     template_name = "elegislative/announcements/announcements.html"
     user = get_object_or_404(models.User, email=request.user.email) 
     announcements = models.AnnouncementModel.objects.all() 
     context = {
         'user': user,
         'announcements': announcements,
+        'notifications':kwargs['notifications'],
     }    
     return render(request, template_name, context)
 
-@authorize
 @login_required
+@authorize 
 def create_announcements(request):
     data = dict()
     template_name = "elegislative/announcements/create_announcement.html"
@@ -1522,7 +1664,7 @@ def create_announcements(request):
                 }
                 data['a_response'] = a_response
                 data['form_is_valid'] = True           
-
+                add_notification(request,'elegislative:announcements', f"Anno. ({instance.title}) has been created!", settings.NOTIFICATION_TAGS[9][0])
         context = {
             'user': user,
             'form': form,
@@ -1532,9 +1674,8 @@ def create_announcements(request):
     else:
         raise Http404()
 
-
-@authorize
 @login_required
+@authorize
 def edit_announcements(request, id):
     data = dict()
     template_name = "elegislative/announcements/edit_announcement.html"
@@ -1567,9 +1708,8 @@ def edit_announcements(request, id):
     else:
         raise Http404()
 
-
-@authorize
 @login_required
+@authorize
 def delete_announcements(request, id):
     data = dict()
     template_name = "elegislative/announcements/delete_announcement.html"
