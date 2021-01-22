@@ -42,8 +42,7 @@ e-Legislative Search Results
             <div class="col-xs-12">
                 <div class="box box-primary">
                     <div class="box-header with-border">
-                    <h3 class="box-title">Search results for: "<b>{{request.GET.q}}</b>" with the total of: "<b style="color: red;">{{records_filtered|length}}</b>" records.
-                        (Showing {{ query_records.number }} to {{ query_records.paginator.num_pages }} of {{ query_records.object_list|length }} entries.)
+                    <h3 class="box-title">Search results for: "<b>{{request.GET.q}}</b>" with the total of: "<b style="color: red;">{{records_filtered|length}}</b>" records.                         
                     </h3>
                     
 
@@ -83,14 +82,7 @@ e-Legislative Search Results
                     <div class="box-body">
                       <ul class="products-list product-list-in-box">       
                    
-                        {% for b in query_records %}
-                           
-                            
-                            {% if b|model_name == 'AgendaModel' %}
-                            {{b|model_name}}
-                            {% endif %}
-                                
-                       
+                        {% for b in query_records %} 
                             <li class="item">
                                 <a href="javascript:void(0)" class="product-title">
                                     {{b.title}} | {{b.no}} {{b.subject}}
@@ -102,13 +94,31 @@ e-Legislative Search Results
                                     <span class="label label-success">{{b.author}}</span> 
                                     <span class="label label-info">{{b.status}}</span> 
                                     <span class="label label-danger">{{b.is_signed}}</span> 
-                                </p>
-                                <a class="btn btn-primary btn-xs">Read more</a>  
+                                </p> 
+                                {% if b|model_name == 'AgendaModel' %}
+                                <a href="{% url 'elegislative:edit_agenda_page' b.id %}" class="btn btn-primary btn-xs">Read more</a>  
+                                {% elif b|model_name == 'ResolutionModel' %} 
+                                <a href="{% url 'elegislative:edit_resolution' b.id %}" class="btn btn-primary btn-xs">Read more</a>  
+                                {% elif b|model_name == 'CommitteeReportResolutionModel' %} 
+                                <a href="{% url 'elegislative:edit_committee_resolution_reports' b.id %}" class="btn btn-primary btn-xs">Read more</a>  
+                                {% elif b|model_name == 'OrdinanceModel' %} 
+                                <a href="{% url 'elegislative:edit_ordinance' b.id %}" class="btn btn-primary btn-xs">Read more</a>  
+                                {% elif b|model_name == 'CommitteeReportOrdinanceModel' %} 
+                                <a href="{% url 'elegislative:edit_committee_ordinance_reports' b.id %}" class="btn btn-primary btn-xs">Read more</a>  
+                                {% elif b|model_name == 'MOMModel' %} 
+                                <a href="{% url 'elegislative:edit_minutes_of_the_meeting' b.id %}" class="btn btn-primary btn-xs">Read more</a>  
+                                {% elif b|model_name == 'AnnouncementModel' %} 
+                                <a href="{% url 'elegislative:announcements'%}" class="btn btn-primary btn-xs">Read more</a>  
+                                {% endif %}
+                                    
+                          
                             </li>   
                         {% endfor %}  
                       </ul>
                     </div>
-               
+                    <div class="box-footer text-center">
+                        <a href="javascript:void(0)" class="uppercase">Showing {{ query_records.number }} to {{ query_records.paginator.num_pages }} of {{ query_records.object_list|length }} entries.</a>
+                      </div>
                 </div>
             </div> 
         </div>
