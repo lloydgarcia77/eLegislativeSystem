@@ -135,9 +135,9 @@ e-Legislative Dashboard
       </div>
     </div>
     <!-- search form -->
-    <form action="#" method="get" class="sidebar-form">
+    <form action="{% url 'elegislative:search' %}" method="GET" class="sidebar-form"> 
       <div class="input-group">
-        <input type="text" name="q" class="form-control" placeholder="Search...">
+        <input type="text" name="q" class="form-control" placeholder="Search..." value="{{request.GET.q}}">
         <span class="input-group-btn">
               <button type="submit" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
               </button>
@@ -283,11 +283,12 @@ e-Legislative Dashboard
     <div class="row">
       <div class="col-md-3 col-sm-6 col-xs-12">
         <div class="info-box">
-          <span class="info-box-icon bg-aqua"><i class="fa fa-envelope-o"></i></span>
+          <a href="{% url 'elegislative:agenda_page' %}"><span class="info-box-icon bg-aqua"><i class="fa fa-envelope-o"></i></span></a>
+          
 
           <div class="info-box-content">
-            <span class="info-box-text">Committee Reports</span>
-            <span class="info-box-number">1,410</span>
+            <span class="info-box-text">Agenda</span>
+            <span class="info-box-number">{{agenda.count|intcomma}}</span>
           </div>
           <!-- /.info-box-content -->
         </div>
@@ -296,11 +297,10 @@ e-Legislative Dashboard
       <!-- /.col -->
       <div class="col-md-3 col-sm-6 col-xs-12">
         <div class="info-box">
-          <span class="info-box-icon bg-green"><i class="fa fa-flag-o"></i></span>
-
+          <a href="{% url 'elegislative:resolution' %}"><span class="info-box-icon bg-green"><i class="fa  fa-file-o"></i></span></a> 
           <div class="info-box-content">
-            <span class="info-box-text">Adpoted Resolution</span>
-            <span class="info-box-number">410</span>
+            <span class="info-box-text">Resolution</span>
+            <span class="info-box-number">{{resolution.count|intcomma}}</span>
           </div>
           <!-- /.info-box-content -->
         </div>
@@ -309,11 +309,10 @@ e-Legislative Dashboard
       <!-- /.col -->
       <div class="col-md-3 col-sm-6 col-xs-12">
         <div class="info-box">
-          <span class="info-box-icon bg-yellow"><i class="fa fa-files-o"></i></span>
-
+          <a href="{% url 'elegislative:ordinance_page' %}"><span class="info-box-icon bg-yellow"><i class="fa fa-files-o"></i></span></a>
           <div class="info-box-content">
-            <span class="info-box-text">Approved Ordinance</span>
-            <span class="info-box-number">13,648</span>
+            <span class="info-box-text">Ordinance</span>
+            <span class="info-box-number">{{ordinance.count|intcomma}}</span>
           </div>
           <!-- /.info-box-content -->
         </div>
@@ -322,11 +321,10 @@ e-Legislative Dashboard
       <!-- /.col -->
       <div class="col-md-3 col-sm-6 col-xs-12">
         <div class="info-box">
-          <span class="info-box-icon bg-red"><i class="fa fa-star-o"></i></span>
-
+          <a href="{% url 'elegislative:comments_and_recommendation' %}"><span class="info-box-icon bg-red"><i class="fa fa-table"></i></span></a> 
           <div class="info-box-content">
-            <span class="info-box-text">Proposals</span>
-            <span class="info-box-number">93,139</span>
+            <span class="info-box-text">Minutes of the meeting</span>
+            <span class="info-box-number">{{mom.count|intcomma}}</span>
           </div>
           <!-- /.info-box-content -->
         </div>
@@ -334,103 +332,21 @@ e-Legislative Dashboard
       </div>
       <!-- /.col -->
     </div>
-    <!-- /.row --> 
-    <div class="row">
-      <div class="col-md-3 col-sm-6 col-xs-12">
-        <div class="info-box bg-aqua">
-          <span class="info-box-icon"><i class="fa fa-bookmark-o"></i></span>
-
-          <div class="info-box-content">
-            <span class="info-box-text">Total Users</span>
-            <span class="info-box-number">41,410</span>
-
-            <div class="progress">
-              <div class="progress-bar" style="width: 70%"></div>
-            </div>
-                <span class="progress-description">
-                  70% Increase in 30 Days
-                </span>
-          </div>
-          <!-- /.info-box-content -->
-        </div>
-        <!-- /.info-box -->
-      </div>
-      <!-- /.col -->
-      <div class="col-md-3 col-sm-6 col-xs-12">
-        <div class="info-box bg-green">
-          <span class="info-box-icon"><i class="fa fa-thumbs-o-up"></i></span>
-
-          <div class="info-box-content">
-            <span class="info-box-text">Total Approvals</span>
-            <span class="info-box-number">41,410</span>
-
-            <div class="progress">
-              <div class="progress-bar" style="width: 70%"></div>
-            </div>
-                <span class="progress-description">
-                  70% Increase in 30 Days
-                </span>
-          </div>
-          <!-- /.info-box-content -->
-        </div>
-        <!-- /.info-box -->
-      </div>
-      <!-- /.col -->
-      <div class="col-md-3 col-sm-6 col-xs-12">
-        <div class="info-box bg-yellow">
-          <span class="info-box-icon"><i class="fa fa-calendar"></i></span>
-
-          <div class="info-box-content">
-            <span class="info-box-text">Total Ordinance</span>
-            <span class="info-box-number">41,410</span>
-
-            <div class="progress">
-              <div class="progress-bar" style="width: 70%"></div>
-            </div>
-                <span class="progress-description">
-                  70% Increase in 30 Days
-                </span>
-          </div>
-          <!-- /.info-box-content -->
-        </div>
-        <!-- /.info-box -->
-      </div>
-      <!-- /.col -->
-      <div class="col-md-3 col-sm-6 col-xs-12">
-        <div class="info-box bg-red">
-          <span class="info-box-icon"><i class="fa fa-comments-o"></i></span>
-
-          <div class="info-box-content">
-            <span class="info-box-text">Total Resolutions</span>
-            <span class="info-box-number">41,410</span>
-
-            <div class="progress">
-              <div class="progress-bar" style="width: 70%"></div>
-            </div>
-                <span class="progress-description">
-                  70% Increase in 30 Days
-                </span>
-          </div>
-          <!-- /.info-box-content -->
-        </div>
-        <!-- /.info-box -->
-      </div>
-      <!-- /.col -->
-    </div>
+    
     <!-- Small boxes (Stat box) -->
     <div class="row">
       <div class="col-lg-3 col-xs-6">
           <!-- small box -->
           <div class="small-box bg-aqua">
           <div class="inner">
-              <h3>150</h3>
+              <h3>{{cr_ord.count|intcomma}}</h3>
 
-              <p>New ordinance</p>
+              <p>Committee Reports (Ordinance)</p>
           </div>
           <div class="icon">
-              <i class="ion ion-bag"></i>
+              <i class="fa fa-microphone"></i>
           </div>
-          <a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+          <a href="{% url 'elegislative:committee_reports' %}" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
           </div>
       </div>
       <!-- ./col -->
@@ -438,14 +354,14 @@ e-Legislative Dashboard
           <!-- small box -->
           <div class="small-box bg-green">
           <div class="inner">
-              <h3>53<sup style="font-size: 20px">%</sup></h3>
+              <h3>{{cr_res.count|intcomma}}</h3>
 
-              <p>New Resolutions</p>
+              <p>Committee Report (Resolution)</p>
           </div>
           <div class="icon">
-              <i class="ion ion-stats-bars"></i>
+              <i class="fa  fa-microphone-slash"></i>
           </div>
-          <a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+          <a href="{% url 'elegislative:committee_reports' %}" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
           </div>
       </div>
       <!-- ./col -->
@@ -453,14 +369,14 @@ e-Legislative Dashboard
           <!-- small box -->
           <div class="small-box bg-yellow">
           <div class="inner">
-              <h3>44</h3>
+              <h3>{{announcement.count|intcomma}}</h3>
 
               <p>Announcements</p>
           </div>
           <div class="icon">
-              <i class="ion ion-person-add"></i>
+              <i class="fa fa-commenting"></i>
           </div>
-          <a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+          <a href="{% url 'elegislative:announcements' %}" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
           </div>
       </div>
       <!-- ./col -->
@@ -468,32 +384,42 @@ e-Legislative Dashboard
           <!-- small box -->
           <div class="small-box bg-red">
           <div class="inner">
-              <h3>65</h3>
+              <h3>{{com_rec_total|intcomma}}</h3>
 
-              <p>Minutes of the meeting</p>
+              <p>Comments & Recommendation</p>
           </div>
           <div class="icon">
-              <i class="ion ion-pie-graph"></i>
+              <i class="fa fa-wechat"></i>
           </div>
-          <a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+          <a href="{% url 'elegislative:comments_and_recommendation' %}" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
           </div>
       </div>
       <!-- ./col -->
     </div>
     <!-- /.row -->
-    <div class="row">
-      <div class="col-sm-6">
-        <div class="box box-solid box-primary">
+    <h2 class="page-header">Announcements</h2>
+    <div class="row"> 
+      {% for a in announcement_display %}
+      <div class="col-sm-3">
+        <div class="box box-solid box-danger">
           <div class="box-header with-border">
-            <h3 class="box-title">Ready</h3>
-            <span class="label label-primary pull-right"><i class="fa fa-html5"></i></span>
-          </div><!-- /.box-header -->
+            <h3 class="box-title">{{a.title}}</h3> 
+            <div class="box-tools pull-right">
+              <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+              </button>
+              <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+            </div>
+          </div>
+
           <div class="box-body">
-            <p>Compiled and ready to use in production. Download this version if you don't want to customize AdminLTE's LESS files.</p>
-            <a href="" class="btn btn-primary"><i class="fa fa-download"></i> Download</a>
+            <div class="callout callout-info"> 
+              <p>{{a.subject}}</p>
+            </div>
+            <p>{{a.content}}</p> 
           </div><!-- /.box-body -->
         </div><!-- /.box -->
-      </div>
+      </div> 
+      {% endfor %} 
     </div>
   
 </section>
