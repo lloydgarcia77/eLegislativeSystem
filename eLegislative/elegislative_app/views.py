@@ -96,15 +96,13 @@ def login_page(request):
         user = authenticate(username=username, password=password)
         # if is active
         if user:
-            if user.is_active and user.is_staff and user.is_superuser: 
+            if user.is_active and user.is_staff: 
                 login(request, user)
                 return HttpResponseRedirect(reverse("elegislative:dashboard_page"))
             else:
                 messages.error(request, "Your account is INVALID! please try again.")
-        else:
-            messages.error(request, "Your account is INVALID! please try again.")
-            print("Invalid Password")
- 
+        else: 
+             messages.error(request, "Invalid Password.")   
     
     return render(request, template_name)
     
@@ -145,17 +143,68 @@ def elegislative_index_page(request):
 """
 [--------------------MAIN FUNCTIONALITY--------------------]
 """
+"""
+START-[DECORATORS]
+"""
 # https://stackoverflow.com/questions/5469159/how-to-write-a-custom-decorator-in-django
 def authorize(function):
     @wraps(function)
     def wrap(request, *args, **kwargs):
         user = get_object_or_404(models.User, email=request.user.email) 
-        if  user.is_superuser:
+        if  request.user.is_active and request.user.is_staff:
             return function(request, *args, **kwargs)
         else:
             raise Http404
             # return HttpResponseRedirect('/')
     return wrap
+
+ 
+def roles(**rules):
+    def _method_wrapper(view_method):
+        def _arguments_wrapper(request, *args, **kwargs):            
+            if request.user.is_active and request.user.is_staff: 
+                is_arocc_manager = rules.get('is_arocc_manager',False)
+                is_mom_manager = rules.get('is_mom_manager',False)
+                is_records_manager = rules.get('is_records_manager',False)
+                is_announcement_manager = rules.get('is_announcement_manager',False)
+                is_old_documents_manager = rules.get('is_old_documents_manager',False)
+                is_webex_manager = rules.get('is_webex_manager',False)
+     
+                if is_arocc_manager:
+                    if request.user.is_arocc_manager:
+                        return view_method(request, *args, **kwargs)
+                    else:
+                        raise Http404()
+                if is_mom_manager:
+                    if request.user.is_mom_manager:
+                        return view_method(request, *args, **kwargs)
+                    else:
+                        raise Http404()
+                if is_records_manager:
+                    if request.user.is_records_manager:
+                        return view_method(request, *args, **kwargs)
+                    else:
+                        raise Http404()
+                if is_announcement_manager:
+                    if request.user.is_announcement_manager:
+                        return view_method(request, *args, **kwargs)
+                    else:
+                        raise Http404()
+
+                if is_old_documents_manager:
+                    if request.user.is_old_documents_manager:
+                        return view_method(request, *args, **kwargs)
+                    else:
+                        raise Http404()
+                if is_webex_manager:
+                    if request.user.is_webex_manager:
+                        return view_method(request, *args, **kwargs)
+                    else:
+                        raise Http404()
+            else:
+                raise Http404()
+        return _arguments_wrapper
+    return _method_wrapper
 
 def get_notification(function):
     @wraps(function)
@@ -191,7 +240,9 @@ def create_notification(url_target, message, tags):
             return view_method(request, *args, **kwargs) 
         return _arguments_wrapper 
     return _method_wrapper
-
+"""
+END-[DECORATORS]
+"""
 def add_notification(request, url_target, message, tags):
     user = get_object_or_404(models.User, email=request.user.email) 
 
@@ -230,7 +281,7 @@ def delete_all_notifications(request):
     else:
         raise Http404()
 # @create_notification('elegislative:agenda_page', "Agenda has been created!", settings.NOTIFICATION_TAGS[1][0])
-@login_required   
+@login_required    
 @authorize 
 @get_notification 
 def dashboard_page(request, *args, **kwargs):
@@ -332,6 +383,26 @@ def search(request, *args, **kwargs):
         # https://treyhunner.com/2018/10/asterisks-in-python-what-they-are-and-how-to-use-them/
         # https://stackoverflow.com/questions/9122169/calling-filter-with-a-variable-for-field-name
         # https://stackoverflow.com/questions/852414/how-to-dynamically-compose-an-or-query-filter-in-django
+        # https://stackoverflow.com/questions/21809112/what-does-tuple-and-dict-mean-in-python
+        """
+        def foo(x, y):
+            print(x, y)
+
+        d = {'x':1, 'y':2}
+        foo(**d)
+        1 2
+
+        >> d = {'a': 1}
+        >> {'b': 2, **d}
+        {'b': 2, 'a': 1}
+
+        def foo(**d):
+            print(d)
+
+        >> foo(x=1, y=2)
+        {'y': 2, 'x': 1}
+        """ 
+            
         try: 
             fn = [field for field in [field.name for field in ml._meta.get_fields()] if field not in excluded_fields]  
             queries = [Q(**{f+"__icontains":search_term}) for f in fn]  
@@ -384,6 +455,7 @@ def search(request, *args, **kwargs):
 
 # Agenda Feature
 @login_required 
+@roles(is_arocc_manager=True)
 @authorize
 @get_notification
 def agenda_page(request, *args, **kwargs):
@@ -399,6 +471,7 @@ def agenda_page(request, *args, **kwargs):
 
 # @create_notification('elegislative:agenda_page', "Agenda has been created!", settings.NOTIFICATION_TAGS[1][0])
 @login_required
+@roles(is_arocc_manager=True)
 @authorize
 @get_notification
 def create_agenda_page(request, *args, **kwargs):
@@ -423,6 +496,7 @@ def create_agenda_page(request, *args, **kwargs):
     return render(request, template_name, context)
 
 @login_required
+@roles(is_arocc_manager=True)
 @authorize
 @get_notification
 def edit_agenda_page(request, *args, **kwargs): 
@@ -444,6 +518,7 @@ def edit_agenda_page(request, *args, **kwargs):
     }
     return render(request, template_name, context)
 
+@roles(is_arocc_manager=True)
 @authorize
 @login_required
 def delete_agenda_page(request, id):
@@ -465,6 +540,7 @@ def delete_agenda_page(request, id):
     else:
         raise Http404()
 
+@roles(is_arocc_manager=True)
 @authorize
 @login_required
 def print_agenda_page(request, id):
@@ -490,6 +566,7 @@ def print_agenda_page(request, id):
 
 # For Resolution
 @login_required
+@roles(is_arocc_manager=True)
 @authorize
 @get_notification
 def comments_and_recommendation(request, *args, **kwargs): 
@@ -513,6 +590,7 @@ def comments_and_recommendation(request, *args, **kwargs):
     return render(request, template_name, context)
 
 @login_required
+@roles(is_arocc_manager=True)
 @authorize
 @get_notification
 def posting_resolution(request, *args, **kwargs):
@@ -529,6 +607,7 @@ def posting_resolution(request, *args, **kwargs):
     return render(request, template_name, context)
 
 @login_required
+@roles(is_arocc_manager=True)
 @authorize
 def posting_resolution_post_comment(request, id):
     data = dict() 
@@ -565,6 +644,7 @@ def posting_resolution_post_comment(request, id):
         raise Http404()
  
 @login_required
+@roles(is_arocc_manager=True)
 @authorize
 def posting_resolution_delete_comment(request, id, rid):
     data = dict() 
@@ -585,6 +665,7 @@ def posting_resolution_delete_comment(request, id, rid):
 
 # For Ordinance
 @login_required
+@roles(is_arocc_manager=True)
 @authorize
 @get_notification
 def posting_ordinance(request, *args, **kwargs):
@@ -601,6 +682,7 @@ def posting_ordinance(request, *args, **kwargs):
     return render(request, template_name, context)
 
 @login_required
+@roles(is_arocc_manager=True)
 @authorize
 def posting_ordinance_post_comment(request, id):
     data = dict() 
@@ -637,6 +719,7 @@ def posting_ordinance_post_comment(request, id):
         raise Http404()
  
 @login_required
+@roles(is_arocc_manager=True)
 @authorize
 def posting_ordinance_delete_comment(request, id, oid):
     data = dict() 
@@ -664,6 +747,7 @@ def posting_ordinance_delete_comment(request, id, oid):
 [START] -> Manage Committee Reports Features
 """
 @login_required
+@roles(is_arocc_manager=True)
 @authorize
 @get_notification
 def committee_reports(request, *args, **kwargs):
@@ -685,6 +769,7 @@ def committee_reports(request, *args, **kwargs):
 
 # CRUD committee reports for resolution
 @login_required
+@roles(is_arocc_manager=True)
 @authorize
 @get_notification
 def create_committee_resolution_reports(request, *args, **kwargs):
@@ -712,6 +797,7 @@ def create_committee_resolution_reports(request, *args, **kwargs):
     return render(request, template_name, context)
 
 @login_required
+@roles(is_arocc_manager=True)
 @authorize
 @get_notification
 def edit_committee_resolution_reports(request, *args, **kwargs):
@@ -736,6 +822,7 @@ def edit_committee_resolution_reports(request, *args, **kwargs):
     return render(request, template_name, context)
 
 @login_required
+@roles(is_arocc_manager=True)
 @authorize
 def delete_committee_resolution_reports(request, id):
     data = dict()
@@ -756,6 +843,7 @@ def delete_committee_resolution_reports(request, id):
         raise Http404
 
 @login_required
+@roles(is_arocc_manager=True)
 @authorize
 def print_committee_resolution_reports(request, id):
     template_name = "elegislative/committee_reports/print_committee_resolution_reports.html"
@@ -770,6 +858,7 @@ def print_committee_resolution_reports(request, id):
 
 # CRUD committee reports for ordinance
 @login_required
+@roles(is_arocc_manager=True)
 @authorize
 @get_notification
 def create_committee_ordinance_reports(request, *args, **kwargs):
@@ -798,6 +887,7 @@ def create_committee_ordinance_reports(request, *args, **kwargs):
     return render(request, template_name, context)
 
 @login_required
+@roles(is_arocc_manager=True)
 @authorize
 @get_notification
 def edit_committee_ordinance_reports(request, *args, **kwargs):
@@ -822,6 +912,7 @@ def edit_committee_ordinance_reports(request, *args, **kwargs):
     return render(request, template_name, context)
 
 @login_required
+@roles(is_arocc_manager=True)
 @authorize
 def delete_committee_ordinance_reports(request, id):
     data = dict()
@@ -843,6 +934,7 @@ def delete_committee_ordinance_reports(request, id):
         raise Http404()
     
 @login_required
+@roles(is_arocc_manager=True)
 @authorize
 def print_committee_ordinance_reports(request, id):
     template_name = "elegislative/committee_reports/print_committee_ordinance_reports.html"
@@ -863,6 +955,7 @@ def print_committee_ordinance_reports(request, id):
 [START] -> Manage Resolution Features
 """ 
 @login_required
+@roles(is_arocc_manager=True)
 @authorize
 @get_notification
 def resolution(request, *args, **kwargs):
@@ -877,6 +970,7 @@ def resolution(request, *args, **kwargs):
     return render(request, template_name, context)
 
 @login_required
+@roles(is_arocc_manager=True)
 @authorize
 @get_notification
 def create_resolutions(request, *args, **kwargs):
@@ -904,6 +998,7 @@ def create_resolutions(request, *args, **kwargs):
     return render(request, template_name, context)
 
 @login_required
+@roles(is_arocc_manager=True)
 @authorize
 @get_notification
 def edit_resolution(request, *args, **kwargs):
@@ -927,7 +1022,7 @@ def edit_resolution(request, *args, **kwargs):
     }    
     return render(request, template_name, context)
 
-
+@roles(is_arocc_manager=True)
 @authorize
 @login_required
 def delete_resolution(request, id):
@@ -949,7 +1044,7 @@ def delete_resolution(request, id):
     else: 
         raise Http404()
 
-
+@roles(is_arocc_manager=True)
 @authorize
 @login_required
 def print_resolution(request, id):
@@ -971,6 +1066,7 @@ def print_resolution(request, id):
 [START] -> Manage Ordinance features
 """
 @login_required
+@roles(is_arocc_manager=True)
 @authorize
 @get_notification
 def ordinance(request, *args, **kwargs):
@@ -985,6 +1081,7 @@ def ordinance(request, *args, **kwargs):
     return render(request, template_name, context)
 
 @login_required
+@roles(is_arocc_manager=True)
 @authorize
 @get_notification
 def create_ordinance(request, *args, **kwargs):
@@ -1011,6 +1108,7 @@ def create_ordinance(request, *args, **kwargs):
     return render(request, template_name, context)
 
 @login_required
+@roles(is_arocc_manager=True)
 @authorize
 @get_notification
 def edit_ordinance(request, *args, **kwargs):
@@ -1035,6 +1133,7 @@ def edit_ordinance(request, *args, **kwargs):
     return render(request, template_name, context)
 
 @login_required
+@roles(is_arocc_manager=True)
 @authorize
 def delete_ordinance(request, id):
     data = dict()
@@ -1056,6 +1155,7 @@ def delete_ordinance(request, id):
         raise Http404()
 
 @login_required
+@roles(is_arocc_manager=True)
 @authorize
 def print_ordinance(request, id):
     template_name = "elegislative/ordinance/print_ordinance.html"  
@@ -1467,6 +1567,7 @@ def report_generator(database_name, date_from, date_to, keyword, signature):
     return query, cols
 
 @login_required
+@roles(is_records_manager=True)
 @authorize
 @get_notification
 def records(request, *args, **kwargs): 
@@ -1492,6 +1593,7 @@ def records(request, *args, **kwargs):
     return render(request, template_name, context)
 
 @login_required
+@roles(is_records_manager=True)
 @authorize
 def print_records(request):
     template_name = "elegislative/records/print_records.html"
@@ -1524,7 +1626,9 @@ def print_records(request):
 """
 [START] -> Manage Minutes of the meeting features
 """
+
 @login_required
+@roles(is_mom_manager=True)
 @authorize
 @get_notification
 def minutes_of_the_meeting(request, *args, **kwargs):
@@ -1539,6 +1643,7 @@ def minutes_of_the_meeting(request, *args, **kwargs):
     return render(request, template_name, context)
 
 @login_required
+@roles(is_mom_manager=True)
 @authorize
 @get_notification
 def create_minutes_of_the_meeting(request, *args, **kwargs):
@@ -1563,6 +1668,7 @@ def create_minutes_of_the_meeting(request, *args, **kwargs):
     return render(request, template_name, context)
 
 @login_required
+@roles(is_mom_manager=True)
 @authorize
 @get_notification
 def edit_minutes_of_the_meeting(request, *args, **kwargs):
@@ -1585,6 +1691,7 @@ def edit_minutes_of_the_meeting(request, *args, **kwargs):
     return render(request, template_name, context)
 
 @login_required
+@roles(is_mom_manager=True)
 @authorize
 def delete_minutes_of_the_meeting(request, id):
     data = dict()
@@ -1608,6 +1715,7 @@ def delete_minutes_of_the_meeting(request, id):
         raise Http404()
 
 @login_required
+@roles(is_mom_manager=True)
 @authorize
 def print_minutes_of_the_meeting(request, id):
     template_name = "elegislative/minutes_of_the_meeting/print_minutes_of_the_meeting.html"
@@ -1626,6 +1734,7 @@ def print_minutes_of_the_meeting(request, id):
 [START] -> Manage announcement features
 """
 @login_required
+@roles(is_announcement_manager=True)
 @authorize
 @get_notification
 def announcements(request, *args, **kwargs):
@@ -1640,6 +1749,7 @@ def announcements(request, *args, **kwargs):
     return render(request, template_name, context)
 
 @login_required
+@roles(is_announcement_manager=True)
 @authorize 
 def create_announcements(request):
     data = dict()
@@ -1676,6 +1786,7 @@ def create_announcements(request):
         raise Http404()
 
 @login_required
+@roles(is_announcement_manager=True)
 @authorize
 def edit_announcements(request, id):
     data = dict()
@@ -1710,6 +1821,7 @@ def edit_announcements(request, id):
         raise Http404()
 
 @login_required
+@roles(is_announcement_manager=True)
 @authorize
 def delete_announcements(request, id):
     data = dict()
@@ -1734,4 +1846,33 @@ def delete_announcements(request, id):
 
 """
 [END] -> Manage announcement features
+"""
+
+"""
+[START] -> OLD DOCUMENTS features
+"""
+def old_documents(request):
+    pass
+"""
+[END] -> OLD DOCUMENTS features
+"""
+
+
+"""
+[START] -> WebEx features
+"""
+def webex(request):
+    pass
+
+"""
+[END] -> WebEx features
+"""
+"""
+[START] -> Trash features
+"""
+def trash(request):
+    pass
+
+"""
+[END] -> Trash features
 """

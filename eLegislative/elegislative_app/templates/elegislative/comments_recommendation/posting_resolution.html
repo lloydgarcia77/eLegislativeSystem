@@ -70,87 +70,89 @@ e-Legislative Posting Resolution Comments & Recommendation
                         <h3 class="box-title">Comments & Recommendation for Resolution</h3>                      
                     </div>
                     <div class="box-body">
-                        <div class="col-sm-6">
-                            <div class="box box-solid box-primary">
-                              <div class="box-header with-border">
-                                <h3 class="box-title text-center">{{resolution.title}}</h3> 
-                              </div><!-- /.box-header -->
-                              <div class="box-body">
-                                <p>
-                                    
-                                    {% autoescape off %}
-                                        {{resolution.content}}
-                                    {% endautoescape %}
-                                    
-                                </p> 
-                                <span class="pull-right text-muted">Date Filed: {{resolution.date_filed}}</span>
-                                <span class="pull-left text-muted">Publicly Shared</span> 
-                              </div><!-- /.box-body -->
-                            </div><!-- /.box -->
-                          </div>
-                        <div class="col-md-6">
-                            <!-- Box Comment -->
-                            <div class="box box-solid box-success">
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="box box-solid box-primary">
                                 <div class="box-header with-border">
-                                    <div class="user-block">
-                                        <span ><a href="#"><b>Comments & Recommendation Section</b></a></span> 
-                                    </div>
-                                    <!-- /.user-block -->
-                                    <div class="box-tools">
-                                
-                                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
-                                    </div>
-                                    <!-- /.box-tools -->
-                                </div>  
-                                <div class="box-body"> 
-                                    <span class="pull-right text-muted" id="comment_count">Total of: {{com_rec.count}} comments</span>
-                                </div>
-                                <!-- /.box-body -->
-                                <div id="comment_section" class="box-footer box-comments">
-                                    
-                                    {% for c in com_rec %}
-                                    <div class="box-comment">
+                                    <h3 class="box-title text-center">{{resolution.title}}</h3> 
+                                </div><!-- /.box-header -->
+                                <div class="box-body">
+                                    <p>
                                         
-                                        {% if c.commentor_resolution.image %}
-                                        <img class="img-circle img-sm" src="{{c.commentor_resolution.image.url}}" alt="User Image">
-                                        {% else %} 
-                                        <img class="img-circle img-sm" src="{% static 'images/150x150.png' %}" alt="User Image">   
-                                        {% endif %}
-                                        <div class="comment-text">
-                                            <span class="username">
-                                                {{c.commentor_resolution.f_name}} {{c.commentor_resolution.l_name}}
-                                                <span class="text-muted pull-right">{% custom_data_format c.date_filed %} 
-                                                    
-                                                    {% if c.commentor_resolution == request.user %}
-                                                    <button class="btn btn-secondary btn-xs delete" data-url="{% url 'elegislative:posting_resolution_delete_comment' c.id resolution.id %}"><i class="fa fa-trash"></i></button>
-                                                    {% endif %}                                                    
-                                                    
-                                                </span>                                                                                   
-                                            </span>
-                                            {{c.message}}
-                                        </div>
-                                    </div>
-                                    {% empty %}  
-                                    {% endfor %}
-                                
-                                </div>
-                                <!-- /.box-footer -->
-                                <div class="box-footer">  
-                                    {% if user.image %}
-                                    <img class="img-responsive img-circle img-sm" src="{{user.image.url}}" alt="Alt Text">
-                                    {% else %}
-                                    <img class="img-responsive img-circle img-sm" src="{% static 'images/150x150.png' %}" alt="Alt Text">   
-                                    {% endif %} 
-                                    <!-- .img-push is used to add margin to elements next to floating images -->
-                                    <div class="img-push">
-                                    <input type="text" id="input_comment" class="form-control input-sm" placeholder="Press enter to post comment" data-url="{% url 'elegislative:posting_resolution_post_comment' resolution.id %}">
-                                    </div> 
-                                </div>
-                              <!-- /.box-footer -->
+                                        {% autoescape off %}
+                                            {{resolution.content}}
+                                        {% endautoescape %}
+                                        
+                                    </p> 
+                                    <span class="pull-right text-muted">Date Filed: {{resolution.date_filed}}</span>
+                                    <span class="pull-left text-muted">Publicly Shared</span> 
+                                </div><!-- /.box-body -->
+                                </div><!-- /.box -->
                             </div>
-                            <!-- /.box -->
+                            <div class="col-md-6">
+                                <!-- Box Comment -->
+                                <div class="box box-solid box-success">
+                                    <div class="box-header with-border">
+                                        <div class="user-block">
+                                            <span ><a href="#"><b>Comments & Recommendation Section</b></a></span> 
+                                        </div>
+                                        <!-- /.user-block -->
+                                        <div class="box-tools">
+                                    
+                                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                                        </div>
+                                        <!-- /.box-tools -->
+                                    </div>  
+                                    <div class="box-body"> 
+                                        <span class="pull-right text-muted" id="comment_count">Total of: {{com_rec.count}} comments</span>
+                                    </div>
+                                    <!-- /.box-body -->
+                                    <div id="comment_section" class="box-footer box-comments">
+                                        
+                                        {% for c in com_rec %}
+                                        <div class="box-comment">
+                                            
+                                            {% if c.commentor_resolution.image %}
+                                            <img class="img-circle img-sm" src="{{c.commentor_resolution.image.url}}" alt="User Image">
+                                            {% else %} 
+                                            <img class="img-circle img-sm" src="{% static 'images/150x150.png' %}" alt="User Image">   
+                                            {% endif %}
+                                            <div class="comment-text">
+                                                <span class="username">
+                                                    {{c.commentor_resolution.f_name}} {{c.commentor_resolution.l_name}}
+                                                    <span class="text-muted pull-right">{% custom_data_format c.date_filed %} 
+                                                        
+                                                        {% if c.commentor_resolution == request.user %}
+                                                        <button class="btn btn-secondary btn-xs delete" data-url="{% url 'elegislative:posting_resolution_delete_comment' c.id resolution.id %}"><i class="fa fa-trash"></i></button>
+                                                        {% endif %}                                                    
+                                                        
+                                                    </span>                                                                                   
+                                                </span>
+                                                {{c.message}}
+                                            </div>
+                                        </div>
+                                        {% empty %}  
+                                        {% endfor %}
+                                    
+                                    </div>
+                                    <!-- /.box-footer -->
+                                    <div class="box-footer">  
+                                        {% if user.image %}
+                                        <img class="img-responsive img-circle img-sm" src="{{user.image.url}}" alt="Alt Text">
+                                        {% else %}
+                                        <img class="img-responsive img-circle img-sm" src="{% static 'images/150x150.png' %}" alt="Alt Text">   
+                                        {% endif %} 
+                                        <!-- .img-push is used to add margin to elements next to floating images -->
+                                        <div class="img-push">
+                                        <input type="text" id="input_comment" class="form-control input-sm" placeholder="Press enter to post comment" data-url="{% url 'elegislative:posting_resolution_post_comment' resolution.id %}">
+                                        </div> 
+                                    </div>
+                                <!-- /.box-footer -->
+                                </div>
+                                <!-- /.box -->
+                            </div>
                         </div>
                     </div>
                 </div>
