@@ -224,7 +224,7 @@ e-Legislative Dashboard
       {% block nav_com_rep %}
       <li>
         <a href="{% url 'elegislative:committee_reports' %}">
-          <i class="fa fa-file-text-o"></i> <span>Commitee Reports</span>
+          <i class="fa fa-file-text-o"></i> <span>Committee Reports</span>
           <span class="pull-right-container">
             <small class="label pull-right bg-green"></small>
           </span>
@@ -254,6 +254,39 @@ e-Legislative Dashboard
         </a>
       </li>
       {% endblock nav_announcements %}
+
+      {% block nav_old_documents %}
+      <li>
+        <a href="" data-toggle="tooltip" title="Old Documents">
+          <i class="fa fa-book"></i> <span>Old Documents</span>
+          <span class="pull-right-container">
+            <small class="label pull-right bg-green"></small>
+          </span>
+        </a>
+      </li>
+      {% endblock nav_old_documents %}
+
+      {% block nav_webex %}
+      <li>
+        <a href="" data-toggle="tooltip" title="Webex Links">
+          <i class="fa fa-external-link"></i> <span>Webex Links</span>
+          <span class="pull-right-container">
+            <small class="label pull-right bg-green"></small>
+          </span>
+        </a>
+      </li>
+      {% endblock nav_webex %}
+
+      {% block nav_trash %}
+      <li>
+        <a href="" data-toggle="tooltip" title="Trash">
+          <i class="fa fa-trash text-red"></i> <span>Trash</span>
+          <span class="pull-right-container">
+            <small class="label pull-right bg-green"></small>
+          </span>
+        </a>
+      </li>
+      {% endblock nav_trash %}
              
      
     </ul>

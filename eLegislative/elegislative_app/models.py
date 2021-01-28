@@ -143,7 +143,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     gender = models.CharField(max_length=50, choices=GENDER_LIST, default='Male')
     dob = models.DateField(null=True, blank=True)
     age = models.IntegerField()
-    address = models.CharField(max_length=255)
+    address = models.CharField(max_length=255) 
     title = models.CharField(max_length=100, choices=TITLE, default=TITLE[0][0])
     date_added = models.DateTimeField(auto_now=True)    
 
@@ -153,6 +153,15 @@ class User(AbstractBaseUser, PermissionsMixin):
     # notice the absence of a "Password field", that is built in.
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+    
+    is_overall = models.BooleanField(default=False, verbose_name = "Manage through all records.")
+    is_arocc_manager = models.BooleanField(default=False, verbose_name="Can Manage Agenda, Resolution, Oridnance, Comments & Recommendation and Committee Reports")
+    is_mom_manager = models.BooleanField(default=False, verbose_name="Can Manage Minutes of the Meeting")
+    is_records_manager = models.BooleanField(default=False, verbose_name="Can Manager Records")
+    is_announcement_manager = models.BooleanField(default=False, verbose_name="Can Manage Announcement")
+    is_old_documents_manager = models.BooleanField(default=False, verbose_name="Can Manage/Upload Old/Existing Oridnance.")
+    is_webex_manager = models.BooleanField(default=False, verbose_name="Can Manage External Links from Webex for Reviewing.")
+
 
     objects = UserManager()
     USERNAME_FIELD = 'email'
