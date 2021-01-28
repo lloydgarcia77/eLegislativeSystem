@@ -102,6 +102,7 @@ def login_page(request):
             else:
                 messages.error(request, "Your account is INVALID! please try again.")
         else:
+            messages.error(request, "Your account is INVALID! please try again.")
             print("Invalid Password")
  
     
