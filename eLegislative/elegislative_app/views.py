@@ -101,9 +101,8 @@ def login_page(request):
                 return HttpResponseRedirect(reverse("elegislative:dashboard_page"))
             else:
                 messages.error(request, "Your account is INVALID! please try again.")
-        else:
-             messages.error(request, "Invalid Password.")
- 
+        else: 
+             messages.error(request, "Invalid Password.")   
     
     return render(request, template_name)
     
