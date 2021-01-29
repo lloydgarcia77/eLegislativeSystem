@@ -164,12 +164,12 @@ class AgendaForm(forms.ModelForm):
             'required': 'required',
         }
 
-        self.fields['author'].widget.attrs = {
-            'type': 'text',
-            'class': 'form-control',
-            'placeholder': 'author',
-            'required': 'required',
-        }
+        # self.fields['author'].widget.attrs = {
+        #     'type': 'text',
+        #     'class': 'form-control',
+        #     'placeholder': 'author',
+        #     'required': 'required',
+        # }
 
         self.fields['content'].widget.attrs = { 
             'id': 'compose_textarea',
@@ -206,12 +206,12 @@ class EditAgendaForm(forms.ModelForm):
             'required': 'required',
         }
 
-        self.fields['author'].widget.attrs = {
-            'type': 'text',
-            'class': 'form-control',
-            'placeholder': 'author',
-            'required': 'required',
-        }
+        # self.fields['author'].widget.attrs = {
+        #     'type': 'text',
+        #     'class': 'form-control',
+        #     'placeholder': 'author',
+        #     'required': 'required',
+        # }
 
         self.fields['content'].widget.attrs = { 
             'id': 'compose_textarea',
@@ -254,12 +254,12 @@ class ResolutionForm(forms.ModelForm):
             'required': 'required',
         }
 
-        self.fields['author'].widget.attrs = {
-            'type': 'text',
-            'class': 'form-control',
-            'placeholder': 'author',
-            'required': 'required',
-        }
+        # self.fields['author'].widget.attrs = {
+        #     'type': 'text',
+        #     'class': 'form-control',
+        #     'placeholder': 'author',
+        #     'required': 'required',
+        # }
 
         self.fields['content'].widget.attrs = { 
             'id': 'compose_textarea',
@@ -296,12 +296,12 @@ class EditResolutionForm(forms.ModelForm):
             'required': 'required',
         }
 
-        self.fields['author'].widget.attrs = {
-            'type': 'text',
-            'class': 'form-control',
-            'placeholder': 'author',
-            'required': 'required',
-        }
+        # self.fields['author'].widget.attrs = {
+        #     'type': 'text',
+        #     'class': 'form-control',
+        #     'placeholder': 'author',
+        #     'required': 'required',
+        # }
 
         self.fields['content'].widget.attrs = { 
             'id': 'compose_textarea',

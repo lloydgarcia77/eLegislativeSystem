@@ -151,6 +151,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     # staff = models.BooleanField(default=False) # a admin user; non super-user
     # admin = models.BooleanField(default=False) # a superuser
     # notice the absence of a "Password field", that is built in.
+    # is_superuser = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     
@@ -198,7 +199,8 @@ class AgendaModel(models.Model):
     no = models.CharField(max_length=50, unique=True)
     title = models.CharField(max_length=255)
     version = models.CharField(max_length=100)
-    author = models.CharField(max_length=100)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, related_name="agenda_user_fk")
+    is_delete = models.BooleanField(default=False)
     status = models.CharField(max_length=100, choices=STATUS_LIST, default=STATUS_LIST[0][0])
     is_signed = models.BooleanField(default=False)
     hard_copy = models.FileField(upload_to='documents/%Y/%m/%d', verbose_name="hard copy", blank=True, null=True, validators=[file_validator_pdf])
@@ -227,7 +229,8 @@ class ResolutionModel(models.Model):
     no = models.CharField(max_length=50, unique=True)
     title = models.CharField(max_length=255)
     version = models.CharField(max_length=100)
-    author = models.CharField(max_length=100)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, related_name="resolution_user_fk")
+    is_delete = models.BooleanField(default=False)
     status = models.CharField(max_length=100, choices=STATUS_LIST, default=STATUS_LIST[0][0])
     is_signed = models.BooleanField(default=False)
     is_public = models.BooleanField(default=False)
@@ -243,7 +246,8 @@ class CommitteeReportResolutionModel(models.Model):
     no = models.CharField(max_length=50, unique=True)
     title = models.CharField(max_length=255)
     version = models.CharField(max_length=100)
-    author = models.CharField(max_length=100)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, related_name="crr_user_fk")
+    is_delete = models.BooleanField(default=False)
     status = models.CharField(max_length=100, choices=STATUS_LIST, default=STATUS_LIST[0][0])
     is_signed = models.BooleanField(default=False)
     is_public = models.BooleanField(default=False)
@@ -268,7 +272,8 @@ class OrdinanceModel(models.Model):
     no = models.CharField(max_length=50, unique=True)
     title = models.CharField(max_length=255)
     version = models.CharField(max_length=100)
-    author = models.CharField(max_length=100)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, related_name="ordinance_user_fk")
+    is_delete = models.BooleanField(default=False)
     status = models.CharField(max_length=100, choices=STATUS_LIST, default=STATUS_LIST[0][0])
     is_signed = models.BooleanField(default=False)
     is_public = models.BooleanField(default=False)
@@ -285,7 +290,8 @@ class CommitteeReportOrdinanceModel(models.Model):
     no = models.CharField(max_length=50, unique=True)
     title = models.CharField(max_length=255)
     version = models.CharField(max_length=100)
-    author = models.CharField(max_length=100)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, related_name="cro_user_fk")
+    is_delete = models.BooleanField(default=False)
     status = models.CharField(max_length=100, choices=STATUS_LIST, default=STATUS_LIST[0][0])
     is_signed = models.BooleanField(default=False)
     is_public = models.BooleanField(default=False)
@@ -309,7 +315,8 @@ class MOMModel(models.Model):
     no = models.CharField(max_length=50, unique=True)
     title = models.CharField(max_length=255)
     version = models.CharField(max_length=100)
-    author = models.CharField(max_length=100)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, related_name="mom_user_fk")
+    is_delete = models.BooleanField(default=False)
     status = models.CharField(max_length=100, choices=STATUS_LIST, default=STATUS_LIST[0][0])
     is_signed = models.BooleanField(default=False) 
     hard_copy = models.FileField(upload_to='documents/%Y/%m/%d', verbose_name="hard copy", blank=True, null=True, validators=[file_validator_pdf])
@@ -322,6 +329,7 @@ class MOMModel(models.Model):
 class AnnouncementModel(models.Model):
     title = models.CharField(max_length=250)
     subject = models.CharField(max_length=250)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, default=None, related_name="announcement_user_fk")
     content = models.CharField(max_length=250)
     visible = models.BooleanField(default=False)
     date_filed = models.DateTimeField(auto_now=True)
@@ -340,3 +348,5 @@ class NotificationsModel(models.Model):
 
     def __str__(self):
         return str(self.message)
+
+# Messages

@@ -25,7 +25,7 @@ def model_name(value):
 def compute_percentage(*args):
     if args is None:
         return False
-    x = args[0]
+    x = args[0] 
     y = 0
 
     # for a in list(args)[1:]:
@@ -35,7 +35,10 @@ def compute_percentage(*args):
     # (5 / 30) * 100
     #  
     
-    total = (x / y) * 100
+    if x != 0 and y != 0:
+        total = (x / y) * 100
+    else:
+        total = 0
     
     return round(total,2)
 

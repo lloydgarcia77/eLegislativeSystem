@@ -1,11 +1,12 @@
 from django.contrib import admin 
 from elegislative_app import models
-from import_export.admin import ImportExportModelAdmin 
+from import_export.admin import ImportExportModelAdmin  
 
 admin.site.site_header = 'e-Legislative Super Administrator'
 admin.site.index_title = 'Super Administrator Page'
 admin.site.site_title = 'Super Administrator Panel'
 admin.site.site_url = "/elegislative/dashboard/"
+ 
 admin.site.register(models.User)
 
 

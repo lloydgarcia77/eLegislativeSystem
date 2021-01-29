@@ -28,8 +28,7 @@ from datetime import timezone, datetime, timedelta
 from django.core.exceptions import FieldDoesNotExist, FieldError
 
 # Pagination
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger 
 
 # Create your views here.
 
@@ -96,7 +95,8 @@ def login_page(request):
         user = authenticate(username=username, password=password)
         # if is active
         if user:
-            if user.is_active and user.is_staff: 
+
+            if user.is_active: 
                 login(request, user)
                 return HttpResponseRedirect(reverse("elegislative:dashboard_page"))
             else:
@@ -152,18 +152,17 @@ def authorize(function):
     @wraps(function)
     def wrap(request, *args, **kwargs):
         user = get_object_or_404(models.User, email=request.user.email) 
-        if  request.user.is_active and request.user.is_staff:
+        if  request.user.is_active:
             return function(request, *args, **kwargs)
         else:
             raise Http404
             # return HttpResponseRedirect('/')
     return wrap
 
- 
 def roles(**rules):
     def _method_wrapper(view_method):
         def _arguments_wrapper(request, *args, **kwargs):            
-            if request.user.is_active and request.user.is_staff: 
+            if request.user.is_active:  
                 is_arocc_manager = rules.get('is_arocc_manager',False)
                 is_mom_manager = rules.get('is_mom_manager',False)
                 is_records_manager = rules.get('is_records_manager',False)
@@ -202,6 +201,7 @@ def roles(**rules):
                         return view_method(request, *args, **kwargs)
                     else:
                         raise Http404()
+                
             else:
                 raise Http404()
         return _arguments_wrapper
@@ -462,7 +462,7 @@ def search(request, *args, **kwargs):
 def agenda_page(request, *args, **kwargs):
     template_name = "elegislative/agenda/agenda.html" 
     user = get_object_or_404(models.User, email=request.user.email) 
-    agenda = models.AgendaModel.objects.all()
+    agenda = models.AgendaModel.objects.all() if user.is_overall else models.AgendaModel.objects.all().filter(Q(author=user))
     context = {
         'user': user,
         'agenda': agenda,
@@ -485,6 +485,7 @@ def create_agenda_page(request, *args, **kwargs):
         form = forms.AgendaForm(request.POST or None) 
         if form.is_valid():
             instance = form.save(commit=False)
+            instance.author = user
             instance.save()
             add_notification(request,'elegislative:agenda_page', f"Agenda ({instance.no}) has been created!", settings.NOTIFICATION_TAGS[1][0])
             return HttpResponseRedirect(reverse_lazy("elegislative:agenda_page")) 
@@ -503,7 +504,9 @@ def create_agenda_page(request, *args, **kwargs):
 def edit_agenda_page(request, *args, **kwargs): 
     template_name = "elegislative/agenda/edit_agenda.html"      
     user = get_object_or_404(models.User, email=request.user.email)
-    agenda = get_object_or_404(models.AgendaModel, id=kwargs['id'])
+    # kwargs['id] is from url
+    agenda = get_object_or_404(models.AgendaModel, id=kwargs['id']) if user.is_overall else get_object_or_404(models.AgendaModel,Q(author=user), id=kwargs['id'])
+    
 
     if request.method == 'GET':
         form = forms.EditAgendaForm(request.GET or None, instance=agenda)
@@ -515,6 +518,7 @@ def edit_agenda_page(request, *args, **kwargs):
     context = {
         'user': user,
         'form':form,
+        'agenda': agenda,
         'notifications':kwargs['notifications'],
     }
     return render(request, template_name, context)
@@ -526,13 +530,14 @@ def delete_agenda_page(request, id):
     data = dict()
     template_name = "elegislative/agenda/delete_agenda.html"    
     user = get_object_or_404(models.User, email=request.user.email)
-    agenda = get_object_or_404(models.AgendaModel, id=id)
-
+    # ~ not
+    agenda = get_object_or_404(models.AgendaModel, id=id) if user.is_overall else get_object_or_404(models.AgendaModel,Q(author=user), id=id)
     if request.is_ajax():
         if request.method == 'GET':
             context = {
                 'agenda': agenda,
             }
+        
             data['html_form'] = render_to_string(template_name, context, request)
         elif request.method == 'POST':            
             data['form_is_valid'] = True
@@ -547,7 +552,7 @@ def delete_agenda_page(request, id):
 def print_agenda_page(request, id):
     template_name = "elegislative/agenda/print_agenda.html"  
     user = get_object_or_404(models.User, email=request.user.email)
-    agenda = get_object_or_404(models.AgendaModel, id=id)
+    agenda = get_object_or_404(models.AgendaModel, id=id) if user.is_overall else get_object_or_404(models.AgendaModel,Q(author=user), id=id)
     context = {
         'user': user,
         'agenda':agenda,
@@ -776,7 +781,7 @@ def committee_reports(request, *args, **kwargs):
 def create_committee_resolution_reports(request, *args, **kwargs):
     template_name = "elegislative/committee_reports/create_committee_resolution_reports.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    resolution = get_object_or_404(models.ResolutionModel, id=kwargs['id'])
+    resolution = get_object_or_404(models.ResolutionModel, id=kwargs['id']) if user.is_overall else get_object_or_404(models.ResolutionModel, Q(author=user), id=kwargs['id'])
 
     if request.method == 'GET':
         form = forms.CommitteeReportResolutionForm(request.GET or None)
@@ -804,7 +809,7 @@ def create_committee_resolution_reports(request, *args, **kwargs):
 def edit_committee_resolution_reports(request, *args, **kwargs):
     template_name = "elegislative/committee_reports/edit_committee_resolution_reports.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    committee_report = get_object_or_404(models.CommitteeReportResolutionModel, id=kwargs['id'])
+    committee_report = get_object_or_404(models.CommitteeReportResolutionModel, id=kwargs['id']) if user.is_overall else get_object_or_404(models.CommitteeReportResolutionModel, Q(author=user), id=kwargs['id'])
 
     if request.method == 'GET':
         form = forms.EditCommitteeReportResolutionForm(request.GET or None, instance=committee_report)
@@ -829,7 +834,7 @@ def delete_committee_resolution_reports(request, id):
     data = dict()
     template_name = "elegislative/committee_reports/delete_committee_resolution_reports.html"
     user = get_object_or_404(models.User, email=request.user.email)
-    committee_report = get_object_or_404(models.CommitteeReportResolutionModel, id=id)
+    committee_report = get_object_or_404(models.CommitteeReportResolutionModel, id=id) if user.is_overall else get_object_or_404(models.CommitteeReportResolutionModel, Q(author=user), id=id) 
     if request.is_ajax():
         if request.method == 'GET':
             context = {
@@ -962,7 +967,7 @@ def print_committee_ordinance_reports(request, id):
 def resolution(request, *args, **kwargs):
     template_name = "elegislative/resolution/resolution.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    resolutions = models.ResolutionModel.objects.all()
+    resolutions = models.ResolutionModel.objects.all() if user.is_overall else models.ResolutionModel.objects.all().filter(Q(author=user))
     context = {
         'user': user,
         'resolutions': resolutions,
@@ -977,7 +982,7 @@ def resolution(request, *args, **kwargs):
 def create_resolutions(request, *args, **kwargs):
     template_name = "elegislative/resolution/create_resolution.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    agenda = get_object_or_404(models.AgendaModel, id=kwargs['id'])
+    agenda = get_object_or_404(models.AgendaModel, id=kwargs['id']) if user.is_overall else get_object_or_404(models.AgendaModel, Q(author=user),id=kwargs['id'])
 
     if request.method == 'GET':
         form = forms.ResolutionForm(request.GET or None)
@@ -986,6 +991,7 @@ def create_resolutions(request, *args, **kwargs):
         if form.is_valid():
             instance = form.save(commit=False)
             instance.agenda_fk = agenda
+            instance.author = user
             instance.save()
             add_notification(request,'elegislative:resolution', f"Resolution ({instance.no}) has been created!", settings.NOTIFICATION_TAGS[2][0])
             return HttpResponseRedirect(reverse_lazy("elegislative:resolution")) 
@@ -1005,7 +1011,7 @@ def create_resolutions(request, *args, **kwargs):
 def edit_resolution(request, *args, **kwargs):
     template_name = "elegislative/resolution/edit_resolution.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    resolution = get_object_or_404(models.ResolutionModel, id=kwargs['id'])
+    resolution = get_object_or_404(models.ResolutionModel, id=kwargs['id']) if user.is_overall else get_object_or_404(models.ResolutionModel, Q(author=user),id=kwargs['id'])
 
     if request.method == 'GET':
         form = forms.EditResolutionForm(request.GET or None, instance=resolution)
@@ -1030,7 +1036,7 @@ def delete_resolution(request, id):
     data = dict()
     template_name = "elegislative/resolution/delete_resolution.html"    
     user = get_object_or_404(models.User, email=request.user.email)
-    resolution = get_object_or_404(models.ResolutionModel, id=id)
+    resolution = get_object_or_404(models.ResolutionModel, id=id) if user.is_overall else get_object_or_404(models.ResolutionModel, Q(author=user), id=id) 
 
     if request.is_ajax():
         if request.method == 'GET': 
@@ -1073,7 +1079,7 @@ def print_resolution(request, id):
 def ordinance(request, *args, **kwargs):
     template_name = "elegislative/ordinance/ordinance.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    ordinance = models.OrdinanceModel.objects.all()
+    ordinance = models.OrdinanceModel.objects.all() if user.is_overall else models.OrdinanceModel.objects.all().filter(Q(author=user))
     context = {
         'user': user,
         'ordinance': ordinance,
@@ -1088,7 +1094,8 @@ def ordinance(request, *args, **kwargs):
 def create_ordinance(request, *args, **kwargs):
     template_name = "elegislative/ordinance/create_ordinance.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    agenda = get_object_or_404(models.AgendaModel, id=kwargs['id'])
+    agenda = get_object_or_404(models.AgendaModel, id=kwargs['id']) if user.is_overall else get_object_or_404(models.AgendaModel, Q(author=user),id=kwargs['id'])
+
     if request.method == 'GET':
         form = forms.OrdinanceForm(request.GET or None)
     elif request.method == 'POST':
@@ -1096,6 +1103,7 @@ def create_ordinance(request, *args, **kwargs):
         if form.is_valid():
             instance = form.save(commit=False)
             instance.agenda_fk = agenda
+            instance.author = user
             instance.save()
             add_notification(request,'elegislative:ordinance_page', f"Ordinance ({instance.no}) has been created!", settings.NOTIFICATION_TAGS[3][0])
             return HttpResponseRedirect(reverse_lazy("elegislative:ordinance_page")) 
@@ -1115,7 +1123,7 @@ def create_ordinance(request, *args, **kwargs):
 def edit_ordinance(request, *args, **kwargs):
     template_name = "elegislative/ordinance/edit_ordinance.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    ordinance = get_object_or_404(models.OrdinanceModel, id=kwargs['id'])
+    ordinance = get_object_or_404(models.OrdinanceModel, id=kwargs['id']) if user.is_overall else get_object_or_404(models.OrdinanceModel, Q(author=user), id=kwargs['id'])
 
     if request.method == 'GET':
         form = forms.EditOrdinanceForm(request.GET or None, instance=ordinance)
@@ -1140,7 +1148,7 @@ def delete_ordinance(request, id):
     data = dict()
     template_name = "elegislative/ordinance/delete_ordinance.html"    
     user = get_object_or_404(models.User, email=request.user.email)
-    ordinance = get_object_or_404(models.OrdinanceModel, id=id)
+    ordinance = get_object_or_404(models.OrdinanceModel, id=id) if user.is_overall else get_object_or_404(models.OrdinanceModel, Q(author=user), id=id)
 
     if request.is_ajax():
         if request.method == 'GET': 
@@ -1161,7 +1169,7 @@ def delete_ordinance(request, id):
 def print_ordinance(request, id):
     template_name = "elegislative/ordinance/print_ordinance.html"  
     user = get_object_or_404(models.User, email=request.user.email)
-    ordinance = get_object_or_404(models.OrdinanceModel, id=id)
+    ordinance = get_object_or_404(models.OrdinanceModel, id=id) if user.is_overall else get_object_or_404(models.OrdinanceModel, Q(author=user), id=id)
     context = {
         'user': user,
         'ordinance':ordinance,
@@ -1847,6 +1855,15 @@ def delete_announcements(request, id):
 
 """
 [END] -> Manage announcement features
+"""
+
+"""
+[START] -> Messages features
+"""
+def messages(request):
+    pass
+"""
+[END] -> Messages features
 """
 
 """
