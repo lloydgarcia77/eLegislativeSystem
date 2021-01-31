@@ -2,11 +2,10 @@
 $(document).ready(function () { 
     let table =  $('#table_announcement').DataTable({
         'columnDefs': [ {
-            'targets': 6, /* column index */
+            'targets': 7, /* column index */
             'orderable': false, /* true or false */
         }]
-    }); 
-
+    });  
     $("#create-announcement").on("click", function(e){
         e.preventDefault();
         let url = $(this).attr("href");
@@ -54,6 +53,7 @@ $(document).ready(function () {
                         `<td>${a_response['subject']}</td>`,
                         `<td>${a_response['content']}</td>`,
                         visible,
+                        `<td>${a_response['author']}</td>`,
                         `<td>${a_response['date_filed']}</td>`,
                         `
                         <div class="btn-group">
@@ -184,6 +184,7 @@ $(document).ready(function () {
                     row_data[2] = `<td>${a_response['subject']}</td>`;
                     row_data[3] = `<td>${a_response['content']}</td>`;
                     row_data[4] = visible;
+                    row_data[5] = `<td>${a_response['author']}</td>`;
                     //https://legacy.datatables.net/ref
                     $('#table_announcement').dataTable().fnUpdate(row_data,row,undefined,false); 
                     $("#modal-default").modal("hide");

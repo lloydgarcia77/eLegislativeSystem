@@ -344,12 +344,12 @@ class OrdinanceForm(forms.ModelForm):
             'required': 'required',
         }
 
-        self.fields['author'].widget.attrs = {
-            'type': 'text',
-            'class': 'form-control',
-            'placeholder': 'author',
-            'required': 'required',
-        }
+        # self.fields['author'].widget.attrs = {
+        #     'type': 'text',
+        #     'class': 'form-control',
+        #     'placeholder': 'author',
+        #     'required': 'required',
+        # }
 
         self.fields['content'].widget.attrs = { 
             'id': 'compose_textarea',
@@ -386,12 +386,12 @@ class EditOrdinanceForm(forms.ModelForm):
             'required': 'required',
         }
 
-        self.fields['author'].widget.attrs = {
-            'type': 'text',
-            'class': 'form-control',
-            'placeholder': 'author',
-            'required': 'required',
-        }
+        # self.fields['author'].widget.attrs = {
+        #     'type': 'text',
+        #     'class': 'form-control',
+        #     'placeholder': 'author',
+        #     'required': 'required',
+        # }
 
         self.fields['veto_message'].widget.attrs = {
             'type': 'text',
@@ -441,12 +441,12 @@ class CommitteeReportResolutionForm(forms.ModelForm):
             'required': 'required',
         }
 
-        self.fields['author'].widget.attrs = {
-            'type': 'text',
-            'class': 'form-control',
-            'placeholder': 'author',
-            'required': 'required',
-        }
+        # self.fields['author'].widget.attrs = {
+        #     'type': 'text',
+        #     'class': 'form-control',
+        #     'placeholder': 'author',
+        #     'required': 'required',
+        # }
 
         self.fields['content'].widget.attrs = { 
             'id': 'compose_textarea',
@@ -483,12 +483,12 @@ class EditCommitteeReportResolutionForm(forms.ModelForm):
             'required': 'required',
         }
 
-        self.fields['author'].widget.attrs = {
-            'type': 'text',
-            'class': 'form-control',
-            'placeholder': 'author',
-            'required': 'required',
-        }
+        # self.fields['author'].widget.attrs = {
+        #     'type': 'text',
+        #     'class': 'form-control',
+        #     'placeholder': 'author',
+        #     'required': 'required',
+        # }
 
         self.fields['content'].widget.attrs = { 
             'id': 'compose_textarea',
@@ -531,12 +531,12 @@ class CommitteeReportOrdinanceForm(forms.ModelForm):
             'required': 'required',
         }
 
-        self.fields['author'].widget.attrs = {
-            'type': 'text',
-            'class': 'form-control',
-            'placeholder': 'author',
-            'required': 'required',
-        }
+        # self.fields['author'].widget.attrs = {
+        #     'type': 'text',
+        #     'class': 'form-control',
+        #     'placeholder': 'author',
+        #     'required': 'required',
+        # }
 
         self.fields['content'].widget.attrs = { 
             'id': 'compose_textarea',
@@ -573,12 +573,12 @@ class EditCommitteeReportOrdinanceForm(forms.ModelForm):
             'required': 'required',
         }
 
-        self.fields['author'].widget.attrs = {
-            'type': 'text',
-            'class': 'form-control',
-            'placeholder': 'author',
-            'required': 'required',
-        }
+        # self.fields['author'].widget.attrs = {
+        #     'type': 'text',
+        #     'class': 'form-control',
+        #     'placeholder': 'author',
+        #     'required': 'required',
+        # }
 
         self.fields['content'].widget.attrs = { 
             'id': 'compose_textarea',
@@ -621,12 +621,12 @@ class MOMForm(forms.ModelForm):
             'required': 'required',
         }
 
-        self.fields['author'].widget.attrs = {
-            'type': 'text',
-            'class': 'form-control',
-            'placeholder': 'author',
-            'required': 'required',
-        }
+        # self.fields['author'].widget.attrs = {
+        #     'type': 'text',
+        #     'class': 'form-control',
+        #     'placeholder': 'author',
+        #     'required': 'required',
+        # }
 
         self.fields['content'].widget.attrs = { 
             'id': 'compose_textarea',
@@ -664,12 +664,12 @@ class EditMOMForm(forms.ModelForm):
             'required': 'required',
         }
 
-        self.fields['author'].widget.attrs = {
-            'type': 'text',
-            'class': 'form-control',
-            'placeholder': 'author',
-            'required': 'required',
-        }
+        # self.fields['author'].widget.attrs = {
+        #     'type': 'text',
+        #     'class': 'form-control',
+        #     'placeholder': 'author',
+        #     'required': 'required',
+        # }
 
         self.fields['content'].widget.attrs = { 
             'id': 'compose_textarea',
@@ -682,7 +682,6 @@ class EditMOMForm(forms.ModelForm):
             'class': 'form-control select2', 
             'style': 'width: 100%', 
         }
-
 
 class AnnouncementForm(forms.ModelForm):
     class Meta:

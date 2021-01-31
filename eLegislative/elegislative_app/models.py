@@ -155,6 +155,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     
+    is_view_mode = models.BooleanField(default=False, verbose_name="View Mode Only")
     is_overall = models.BooleanField(default=False, verbose_name = "Manage through all records.")
     is_arocc_manager = models.BooleanField(default=False, verbose_name="Can Manage Agenda, Resolution, Oridnance, Comments & Recommendation and Committee Reports")
     is_mom_manager = models.BooleanField(default=False, verbose_name="Can Manage Minutes of the Meeting")

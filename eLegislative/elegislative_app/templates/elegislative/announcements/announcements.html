@@ -64,11 +64,13 @@ e-Legislative Announcement
                 <div class="box">
                     <div class="box-header with-border">
                         <h3 class="box-title">Announcement Table</h3>
+                        {% if not user.is_view_mode %}
                         <div class="box-tools"> 
                             <ul class="pagination pagination-sm no-margin pull-right">
                               <li><a id="create-announcement" href="{% url 'elegislative:create_announcements' %}" data-toggle="tooltip" title="File New Announcement"><i class="fa fa-fw fa-plus"></i>File New Announcement</a></li>  
                             </ul>
                         </div> 
+                        {% endif %}
                     </div>
                     <div class="box-body">
                         <table id="table_announcement" class="table table-bordered table-striped">
@@ -79,6 +81,7 @@ e-Legislative Announcement
                                     <th class="text-center" style="width: 10%;">Subject</th> 
                                     <th class="text-center" style="width: 10%;">Content</th> 
                                     <th class="text-center" style="width: 10%;">Visible</th> 
+                                    <th class="text-center" style="width: 10%;">Author</th> 
                                     <th class="text-center" style="width: 10%;">Date Filed</th> 
                                     <th class="text-center" style="width: 10%;"></th> 
                                 </tr>
@@ -98,8 +101,10 @@ e-Legislative Announcement
                                             <span class="label label-danger">{{a.visible}}</span>
                                             {% endif %}  
                                         </td>
+                                        <td>{{a.author.f_name}} {{a.author.l_name}}</td>
                                         <td>{% custom_data_format a.date_filed %}</td>
                                         <td>
+                                        {% if not user.is_view_mode %}
                                             <div class="btn-group">
                                                 <button type="button" class="btn btn-default btn-flat">Action</button>
                                                 <button type="button" class="btn btn-default btn-flat dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
@@ -111,6 +116,7 @@ e-Legislative Announcement
                                                   <li><a href="{% url 'elegislative:delete_announcements' a.id %}" class="delete">Delete</a></li>              
                                                 </ul>
                                             </div>
+                                        {% endif %}
                                         </td>
                                     </tr>
                                 {% endfor %}
