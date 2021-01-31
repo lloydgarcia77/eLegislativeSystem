@@ -306,8 +306,8 @@ def dashboard_page(request, *args, **kwargs):
     cr_ord = models.CommitteeReportOrdinanceModel.objects.all() if user.is_overall else models.CommitteeReportOrdinanceModel.objects.all().filter(Q(author=user))
     cr_res = models.CommitteeReportResolutionModel.objects.all() if user.is_overall else models.CommitteeReportResolutionModel.objects.all().filter(Q(author=user))
     announcement = models.AnnouncementModel.objects.all() if user.is_overall else models.AnnouncementModel.objects.all().filter(Q(author=user))
-    com_rec_res = models.CommentsRecomendationResolutionModel.objects.all() if user.is_overall else models.CommentsRecomendationResolutionModel.objects.all().filter(Q(author=user))
-    com_rec_ord = models.CommentsRecomendationOrdinanceModel.objects.all() if user.is_overall else models.CommentsRecomendationOrdinanceModel.objects.all().filter(Q(author=user))
+    com_rec_res = models.CommentsRecomendationResolutionModel.objects.all()  
+    com_rec_ord = models.CommentsRecomendationOrdinanceModel.objects.all()  
     com_rec_total = int(com_rec_res.count()) + int(com_rec_ord.count()) 
     announcement_display = models.AnnouncementModel.objects.all().filter(Q(visible=True))
 
@@ -324,12 +324,12 @@ def dashboard_page(request, *args, **kwargs):
     signed, unsigned, approved, denied, pending, uncategorized = 0,0,0,0,0,0
 
     for m in model_list:
-        signed += m.objects.all().filter(Q(is_signed=True)).count()
-        unsigned += m.objects.all().filter(Q(is_signed=False)).count()
-        approved += m.objects.all().filter(Q(status='Approved')).count()
-        denied += m.objects.all().filter(Q(status='Denied')).count()
-        pending += m.objects.all().filter(Q(status='Pending')).count()
-        uncategorized += m.objects.all().filter(Q(status='None')).count()
+        signed += m.objects.all().filter(Q(is_signed=True)).count() if user.is_overall else m.objects.all().filter(Q(is_signed=True), Q(author=user)).count()
+        unsigned += m.objects.all().filter(Q(is_signed=False)).count() if user.is_overall else m.objects.all().filter(Q(is_signed=False), Q(author=user)).count()
+        approved += m.objects.all().filter(Q(status='Approved')).count() if user.is_overall else m.objects.all().filter(Q(status='Approved'), Q(author=user)).count()
+        denied += m.objects.all().filter(Q(status='Denied')).count() if user.is_overall else m.objects.all().filter(Q(status='Denied'), Q(author=user)).count()
+        pending += m.objects.all().filter(Q(status='Pending')).count() if user.is_overall else m.objects.all().filter(Q(status='Pending'), Q(author=user)).count()
+        uncategorized += m.objects.all().filter(Q(status='None')).count() if user.is_overall else m.objects.all().filter(Q(status='None'), Q(author=user)).count()
         
     context = {
         'user': user,
