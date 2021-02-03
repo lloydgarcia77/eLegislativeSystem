@@ -136,7 +136,7 @@ e-Legislative Dashboard
     <!-- search form -->
     <form action="{% url 'elegislative:search' %}" method="GET" class="sidebar-form"> 
       <div class="input-group">
-        <input type="text" name="q" class="form-control" placeholder="Search..." value="{{request.GET.q}}">
+        <input type="text" name="q" class="form-control" placeholder="Search..." value="{{request.GET.q}}" required>
         <span class="input-group-btn">
               <button type="submit" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
               </button>
@@ -161,125 +161,143 @@ e-Legislative Dashboard
         </ul>
       </li>
       {% endblock nav_dashboard %}
-        
-      {% block nav_agenda %}
-      <li>
-        <a href="{% url 'elegislative:agenda_page' %}">
-          <i class="fa fa-hand-o-right"></i> <span>Agenda</span>
-          <span class="pull-right-container">
-            <small class="label pull-right bg-green"></small>
-          </span>
-        </a>
-      </li>
-      {% endblock nav_agenda %}
-
-
-      {% block nav_resolution %}
-      <li>
-        <a href="{% url 'elegislative:resolution' %}">
-          <i class="fa fa-hand-rock-o"></i> <span>Resolution</span>
-          <span class="pull-right-container">
-            <small class="label pull-right bg-green"></small>
-          </span>
-        </a>
-      </li>
-      {% endblock nav_resolution %}
-
-      {% block nav_oridnance %}
-      <li>
-        <a href="{% url 'elegislative:ordinance_page' %}">
-          <i class="fa fa-balance-scale"></i> <span>Ordinances</span>
-          <span class="pull-right-container">
-            <small class="label pull-right bg-green"></small>
-          </span>
-        </a>
-      </li>
-      {% endblock nav_oridnance %}
       
-      {% block nav_mom %} 
-      <li>
-        <a href="{% url 'elegislative:minutes_of_the_meeting' %}" data-toggle="tooltip" title="Minutes of the meeting">
-          <i class="fa fa-comments"></i> <span>Min. of the meeting</span>
-          <span class="pull-right-container">
-            <small class="label pull-right bg-green"></small>
-          </span>
-        </a>
-      </li>
-      {% endblock nav_mom %}   
+      {% if request.user.is_arocc_manager %}      
+        {% block nav_agenda %}
+        <li>
+          <a href="{% url 'elegislative:agenda_page' %}">
+            <i class="fa fa-hand-o-right"></i> <span>Agenda</span>
+            <span class="pull-right-container">
+              <small class="label pull-right bg-green"></small>
+            </span>
+          </a>
+        </li>
+        {% endblock nav_agenda %}
+
+
+        {% block nav_resolution %}
+        <li>
+          <a href="{% url 'elegislative:resolution' %}">
+            <i class="fa fa-hand-rock-o"></i> <span>Resolution</span>
+            <span class="pull-right-container">
+              <small class="label pull-right bg-green"></small>
+            </span>
+          </a>
+        </li>
+        {% endblock nav_resolution %}
+
+        {% block nav_oridnance %}
+        <li>
+          <a href="{% url 'elegislative:ordinance_page' %}">
+            <i class="fa fa-balance-scale"></i> <span>Ordinances</span>
+            <span class="pull-right-container">
+              <small class="label pull-right bg-green"></small>
+            </span>
+          </a>
+        </li>
+        {% endblock nav_oridnance %} 
+
+        {% block nav_com_rec %}
+        <li>
+          <a href="{% url 'elegislative:comments_and_recommendation' %}" data-toggle="tooltip" title="Comments & Recommendation">
+            <i class="fa fa-files-o"></i> <span>Commt & Rec.</span>
+            <span class="pull-right-container">
+              <small class="label pull-right bg-green"></small>
+            </span>
+          </a>
+        </li> 
+        {% endblock nav_com_rec %} 
+        
+        {% block nav_com_rep %}
+        <li>
+          <a href="{% url 'elegislative:committee_reports' %}">
+            <i class="fa fa-file-text-o"></i> <span>Committee Reports</span>
+            <span class="pull-right-container">
+              <small class="label pull-right bg-green"></small>
+            </span>
+          </a>
+        </li>
+        {% endblock nav_com_rep %}  
+      {% endif %}
+
+      {% if request.user.is_mom_manager %} 
+        {% block nav_mom %} 
+        <li>
+          <a href="{% url 'elegislative:minutes_of_the_meeting' %}" data-toggle="tooltip" title="Minutes of the meeting">
+            <i class="fa fa-comments"></i> <span>Min. of the meeting</span>
+            <span class="pull-right-container">
+              <small class="label pull-right bg-green"></small>
+            </span>
+          </a>
+        </li>
+        {% endblock nav_mom %}   
+      {% endif %}
      
+      {% if request.user.is_records_manager %}
+        {% block records %}
+        <li>
+          <a href="{% url 'elegislative:records' %}" data-toggle="tooltip" title="Records">
+            <i class="fa fa-gavel"></i> <span>Records</span>
+            <span class="pull-right-container">
+              <small class="label pull-right bg-green"></small>
+            </span>
+          </a>
+        </li>
+        {% endblock records %}
+      {% endif %}
 
-      {% block nav_com_rec %}
+      {% if request.user.is_announcement_manager %}
+        {% block nav_announcements %}
+        <li>
+          <a href="{% url 'elegislative:announcements' %}" data-toggle="tooltip" title="Announcement">
+            <i class="fa fa-volume-up"></i> <span>Announcements</span>
+            <span class="pull-right-container">
+              <small class="label pull-right bg-green"></small>
+            </span>
+          </a>
+        </li>
+        {% endblock nav_announcements %}
+      {% endif %}
+
+      {% block nav_messages %}
       <li>
-        <a href="{% url 'elegislative:comments_and_recommendation' %}" data-toggle="tooltip" title="Comments & Recommendation">
-          <i class="fa fa-files-o"></i> <span>Commt & Rec.</span>
-          <span class="pull-right-container">
-            <small class="label pull-right bg-green"></small>
-          </span>
-        </a>
-      </li> 
-      {% endblock nav_com_rec %}
-      
-      
-      
-      {% block nav_com_rep %}
-      <li>
-        <a href="{% url 'elegislative:committee_reports' %}">
-          <i class="fa fa-file-text-o"></i> <span>Committee Reports</span>
+        <a href="" data-toggle="tooltip" title="Messages">
+          <i class="fa fa-envelope"></i> <span>Messages</span>
           <span class="pull-right-container">
             <small class="label pull-right bg-green"></small>
           </span>
         </a>
       </li>
-      {% endblock nav_com_rep %} 
-        
-      {% block records %}
-      <li>
-        <a href="{% url 'elegislative:records' %}" data-toggle="tooltip" title="Records">
-          <i class="fa fa-gavel"></i> <span>Records</span>
-          <span class="pull-right-container">
-            <small class="label pull-right bg-green"></small>
-          </span>
-        </a>
-      </li>
-      {% endblock records %}
- 
+      {% endblock nav_messages %}
 
-      {% block nav_announcements %}
-      <li>
-        <a href="{% url 'elegislative:announcements' %}" data-toggle="tooltip" title="Announcement">
-          <i class="fa fa-volume-up"></i> <span>Announcements</span>
-          <span class="pull-right-container">
-            <small class="label pull-right bg-green"></small>
-          </span>
-        </a>
-      </li>
-      {% endblock nav_announcements %}
+      {% if request.user.is_old_documents_manager %}
+        {% block nav_old_documents %}
+        <li>
+          <a href="" data-toggle="tooltip" title="Old Documents">
+            <i class="fa fa-book"></i> <span>Old Documents</span>
+            <span class="pull-right-container">
+              <small class="label pull-right bg-green"></small>
+            </span>
+          </a>
+        </li>
+        {% endblock nav_old_documents %}
+      {% endif %}
 
-      {% block nav_old_documents %}
-      <li>
-        <a href="" data-toggle="tooltip" title="Old Documents">
-          <i class="fa fa-book"></i> <span>Old Documents</span>
-          <span class="pull-right-container">
-            <small class="label pull-right bg-green"></small>
-          </span>
-        </a>
-      </li>
-      {% endblock nav_old_documents %}
-
-      {% block nav_webex %}
-      <li>
-        <a href="" data-toggle="tooltip" title="Webex Links">
-          <i class="fa fa-external-link"></i> <span>Webex Links</span>
-          <span class="pull-right-container">
-            <small class="label pull-right bg-green"></small>
-          </span>
-        </a>
-      </li>
-      {% endblock nav_webex %}
-
+      {% if request.user.is_webex_manager %}
+        {% block nav_webex %}
+        <li>
+          <a href="" data-toggle="tooltip" title="Webex Links">
+            <i class="fa fa-external-link"></i> <span>Webex Links</span>
+            <span class="pull-right-container">
+              <small class="label pull-right bg-green"></small>
+            </span>
+          </a>
+        </li>
+        {% endblock nav_webex %}
+      {% endif %}
       {% block nav_trash %}
       <li>
-        <a href="" data-toggle="tooltip" title="Trash">
+        <a href="{% url 'elegislative:trash' %}" data-toggle="tooltip" title="Trash">
           <i class="fa fa-trash text-red"></i> <span>Trash</span>
           <span class="pull-right-container">
             <small class="label pull-right bg-green"></small>
@@ -554,6 +572,7 @@ e-Legislative Dashboard
           <div class="box-header with-border">
             <h3 class="box-title">{{a.title}}</h3> 
             <div class="box-tools pull-right">
+              <span data-toggle="tooltip" title="" class="badge bg-green" data-original-title="Author">{{a.author.f_name}} {{a.author.l_name}}</span>
               <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
               </button>
               <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
@@ -695,6 +714,47 @@ e-Legislative Dashboard
     </div>
     <!-- /.modal-dialog -->
   </div>
-<!-- /.modal -->
+  
+  <div class="modal modal-danger fade" id="modal-danger">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">×</span></button>
+          <h4 class="modal-title">Danger Modal</h4>
+        </div>
+        <div class="modal-body">
+          <p>One fine body…</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline pull-left" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-outline">Save changes</button>
+        </div>
+      </div>
+      <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+  </div>
+
+  <div class="modal modal-info fade" id="modal-info">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">×</span></button>
+                <h4 class="modal-title">Info Modal</h4>
+              </div>
+              <div class="modal-body">
+                <p>One fine body…</p>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-outline pull-left" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-outline">Save changes</button>
+              </div>
+            </div>
+            <!-- /.modal-content -->
+          </div>
+          <!-- /.modal-dialog -->
+        </div>
 {% endblock body_block %}  
 

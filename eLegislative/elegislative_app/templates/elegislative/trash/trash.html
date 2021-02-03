@@ -1,0 +1,133 @@
+{% extends 'elegislative/dashboard.html' %}
+{% load static %}
+{% load custom_tags %}
+{% load humanize %} 
+{% block title %}
+e-Legislative Trash
+{% endblock title%}
+
+
+<!-- CSS -->
+{% block additional_css %}
+<!-- DataTables -->
+<link rel="stylesheet" href="{% static 'bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css' %}">
+<link rel="stylesheet" href="{% static 'bower_components/datatables.net/css/select.dataTables.min.css' %}"> 
+<style>
+    table td{
+        text-align: center; 
+        vertical-align: middle !important;
+    }
+</style>
+{% endblock additional_css %}
+
+<!-- navigation -->
+{% block nav_dashboard %}
+<li class="treeview">
+    <a href="{% url 'elegislative:dashboard_page' %}" >
+    <i class="fa fa-dashboard" ></i> <span>Dashboard</span>
+    <span class="pull-right-container">
+        <i class="fa fa-angle-left pull-right"></i>
+    </span>
+    </a>
+    <ul class="treeview-menu">
+    <li class="active"><a href="{% url 'elegislative:dashboard_page' %}"><i class="fa fa-circle-o"></i> Dashboard</a></li> 
+    </ul>
+</li>
+{% endblock nav_dashboard %}
+
+{% block nav_trash %}
+<li class="active">
+<a href="{% url 'elegislative:trash' %}" data-toggle="tooltip" title="Trash">
+    <i class="fa fa-trash text-red"></i> <span>Trash</span>
+    <span class="pull-right-container">
+    <small class="label pull-right bg-green"></small>
+    </span>
+</a>
+</li>
+{% endblock nav_trash %}
+
+{% block main_content %} 
+<div class="content-wrapper">
+    <section class="content-header">
+        <h1>
+        Trash Bin
+        <small>Manage deleted documents</small>
+        </h1>
+        <ol class="breadcrumb">
+        <li><a href="{% url 'elegislative:dashboard_page' %}"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Trash</li>
+        </ol>
+    </section>
+    <section class="content">
+      <div class="row">
+      
+        <div class="col-md-12">
+          <div class="box box-primary">
+            <div class="box-header with-border">
+              <h3 class="box-title">Trash bin</h3> 
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+                <table id="table_trash" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th ></th>
+                            <th>ID</th> 
+                            <th>No</th> 
+                            <th>Title</th>
+                            <th>Author</th>    
+                            <th>Source</th>  
+                        </tr>
+                    </thead>
+                    <tbody>
+                      {% for q in queryset %}
+                        {% if q %}
+                          {% for a in q %}
+                            <tr>
+                                <td class="select-checkbox" style="width: 10%"></td>
+                                <td class="text-left" style="width: 10%" data-model="{{a|model_name}}">{{a.id}}</td>
+                                <td class="text-left" style="width: 10%">{{a.no}}</td>
+                                <td class="text-left" style="width: 10%">{{a.title}}</td>
+                                <td class="text-left" style="width: 10%"><a href="">{{a.author.f_name}} {{a.author.l_name}}</a></td>
+                                <td class="text-left" style="width: 10%"><span class="label label-{%random_tags%}">{{a|model_source}}</span></td>
+                            </tr>  
+                          {% endfor %}
+                        {% endif %}
+                      {% endfor %}
+                    </tbody> 
+                </table>
+            </div>
+            <!-- /.box-body -->
+            <div class="box-footer no-padding">
+              <div class="mailbox-controls">
+                <!-- Check all button -->
+                <button type="button" class="btn btn-default btn-sm checkbox-toggle" id="btn-select-all"><i class="fa fa-square-o"></i>
+                </button>
+                <div class="btn-group">
+                  <button type="button" class="btn btn-default btn-sm" id="btn-trash-all" data-url="{% url 'elegislative:trash_delete' %}"><i class="fa fa-trash-o"></i></button> 
+                </div> 
+                <button type="button" class="btn btn-default btn-sm"  id="btn-restore-all" data-url="{% url 'elegislative:restore_deleted' %}"><i class="fa fa-refresh"></i></button>
+              </div>
+            </div>
+          </div>
+          <!-- /. box -->
+        </div>
+        <!-- /.col -->
+      </div>
+      <!-- /.row -->
+    </section>
+
+</div> 
+{% endblock main_content %}  
+
+
+
+{% block additional_js %}
+
+<!-- DataTables -->
+<script src="{% static 'bower_components/datatables.net/js/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'bower_components/datatables.net/js/dataTables.select.min.js' %}"></script>
+<script src="{% static 'bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js' %}"></script>
+<script src="{% static 'js/trash.js' %}"></script>
+ 
+{% endblock additional_js %}

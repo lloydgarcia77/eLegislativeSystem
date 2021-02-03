@@ -90,7 +90,7 @@ e-Legislative Committee Reports
                                     <td>{{r.id}}</td>
                                     <td>{{r.no}}</td>
                                     <td>{{r.title}}</td>
-                                    <td>{{r.author}}</td>
+                                    <td>{{r.author.f_name}} {{r.author.l_name}}</td>
                                     <td>{{r.version}}</td>
                                     <td>{{r.status}}</td>
                                     <td>
@@ -109,10 +109,14 @@ e-Legislative Committee Reports
                                                 <span class="sr-only">Toggle Dropdown</span>
                                             </button>
                                             <ul class="dropdown-menu" role="menu">
+                                                {% if user.is_view_mode %}
+                                                <li><a href="{% url 'elegislative:print_committee_resolution_reports' r.id %}" target="_blank">Preview/Print</a></li>        
+                                                {% else %}
                                                 <li><a href="{% url 'elegislative:edit_committee_resolution_reports' r.id %}">Edit</a></li>   
                                                 <li><a href="{% url 'elegislative:delete_committee_resolution_reports' r.id %}" class="delete">Delete</a></li>   
                                                 <li class="divider"></li>                          
-                                                <li><a href="{% url 'elegislative:print_committee_resolution_reports' r.id %}" target="_blank">Preview/Print</a></li>        
+                                                <li><a href="{% url 'elegislative:print_committee_resolution_reports' r.id %}" target="_blank">Preview/Print</a></li>     
+                                                {% endif %}    
                                             </ul>
                                         </div> 
 
@@ -155,7 +159,7 @@ e-Legislative Committee Reports
                                     <td>{{o.id}}</td>
                                     <td>{{o.no}}</td>
                                     <td>{{o.title}}</td>
-                                    <td>{{o.author}}</td>
+                                    <td>{{o.author.f_name}} {{o.author.l_name}}</td>
                                     <td>{{o.version}}</td>
                                     <td>{{o.status}}</td>
                                     <td>
@@ -174,10 +178,14 @@ e-Legislative Committee Reports
                                                 <span class="sr-only">Toggle Dropdown</span>
                                             </button>
                                             <ul class="dropdown-menu" role="menu">
+                                                {% if user.is_view_mode %}
+                                                <li><a href="{% url 'elegislative:print_committee_ordinance_reports' o.id %}" target="_blank">Preview/Print</a></li>  
+                                                {% else %}
                                                 <li><a href="{% url 'elegislative:edit_committee_ordinance_reports' o.id %}">Edit</a></li>   
                                                 <li><a href="{% url 'elegislative:delete_committee_ordinance_reports' o.id %}" class="delete">Delete</a></li>   
                                                 <li class="divider"></li>                          
-                                                <li><a href="{% url 'elegislative:print_committee_ordinance_reports' o.id %}" target="_blank">Preview/Print</a></li>        
+                                                <li><a href="{% url 'elegislative:print_committee_ordinance_reports' o.id %}" target="_blank">Preview/Print</a></li>   
+                                                {% endif %} 
                                             </ul>
                                         </div> 
 

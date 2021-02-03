@@ -86,7 +86,7 @@ e-Legislative Ordinance
                                     <td>{{o.id}}</td>
                                     <td>{{o.no}}</td>
                                     <td>{{o.title}}</td> 
-                                    <td>{{o.author}}</td>
+                                    <td>{{o.author.f_name}} {{o.author.l_name}}</td>
                                     <td>{{o.version}}</td>
                                     <td>{{o.status}}</td>
                                     <td> 
@@ -96,7 +96,7 @@ e-Legislative Ordinance
                                         <span class="label label-danger">{{o.is_signed}}</span>
                                         {% endif %} 
                                     </td>
-                                    <td>{{r.date_filed}}</td> 
+                                    <td>{{o.date_filed}}</td> 
                                     <td>
                                         <div class="btn-group">
                                             <button type="button" class="btn btn-default btn-flat">Action</button>
@@ -105,11 +105,15 @@ e-Legislative Ordinance
                                                 <span class="sr-only">Toggle Dropdown</span>
                                             </button>
                                             <ul class="dropdown-menu" role="menu">
+                                            {% if user.is_view_mode %}
+                                                <li><a href="{% url 'elegislative:print_ordinance' o.id %}" target="_blank">Preview/Print</a></li>    
+                                            {% else %}
                                                 <li><a href="{% url 'elegislative:edit_ordinance' o.id %}">Edit</a></li>   
                                                 <li><a href="{% url 'elegislative:delete_ordinance' o.id %}" class="delete">Delete</a></li>   
                                                 <li class="divider"></li>                                                
                                                 <li><a href="{% url 'elegislative:create_committee_ordinance_reports' o.id %}">Committee Report</a></li>   
-                                                <li><a href="{% url 'elegislative:print_ordinance' o.id %}" target="_blank">Preview/Print</a></li>                                                     
+                                                <li><a href="{% url 'elegislative:print_ordinance' o.id %}" target="_blank">Preview/Print</a></li>    
+                                            {% endif %}                                                  
                                             </ul>
                                         </div>
                                     </td>

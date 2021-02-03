@@ -1,17 +1,18 @@
 from django.contrib import admin 
 from elegislative_app import models
-from import_export.admin import ImportExportModelAdmin 
+from import_export.admin import ImportExportModelAdmin  
 
 admin.site.site_header = 'e-Legislative Super Administrator'
 admin.site.index_title = 'Super Administrator Page'
 admin.site.site_title = 'Super Administrator Panel'
 admin.site.site_url = "/elegislative/dashboard/"
+ 
 admin.site.register(models.User)
 
 
 class AgendaAdmin(ImportExportModelAdmin):
-    list_display = ("id","no","title","version","author","status","is_signed","hard_copy","content","date_filed")
-    list_editable = ("no","title","version","author","status","is_signed","hard_copy","content",)
+    list_display = ("id","no","title","version","author","is_delete","status","is_signed","hard_copy","content","date_filed")
+    list_editable = ("no","title","version","author","is_delete","status","is_signed","hard_copy","content",)
     list_per_page = 10
     search_fields = ("id","no","title",)
     list_filter = ("author","status","is_signed",)
@@ -20,8 +21,8 @@ class AgendaAdmin(ImportExportModelAdmin):
 admin.site.register(models.AgendaModel, AgendaAdmin)
 
 class ResolutionAdmin(ImportExportModelAdmin):
-    list_display = ("id","agenda_fk","no","title","version","author","status","is_signed","is_public","hard_copy","content","date_filed")
-    list_editable = ("no","agenda_fk","title","version","author","status","is_signed","is_public","hard_copy","content",)
+    list_display = ("id","agenda_fk","no","title","version","author","is_delete","status","is_signed","is_public","hard_copy","content","date_filed")
+    list_editable = ("no","agenda_fk","title","version","author","is_delete","status","is_signed","is_public","hard_copy","content",)
     list_per_page = 10
     search_fields = ("id","no","title",)
     list_filter = ("author","status","is_signed",)
@@ -29,8 +30,8 @@ class ResolutionAdmin(ImportExportModelAdmin):
 admin.site.register(models.ResolutionModel, ResolutionAdmin)
 
 class CommitteeReportResolutionAdmin(ImportExportModelAdmin):
-    list_display = ("id","resolution_committee_report_fk","no","title","version","author","status","is_signed","hard_copy","content","date_filed")
-    list_editable = ("no","resolution_committee_report_fk","title","version","author","status","is_signed","hard_copy","content",)
+    list_display = ("id","resolution_committee_report_fk","no","title","version","author","is_delete","status","is_signed","hard_copy","content","date_filed")
+    list_editable = ("no","resolution_committee_report_fk","title","version","author","is_delete","status","is_signed","hard_copy","content",)
     list_per_page = 10
     search_fields = ("id","no","title",)
     list_filter = ("author","status","is_signed",)
@@ -48,8 +49,8 @@ admin.site.register(models.CommentsRecomendationResolutionModel, CommentsRecomen
 
 
 class OrdinanceAdmin(ImportExportModelAdmin):
-    list_display = ("id","agenda_fk","no","title","version","author","status","is_signed","is_public","hard_copy","content","date_filed")
-    list_editable = ("no","agenda_fk","title","version","author","status","is_signed","is_public","hard_copy","content",)
+    list_display = ("id","agenda_fk","no","title","version","author","is_delete","status","is_signed","is_public","hard_copy","content","date_filed")
+    list_editable = ("no","agenda_fk","title","version","author","is_delete","status","is_signed","is_public","hard_copy","content",)
     list_per_page = 10
     search_fields = ("id","no","title",)
     list_filter = ("author","status","is_signed",)
@@ -57,8 +58,8 @@ class OrdinanceAdmin(ImportExportModelAdmin):
 admin.site.register(models.OrdinanceModel, OrdinanceAdmin)
 
 class CommitteeReportOrdinanceAdmin(ImportExportModelAdmin):
-    list_display = ("id","ordinance_committee_report_fk","no","title","version","author","status","is_signed","hard_copy","content","date_filed")
-    list_editable = ("no","ordinance_committee_report_fk","title","version","author","status","is_signed","hard_copy","content",)
+    list_display = ("id","ordinance_committee_report_fk","no","title","version","author","is_delete","status","is_signed","hard_copy","content","date_filed")
+    list_editable = ("no","ordinance_committee_report_fk","title","version","author","is_delete","status","is_signed","hard_copy","content",)
     list_per_page = 10
     search_fields = ("id","no","title",)
     list_filter = ("author","status","is_signed",)
@@ -78,8 +79,8 @@ admin.site.register(models.CommentsRecomendationOrdinanceModel, CommentsRecomend
 
 
 class MOMAdmin(ImportExportModelAdmin):
-    list_display = ("id","no","title","version","author","status","is_signed","hard_copy","content","date_filed")
-    list_editable = ("no","title","version","author","status","is_signed","hard_copy","content",)
+    list_display = ("id","no","title","version","author","is_delete","status","is_signed","hard_copy","content","date_filed")
+    list_editable = ("no","title","version","author","is_delete","status","is_signed","hard_copy","content",)
     list_per_page = 10
     search_fields = ("id","no","title",)
     list_filter = ("author","status","is_signed",)
@@ -88,8 +89,8 @@ class MOMAdmin(ImportExportModelAdmin):
 admin.site.register(models.MOMModel, MOMAdmin)
 
 class AnnouncementAdmin(ImportExportModelAdmin):
-    list_display = ("id","title","subject","content","date_filed")
-    list_editable = ("title","subject","content",)
+    list_display = ("id","title","subject","author","content","date_filed")
+    list_editable = ("title","subject","author","content",)
     list_per_page = 10
     search_fields = ("id","title","subject","content","date_filed",)
     list_filter = ("date_filed",)

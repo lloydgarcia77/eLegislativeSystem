@@ -28,8 +28,7 @@ from datetime import timezone, datetime, timedelta
 from django.core.exceptions import FieldDoesNotExist, FieldError
 
 # Pagination
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger 
 
 # Create your views here.
 
@@ -94,11 +93,21 @@ def login_page(request):
         password = request.POST.get('password')
 
         user = authenticate(username=username, password=password)
+        
         # if is active
         if user:
-            if user.is_active and user.is_staff: 
+
+            if user.is_active: 
                 login(request, user)
-                return HttpResponseRedirect(reverse("elegislative:dashboard_page"))
+                # https://stackoverflow.com/questions/3024153/how-to-expire-session-due-to-inactivity-in-django
+                
+                # https://stackoverflow.com/questions/35796195/how-to-redirect-to-previous-page-in-django-after-post-request/35796330
+                # https://stackoverflow.com/questions/806835/django-redirect-to-previous-page-after-login
+                # https://stackoverflow.com/questions/38431166/redirect-to-next-after-login-in-django
+                request.session.set_expiry(request.session.get_expiry_age())  
+                previous_page = request.GET.get('next',reverse("elegislative:dashboard_page"))
+                return HttpResponseRedirect(previous_page)
+                # return HttpResponseRedirect(reverse("elegislative:dashboard_page"))
             else:
                 messages.error(request, "Your account is INVALID! please try again.")
         else:  
@@ -152,18 +161,17 @@ def authorize(function):
     @wraps(function)
     def wrap(request, *args, **kwargs):
         user = get_object_or_404(models.User, email=request.user.email) 
-        if  request.user.is_active and request.user.is_staff:
+        if  request.user.is_active:
             return function(request, *args, **kwargs)
         else:
             raise Http404
             # return HttpResponseRedirect('/')
     return wrap
 
- 
 def roles(**rules):
     def _method_wrapper(view_method):
         def _arguments_wrapper(request, *args, **kwargs):            
-            if request.user.is_active and request.user.is_staff: 
+            if request.user.is_active:  
                 is_arocc_manager = rules.get('is_arocc_manager',False)
                 is_mom_manager = rules.get('is_mom_manager',False)
                 is_records_manager = rules.get('is_records_manager',False)
@@ -202,6 +210,7 @@ def roles(**rules):
                         return view_method(request, *args, **kwargs)
                     else:
                         raise Http404()
+                
             else:
                 raise Http404()
         return _arguments_wrapper
@@ -241,6 +250,7 @@ def create_notification(url_target, message, tags):
             return view_method(request, *args, **kwargs) 
         return _arguments_wrapper 
     return _method_wrapper
+
 """
 END-[DECORATORS]
 """
@@ -288,15 +298,15 @@ def delete_all_notifications(request):
 def dashboard_page(request, *args, **kwargs):
     template_name = "elegislative/dashboard.html"
     user = get_object_or_404(models.User, email=request.user.email)
-    agenda = models.AgendaModel.objects.all()
-    resolution = models.ResolutionModel.objects.all()
-    ordinance = models.OrdinanceModel.objects.all()
-    mom = models.MOMModel.objects.all()
-    cr_ord = models.CommitteeReportOrdinanceModel.objects.all()
-    cr_res = models.CommitteeReportResolutionModel.objects.all()
-    announcement = models.AnnouncementModel.objects.all()
-    com_rec_res = models.CommentsRecomendationResolutionModel.objects.all() 
-    com_rec_ord = models.CommentsRecomendationOrdinanceModel.objects.all() 
+    agenda = models.AgendaModel.objects.all().filter(Q(is_delete=False)) if user.is_overall else models.AgendaModel.objects.all().filter(Q(author=user), Q(is_delete=False))
+    resolution = models.ResolutionModel.objects.all().filter(Q(is_delete=False)) if user.is_overall else models.ResolutionModel.objects.all().filter(Q(author=user), Q(is_delete=False))
+    ordinance = models.OrdinanceModel.objects.all().filter(Q(is_delete=False)) if user.is_overall else models.OrdinanceModel.objects.all().filter(Q(author=user), Q(is_delete=False))
+    mom = models.MOMModel.objects.all().filter(Q(is_delete=False)) if user.is_overall else models.MOMModel.objects.all().filter(Q(author=user), Q(is_delete=False))
+    cr_ord = models.CommitteeReportOrdinanceModel.objects.all().filter(Q(is_delete=False)) if user.is_overall else models.CommitteeReportOrdinanceModel.objects.all().filter(Q(author=user), Q(is_delete=False))
+    cr_res = models.CommitteeReportResolutionModel.objects.all().filter(Q(is_delete=False)) if user.is_overall else models.CommitteeReportResolutionModel.objects.all().filter(Q(author=user), Q(is_delete=False))
+    announcement = models.AnnouncementModel.objects.all() if user.is_overall else models.AnnouncementModel.objects.all().filter(Q(author=user))
+    com_rec_res = models.CommentsRecomendationResolutionModel.objects.all()  
+    com_rec_ord = models.CommentsRecomendationOrdinanceModel.objects.all()  
     com_rec_total = int(com_rec_res.count()) + int(com_rec_ord.count()) 
     announcement_display = models.AnnouncementModel.objects.all().filter(Q(visible=True))
 
@@ -313,12 +323,12 @@ def dashboard_page(request, *args, **kwargs):
     signed, unsigned, approved, denied, pending, uncategorized = 0,0,0,0,0,0
 
     for m in model_list:
-        signed += m.objects.all().filter(Q(is_signed=True)).count()
-        unsigned += m.objects.all().filter(Q(is_signed=False)).count()
-        approved += m.objects.all().filter(Q(status='Approved')).count()
-        denied += m.objects.all().filter(Q(status='Denied')).count()
-        pending += m.objects.all().filter(Q(status='Pending')).count()
-        uncategorized += m.objects.all().filter(Q(status='None')).count()
+        signed += m.objects.all().filter(Q(is_signed=True), Q(is_delete=False)).count() if user.is_overall else m.objects.all().filter(Q(is_signed=True), Q(author=user), Q(is_delete=False)).count()
+        unsigned += m.objects.all().filter(Q(is_signed=False), Q(is_delete=False)).count() if user.is_overall else m.objects.all().filter(Q(is_signed=False), Q(author=user), Q(is_delete=False)).count()
+        approved += m.objects.all().filter(Q(status='Approved'), Q(is_delete=False)).count() if user.is_overall else m.objects.all().filter(Q(status='Approved'), Q(author=user), Q(is_delete=False)).count()
+        denied += m.objects.all().filter(Q(status='Denied'), Q(is_delete=False)).count() if user.is_overall else m.objects.all().filter(Q(status='Denied'), Q(author=user), Q(is_delete=False)).count()
+        pending += m.objects.all().filter(Q(status='Pending'), Q(is_delete=False)).count() if user.is_overall else m.objects.all().filter(Q(status='Pending'), Q(author=user), Q(is_delete=False)).count()
+        uncategorized += m.objects.all().filter(Q(status='None'), Q(is_delete=False)).count() if user.is_overall else m.objects.all().filter(Q(status='None'), Q(author=user), Q(is_delete=False)).count()
         
     context = {
         'user': user,
@@ -405,17 +415,24 @@ def search(request, *args, **kwargs):
         """ 
             
         try: 
-            fn = [field for field in [field.name for field in ml._meta.get_fields()] if field not in excluded_fields]  
-            queries = [Q(**{f+"__icontains":search_term}) for f in fn]  
+            fn = [field for field in [field.name for field in ml._meta.get_fields() if not (field.many_to_one or field.one_to_one)] if field not in excluded_fields]   
+            frn = [field for field in [field.name for field in ml._meta.get_fields() if (field.many_to_one or field.one_to_one)] if field not in excluded_fields] 
+ 
+            queries = [Q(**{f+"__icontains":search_term}) for f in fn] + [Q(Q(**{f+"__l_name__icontains":search_term}) | Q(**{f+"__f_name__icontains":search_term})) for f in frn] 
             que = queries.pop() 
         
             for q in queries: 
-                que |= q 
-            
-            query = ml.objects.all().filter(que)   
+                que |= q  
+            field = getattr(ml,'is_delete',False) 
+            if field:
+                query = ml.objects.all().filter(que, Q(is_delete=False)) if user.is_overall else ml.objects.all().filter(Q(que),Q(author=user), Q(is_delete=False)) 
+            else:
+                query = ml.objects.all().filter(que) if user.is_overall else ml.objects.all().filter(Q(que),Q(author=user)) 
+
             if query:
                 queryset.append(query)
-        except FieldError:
+        except FieldError as e:
+            print(e)
             continue
     
     # for a in queryset:
@@ -462,7 +479,7 @@ def search(request, *args, **kwargs):
 def agenda_page(request, *args, **kwargs):
     template_name = "elegislative/agenda/agenda.html" 
     user = get_object_or_404(models.User, email=request.user.email) 
-    agenda = models.AgendaModel.objects.all()
+    agenda = models.AgendaModel.objects.all(Q(is_delete=False)) if user.is_overall else models.AgendaModel.objects.all().filter(Q(author=user), Q(is_delete=False))
     context = {
         'user': user,
         'agenda': agenda,
@@ -479,12 +496,16 @@ def create_agenda_page(request, *args, **kwargs):
     template_name = "elegislative/agenda/create_new_agenda.html"
     user = get_object_or_404(models.User, email=request.user.email)  
 
+    if user.is_view_mode:
+        raise Http404()
+
     if request.method == 'GET':
         form = forms.AgendaForm(request.GET or None)
     elif request.method == 'POST':
         form = forms.AgendaForm(request.POST or None) 
         if form.is_valid():
             instance = form.save(commit=False)
+            instance.author = user
             instance.save()
             add_notification(request,'elegislative:agenda_page', f"Agenda ({instance.no}) has been created!", settings.NOTIFICATION_TAGS[1][0])
             return HttpResponseRedirect(reverse_lazy("elegislative:agenda_page")) 
@@ -503,18 +524,25 @@ def create_agenda_page(request, *args, **kwargs):
 def edit_agenda_page(request, *args, **kwargs): 
     template_name = "elegislative/agenda/edit_agenda.html"      
     user = get_object_or_404(models.User, email=request.user.email)
-    agenda = get_object_or_404(models.AgendaModel, id=kwargs['id'])
+    # kwargs['id] is from url
+    agenda = get_object_or_404(models.AgendaModel, Q(is_delete=False), id=kwargs['id']) if user.is_overall else get_object_or_404(models.AgendaModel,Q(author=user), Q(is_delete=False), id=kwargs['id'])
+
+    if user.is_view_mode:
+        raise Http404()
 
     if request.method == 'GET':
         form = forms.EditAgendaForm(request.GET or None, instance=agenda)
     elif request.method == 'POST':
         form = forms.EditAgendaForm(request.POST or None, request.FILES, instance=agenda)
         if form.is_valid():
-            form.save()
+            instance = form.save(commit=False)
+            instance.author = user
+            instance.save()
             return HttpResponseRedirect(reverse_lazy("elegislative:agenda_page"))
     context = {
         'user': user,
         'form':form,
+        'agenda': agenda,
         'notifications':kwargs['notifications'],
     }
     return render(request, template_name, context)
@@ -526,17 +554,24 @@ def delete_agenda_page(request, id):
     data = dict()
     template_name = "elegislative/agenda/delete_agenda.html"    
     user = get_object_or_404(models.User, email=request.user.email)
-    agenda = get_object_or_404(models.AgendaModel, id=id)
+    # ~ not
+    agenda = get_object_or_404(models.AgendaModel, Q(is_delete=False), id=id) if user.is_overall else get_object_or_404(models.AgendaModel,Q(author=user),Q(is_delete=False), id=id)
+
+    if user.is_view_mode:
+        raise Http404()
 
     if request.is_ajax():
         if request.method == 'GET':
             context = {
                 'agenda': agenda,
             }
+        
             data['html_form'] = render_to_string(template_name, context, request)
         elif request.method == 'POST':            
             data['form_is_valid'] = True
-            agenda.delete() 
+            agenda.is_delete = True
+            agenda.save()
+            # agenda.delete() 
         return JsonResponse(data)
     else:
         raise Http404()
@@ -547,14 +582,12 @@ def delete_agenda_page(request, id):
 def print_agenda_page(request, id):
     template_name = "elegislative/agenda/print_agenda.html"  
     user = get_object_or_404(models.User, email=request.user.email)
-    agenda = get_object_or_404(models.AgendaModel, id=id)
+    agenda = get_object_or_404(models.AgendaModel, Q(is_delete=False), id=id) if user.is_overall else get_object_or_404(models.AgendaModel,Q(author=user), Q(is_delete=False), id=id)
     context = {
         'user': user,
         'agenda':agenda,
     }
     return render(request, template_name, context)
-
-
 
 """
 [END] -> CRUD, Manage Agenda Features
@@ -573,8 +606,8 @@ def print_agenda_page(request, id):
 def comments_and_recommendation(request, *args, **kwargs): 
     template_name = "elegislative/comments_recommendation/comments_recommendation.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    resolutions = models.ResolutionModel.objects.all().filter(Q(is_public=True)) 
-    ordinances = models.OrdinanceModel.objects.all().filter(Q(is_public=True)) 
+    resolutions = models.ResolutionModel.objects.all().filter(Q(Q(is_public=True) & Q(is_signed=False)), Q(is_delete=False)) 
+    ordinances = models.OrdinanceModel.objects.all().filter(Q(Q(is_public=True) & Q(is_signed=False)), Q(is_delete=False),) 
 
     # combine = list(resolutions) + list(ordinances)
 
@@ -597,7 +630,7 @@ def comments_and_recommendation(request, *args, **kwargs):
 def posting_resolution(request, *args, **kwargs):
     template_name = "elegislative/comments_recommendation/posting_resolution.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    resolution = get_object_or_404(models.ResolutionModel, id=kwargs['id'])
+    resolution = get_object_or_404(models.ResolutionModel, Q(is_delete=False), Q(is_signed=False), id=kwargs['id'])
     com_rec = models.CommentsRecomendationResolutionModel.objects.all().filter(resolution_comments_recommendation_fk=resolution)
     context = {
         'user': user, 
@@ -672,7 +705,7 @@ def posting_resolution_delete_comment(request, id, rid):
 def posting_ordinance(request, *args, **kwargs):
     template_name = "elegislative/comments_recommendation/posting_ordinance.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    ordinance = get_object_or_404(models.OrdinanceModel, id=kwargs['id'])
+    ordinance = get_object_or_404(models.OrdinanceModel, Q(is_delete=False), Q(is_signed=False), id=kwargs['id'])
     com_rec = models.CommentsRecomendationOrdinanceModel.objects.all().filter(ordinance_comments_recomendation_fk=ordinance)
     context = {
         'user': user, 
@@ -757,8 +790,8 @@ def committee_reports(request, *args, **kwargs):
     c_resolutions = models.CommitteeReportResolutionModel.objects.all()
     c_ordinances = models.CommitteeReportOrdinanceModel.objects.all()
     # result_list = list(chain(c_resolutions, c_ordinances)) 
-    resolution = models.CommitteeReportResolutionModel.objects.all()
-    ordinance = models.CommitteeReportOrdinanceModel.objects.all()
+    resolution = models.CommitteeReportResolutionModel.objects.all().filter(Q(is_delete=False)) if user.is_overall else models.CommitteeReportResolutionModel.objects.all().filter(Q(author=user), Q(is_delete=False))
+    ordinance = models.CommitteeReportOrdinanceModel.objects.all().filter(Q(is_delete=False)) if user.is_overall else models.CommitteeReportOrdinanceModel.objects.all().filter(Q(author=user), Q(is_delete=False))
 
     context = {
         'user': user,
@@ -776,7 +809,10 @@ def committee_reports(request, *args, **kwargs):
 def create_committee_resolution_reports(request, *args, **kwargs):
     template_name = "elegislative/committee_reports/create_committee_resolution_reports.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    resolution = get_object_or_404(models.ResolutionModel, id=kwargs['id'])
+    resolution = get_object_or_404(models.ResolutionModel, Q(is_delete=False), id=kwargs['id']) if user.is_overall else get_object_or_404(models.ResolutionModel, Q(author=user), Q(is_delete=False), id=kwargs['id'])
+
+    if user.is_view_mode:
+        raise Http404()
 
     if request.method == 'GET':
         form = forms.CommitteeReportResolutionForm(request.GET or None)
@@ -785,6 +821,7 @@ def create_committee_resolution_reports(request, *args, **kwargs):
         if form.is_valid():
             instance = form.save(commit=False)
             instance.resolution_committee_report_fk = resolution
+            instance.author = user
             instance.save()
             add_notification(request,'elegislative:committee_reports', f"Com. Rep. Res ({instance.no}) has been created!", settings.NOTIFICATION_TAGS[6][0])
             return HttpResponseRedirect(reverse_lazy("elegislative:committee_reports")) 
@@ -804,14 +841,19 @@ def create_committee_resolution_reports(request, *args, **kwargs):
 def edit_committee_resolution_reports(request, *args, **kwargs):
     template_name = "elegislative/committee_reports/edit_committee_resolution_reports.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    committee_report = get_object_or_404(models.CommitteeReportResolutionModel, id=kwargs['id'])
+    committee_report = get_object_or_404(models.CommitteeReportResolutionModel, Q(is_delete=False), id=kwargs['id']) if user.is_overall else get_object_or_404(models.CommitteeReportResolutionModel, Q(author=user), Q(is_delete=False), id=kwargs['id'])
+
+    if user.is_view_mode:
+        raise Http404()
 
     if request.method == 'GET':
         form = forms.EditCommitteeReportResolutionForm(request.GET or None, instance=committee_report)
     elif request.method == 'POST':
         form = forms.EditCommitteeReportResolutionForm(request.POST or None, request.FILES, instance=committee_report) 
         if form.is_valid(): 
-            form.save()
+            instance = form.save(commit=False)
+            instance.author = user
+            instance.save()
             return HttpResponseRedirect(reverse_lazy("elegislative:committee_reports")) 
     context = {
         'user': user,
@@ -829,7 +871,11 @@ def delete_committee_resolution_reports(request, id):
     data = dict()
     template_name = "elegislative/committee_reports/delete_committee_resolution_reports.html"
     user = get_object_or_404(models.User, email=request.user.email)
-    committee_report = get_object_or_404(models.CommitteeReportResolutionModel, id=id)
+    committee_report = get_object_or_404(models.CommitteeReportResolutionModel, Q(is_delete=False), id=id) if user.is_overall else get_object_or_404(models.CommitteeReportResolutionModel, Q(author=user), Q(is_delete=False), id=id) 
+    
+    if user.is_view_mode:
+        raise Http404()
+
     if request.is_ajax():
         if request.method == 'GET':
             context = {
@@ -838,7 +884,9 @@ def delete_committee_resolution_reports(request, id):
             data['html_form'] = render_to_string(template_name, context, request)
         elif request.method == 'POST':
             data['form_is_valid'] = True
-            committee_report.delete() 
+            committee_report.is_delete = True
+            committee_report.save()
+            # committee_report.delete() 
         return JsonResponse(data)
     else:
         raise Http404
@@ -849,7 +897,7 @@ def delete_committee_resolution_reports(request, id):
 def print_committee_resolution_reports(request, id):
     template_name = "elegislative/committee_reports/print_committee_resolution_reports.html"
     user = get_object_or_404(models.User, email=request.user.email)
-    committee_report = get_object_or_404(models.CommitteeReportResolutionModel, id=id)
+    committee_report = get_object_or_404(models.CommitteeReportResolutionModel, Q(is_delete=False), id=id) if user.is_overall else get_object_or_404(models.CommitteeReportResolutionModel, Q(author=user), Q(is_delete=False), id=id)
     
     context = {
         'user': user,
@@ -865,7 +913,10 @@ def print_committee_resolution_reports(request, id):
 def create_committee_ordinance_reports(request, *args, **kwargs):
     template_name = "elegislative/committee_reports/create_committee_ordinance_reports.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    ordinance = get_object_or_404(models.OrdinanceModel, id=kwargs['id'])
+    ordinance = get_object_or_404(models.OrdinanceModel, Q(is_delete=False), id=kwargs['id']) if user.is_overall else get_object_or_404(models.OrdinanceModel, Q(author=user), Q(is_delete=False), id=kwargs['id'])
+
+    if user.is_view_mode:
+        raise Http404()
 
     if request.method == 'GET':
         form = forms.CommitteeReportOrdinanceForm(request.GET or None)
@@ -874,6 +925,7 @@ def create_committee_ordinance_reports(request, *args, **kwargs):
         if form.is_valid():
             instance = form.save(commit=False)
             instance.ordinance_committee_report_fk = ordinance
+            instance.author = user
             instance.save()
             add_notification(request,'elegislative:committee_reports', f"Com. Rep. Ord ({instance.no}) has been created!", settings.NOTIFICATION_TAGS[6][0])
             return HttpResponseRedirect(reverse_lazy("elegislative:committee_reports")) 
@@ -894,14 +946,19 @@ def create_committee_ordinance_reports(request, *args, **kwargs):
 def edit_committee_ordinance_reports(request, *args, **kwargs):
     template_name = "elegislative/committee_reports/edit_committee_ordinance_reports.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    committee_report = get_object_or_404(models.CommitteeReportOrdinanceModel, id=kwargs['id']) 
+    committee_report = get_object_or_404(models.CommitteeReportOrdinanceModel, Q(is_delete=False), id=kwargs['id']) if user.is_overall else get_object_or_404(models.CommitteeReportOrdinanceModel, Q(author=user), Q(is_delete=False), id=kwargs['id'])
+
+    if user.is_view_mode:
+        raise Http404()
 
     if request.method == 'GET':
         form = forms.EditCommitteeReportResolutionForm(request.GET or None, instance=committee_report)
     elif request.method == 'POST':
         form = forms.EditCommitteeReportResolutionForm(request.POST or None, request.FILES, instance=committee_report) 
         if form.is_valid(): 
-            form.save()
+            instance = form.save(commit=False)
+            instance.author = user
+            instance.save()
             return HttpResponseRedirect(reverse_lazy("elegislative:committee_reports")) 
     context = {
         'user': user,
@@ -919,7 +976,10 @@ def delete_committee_ordinance_reports(request, id):
     data = dict()
     template_name = "elegislative/committee_reports/delete_committee_ordinance_reports.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    committee_report = get_object_or_404(models.CommitteeReportOrdinanceModel, id=id) 
+    committee_report = get_object_or_404(models.CommitteeReportOrdinanceModel, Q(is_delete=False), id=id) if user.is_overall else get_object_or_404(models.CommitteeReportOrdinanceModel, Q(author=user), Q(is_delete=False), id=id)
+
+    if user.is_view_mode:
+        raise Http404()
 
     if request.is_ajax():
         if request.method == 'GET':
@@ -929,7 +989,9 @@ def delete_committee_ordinance_reports(request, id):
             data['html_form'] = render_to_string(template_name, context, request)
         elif request.method == 'POST':
             data['form_is_valid'] = True
-            committee_report.delete()  
+            committee_report.is_delete = True
+            committee_report.save()
+            # committee_report.delete()  
         return JsonResponse(data)
     else:
         raise Http404()
@@ -940,7 +1002,7 @@ def delete_committee_ordinance_reports(request, id):
 def print_committee_ordinance_reports(request, id):
     template_name = "elegislative/committee_reports/print_committee_ordinance_reports.html"
     user = get_object_or_404(models.User, email=request.user.email)
-    committee_report = get_object_or_404(models.CommitteeReportOrdinanceModel, id=id)
+    committee_report = get_object_or_404(models.CommitteeReportOrdinanceModel, Q(is_delete=False), id=id) if user.is_overall else get_object_or_404(models.CommitteeReportOrdinanceModel, Q(author=user), Q(is_delete=False), id=id)
 
     context = {
         'user': user,
@@ -962,7 +1024,7 @@ def print_committee_ordinance_reports(request, id):
 def resolution(request, *args, **kwargs):
     template_name = "elegislative/resolution/resolution.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    resolutions = models.ResolutionModel.objects.all()
+    resolutions = models.ResolutionModel.objects.all().filter(Q(is_delete=False)) if user.is_overall else models.ResolutionModel.objects.all().filter(Q(author=user), Q(is_delete=False))
     context = {
         'user': user,
         'resolutions': resolutions,
@@ -977,7 +1039,10 @@ def resolution(request, *args, **kwargs):
 def create_resolutions(request, *args, **kwargs):
     template_name = "elegislative/resolution/create_resolution.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    agenda = get_object_or_404(models.AgendaModel, id=kwargs['id'])
+    agenda = get_object_or_404(models.AgendaModel, Q(is_delete=False), id=kwargs['id']) if user.is_overall else get_object_or_404(models.AgendaModel, Q(author=user), Q(is_delete=False), id=kwargs['id'])
+
+    if user.is_view_mode:
+        raise Http404()
 
     if request.method == 'GET':
         form = forms.ResolutionForm(request.GET or None)
@@ -986,6 +1051,7 @@ def create_resolutions(request, *args, **kwargs):
         if form.is_valid():
             instance = form.save(commit=False)
             instance.agenda_fk = agenda
+            instance.author = user
             instance.save()
             add_notification(request,'elegislative:resolution', f"Resolution ({instance.no}) has been created!", settings.NOTIFICATION_TAGS[2][0])
             return HttpResponseRedirect(reverse_lazy("elegislative:resolution")) 
@@ -1005,14 +1071,19 @@ def create_resolutions(request, *args, **kwargs):
 def edit_resolution(request, *args, **kwargs):
     template_name = "elegislative/resolution/edit_resolution.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    resolution = get_object_or_404(models.ResolutionModel, id=kwargs['id'])
+    resolution = get_object_or_404(models.ResolutionModel, Q(is_delete=False), id=kwargs['id']) if user.is_overall else get_object_or_404(models.ResolutionModel, Q(author=user), Q(is_delete=False), id=kwargs['id'])
+
+    if user.is_view_mode:
+        raise Http404()
 
     if request.method == 'GET':
         form = forms.EditResolutionForm(request.GET or None, instance=resolution)
     elif request.method == 'POST':
         form = forms.EditResolutionForm(request.POST or None, request.FILES, instance=resolution) 
         if form.is_valid(): 
-            form.save()
+            instance = form.save(commit=False)
+            instance.author = user
+            instance.save()
             return HttpResponseRedirect(reverse_lazy("elegislative:resolution")) 
 
     context = {
@@ -1030,7 +1101,10 @@ def delete_resolution(request, id):
     data = dict()
     template_name = "elegislative/resolution/delete_resolution.html"    
     user = get_object_or_404(models.User, email=request.user.email)
-    resolution = get_object_or_404(models.ResolutionModel, id=id)
+    resolution = get_object_or_404(models.ResolutionModel, Q(is_delete=False), id=id) if user.is_overall else get_object_or_404(models.ResolutionModel, Q(author=user), Q(is_delete=False), id=id) 
+
+    if user.is_view_mode:
+        raise Http404()
 
     if request.is_ajax():
         if request.method == 'GET': 
@@ -1040,7 +1114,9 @@ def delete_resolution(request, id):
             data['html_form'] = render_to_string(template_name, context, request)
         elif request.method == 'POST':            
             data['form_is_valid'] = True
-            resolution.delete() 
+            resolution.is_delete = True
+            resolution.save()
+            # resolution.delete() 
         return JsonResponse(data)
     else: 
         raise Http404()
@@ -1051,7 +1127,7 @@ def delete_resolution(request, id):
 def print_resolution(request, id):
     template_name = "elegislative/resolution/print_resolution.html"  
     user = get_object_or_404(models.User, email=request.user.email)
-    resolution = get_object_or_404(models.ResolutionModel, id=id)
+    resolution = get_object_or_404(models.ResolutionModel, Q(is_delete=False), id=id) if user.is_overall else get_object_or_404(models.ResolutionModel,Q(is_delete=False), Q(author=user), id=id)
     context = {
         'user': user,
         'resolution':resolution,
@@ -1073,7 +1149,7 @@ def print_resolution(request, id):
 def ordinance(request, *args, **kwargs):
     template_name = "elegislative/ordinance/ordinance.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    ordinance = models.OrdinanceModel.objects.all()
+    ordinance = models.OrdinanceModel.objects.all().filter(Q(is_delete=False)) if user.is_overall else models.OrdinanceModel.objects.all().filter(Q(author=user),Q(is_delete=False))
     context = {
         'user': user,
         'ordinance': ordinance,
@@ -1088,7 +1164,11 @@ def ordinance(request, *args, **kwargs):
 def create_ordinance(request, *args, **kwargs):
     template_name = "elegislative/ordinance/create_ordinance.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    agenda = get_object_or_404(models.AgendaModel, id=kwargs['id'])
+    agenda = get_object_or_404(models.AgendaModel, Q(is_delete=False), id=kwargs['id']) if user.is_overall else get_object_or_404(models.AgendaModel, Q(author=user), Q(is_delete=False), id=kwargs['id'])
+
+    if user.is_view_mode:
+        raise Http404()
+
     if request.method == 'GET':
         form = forms.OrdinanceForm(request.GET or None)
     elif request.method == 'POST':
@@ -1096,6 +1176,7 @@ def create_ordinance(request, *args, **kwargs):
         if form.is_valid():
             instance = form.save(commit=False)
             instance.agenda_fk = agenda
+            instance.author = user
             instance.save()
             add_notification(request,'elegislative:ordinance_page', f"Ordinance ({instance.no}) has been created!", settings.NOTIFICATION_TAGS[3][0])
             return HttpResponseRedirect(reverse_lazy("elegislative:ordinance_page")) 
@@ -1115,14 +1196,19 @@ def create_ordinance(request, *args, **kwargs):
 def edit_ordinance(request, *args, **kwargs):
     template_name = "elegislative/ordinance/edit_ordinance.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    ordinance = get_object_or_404(models.OrdinanceModel, id=kwargs['id'])
+    ordinance = get_object_or_404(models.OrdinanceModel, Q(is_delete=False), id=kwargs['id']) if user.is_overall else get_object_or_404(models.OrdinanceModel, Q(author=user), Q(is_delete=False), id=kwargs['id'])
 
+    if user.is_view_mode:
+        raise Http404()
+        
     if request.method == 'GET':
         form = forms.EditOrdinanceForm(request.GET or None, instance=ordinance)
     elif request.method == 'POST':
         form = forms.EditOrdinanceForm(request.POST or None, request.FILES, instance=ordinance) 
         if form.is_valid(): 
-            form.save()
+            instance = form.save(commit=False)
+            instance.author = user
+            instance.save()
             return HttpResponseRedirect(reverse_lazy("elegislative:ordinance_page")) 
 
     context = {
@@ -1140,7 +1226,10 @@ def delete_ordinance(request, id):
     data = dict()
     template_name = "elegislative/ordinance/delete_ordinance.html"    
     user = get_object_or_404(models.User, email=request.user.email)
-    ordinance = get_object_or_404(models.OrdinanceModel, id=id)
+    ordinance = get_object_or_404(models.OrdinanceModel, Q(is_delete=False), id=id) if user.is_overall else get_object_or_404(models.OrdinanceModel, Q(author=user), Q(is_delete=False), id=id)
+
+    if user.is_view_mode:
+        raise Http404()
 
     if request.is_ajax():
         if request.method == 'GET': 
@@ -1150,7 +1239,9 @@ def delete_ordinance(request, id):
             data['html_form'] = render_to_string(template_name, context, request)
         elif request.method == 'POST':            
             data['form_is_valid'] = True
-            ordinance.delete() 
+            ordinance.is_delete = True
+            ordinance.save()
+            # ordinance.delete() 
         return JsonResponse(data)
     else: 
         raise Http404()
@@ -1161,7 +1252,7 @@ def delete_ordinance(request, id):
 def print_ordinance(request, id):
     template_name = "elegislative/ordinance/print_ordinance.html"  
     user = get_object_or_404(models.User, email=request.user.email)
-    ordinance = get_object_or_404(models.OrdinanceModel, id=id)
+    ordinance = get_object_or_404(models.OrdinanceModel, Q(is_delete=False), id=id) if user.is_overall else get_object_or_404(models.OrdinanceModel, Q(author=user), Q(is_delete=False), id=id)
     context = {
         'user': user,
         'ordinance':ordinance,
@@ -1186,7 +1277,7 @@ def date_formatter(date_parse, date_format, date):
     
     return df
 
-def report_generator(database_name, date_from, date_to, keyword, signature):
+def report_generator(database_name, date_from, date_to, keyword, signature, user):
     
     query, cols = False, False
 
@@ -1199,14 +1290,16 @@ def report_generator(database_name, date_from, date_to, keyword, signature):
                         Q(Q(id__icontains=keyword) | 
                         Q(no__icontains=keyword) | 
                         Q(title__icontains=keyword) | 
-                        Q(author__icontains=keyword) |
+                        Q(author__l_name__icontains=keyword) |
+                        Q(author__f_name__icontains=keyword) |
                         Q(date_filed__icontains=keyword)))
             if signature == 'Signed Only':
                 filters = Q(Q(date_filed__range=(date_from, date_to)) & 
                             Q(Q(id__icontains=keyword) | 
                             Q(no__icontains=keyword) | 
                             Q(title__icontains=keyword) | 
-                            Q(author__icontains=keyword) |
+                            Q(author__l_name__icontains=keyword) |
+                            Q(author__f_name__icontains=keyword) |
                             Q(date_filed__icontains=keyword)) &
                             Q(is_signed=True)
                             )
@@ -1215,41 +1308,44 @@ def report_generator(database_name, date_from, date_to, keyword, signature):
                             Q(Q(id__icontains=keyword) | 
                             Q(no__icontains=keyword) | 
                             Q(title__icontains=keyword) | 
-                            Q(author__icontains=keyword) |
+                            Q(author__l_name__icontains=keyword) |
+                            Q(author__f_name__icontains=keyword) |
                             Q(date_filed__icontains=keyword)) &
                             Q(is_signed=False)
                             )
-            query = models.AgendaModel.objects.all().filter(filters).order_by('-id') 
+            query = models.AgendaModel.objects.all().filter(filters, Q(is_delete=False)).order_by('-id') if user.is_overall else models.AgendaModel.objects.all().filter(filters,Q(author=user),Q(is_delete=False)).order_by('-id') 
               
         elif date_from and date_to:
             date_from = date_formatter('%m/%d/%Y','%Y-%m-%d %H:%M:%S.%f',date_from)
             date_to = date_formatter('%m/%d/%Y','%Y-%m-%d %H:%M:%S.%f',date_to)  
-            query = models.AgendaModel.objects.all().filter(Q(date_filed__range=(date_from, date_to))).order_by('-id')                    
+            query = models.AgendaModel.objects.all().filter(Q(date_filed__range=(date_from, date_to)), Q(is_delete=False)).order_by('-id') if user.is_overall else models.AgendaModel.objects.all().filter(Q(date_filed__range=(date_from, date_to)), Q(author=user), Q(is_delete=False)).order_by('-id')                     
         
         elif keyword:
             filters = Q(
                 Q(id__icontains=keyword) | 
                 Q(no__icontains=keyword) | 
                 Q(title__icontains=keyword) | 
-                Q(author__icontains=keyword) |
+                Q(author__l_name__icontains=keyword) |
+                Q(author__f_name__icontains=keyword) |
                 Q(date_filed__icontains=keyword)
                 )
-            query = models.AgendaModel.objects.all().filter(filters).order_by('-id')
+            query = models.AgendaModel.objects.all().filter(filters, Q(is_delete=False)).order_by('-id') if user.is_overall else models.AgendaModel.objects.all().filter(filters, Q(author=user), Q(is_delete=False)).order_by('-id')
  
         elif signature: 
             if signature == 'Signed Only': 
-                query = models.AgendaModel.objects.all().filter(Q(is_signed=True)).order_by('-id')    
+                query = models.AgendaModel.objects.all().filter(Q(is_signed=True), Q(is_delete=False)).order_by('-id') if user.is_overall else models.AgendaModel.objects.all().filter(Q(is_signed=True), Q(author=user), Q(is_delete=False)).order_by('-id')    
             elif signature == 'Unsigned Only':      
-                query = models.AgendaModel.objects.all().filter(Q(is_signed=False)).order_by('-id')    
+                query = models.AgendaModel.objects.all().filter(Q(is_signed=False), Q(is_delete=False)).order_by('-id') if user.is_overall else models.AgendaModel.objects.all().filter(Q(is_signed=False), Q(author=user), Q(is_delete=False)).order_by('-id')     
             else:
-                query = models.AgendaModel.objects.all() 
+                query = models.AgendaModel.objects.all().filter(Q(is_delete=False)) if user.is_overall else models.AgendaModel.objects.all().filter(Q(author=user), Q(is_delete=False))
         else:
-            query = models.AgendaModel.objects.all() 
+            query = models.AgendaModel.objects.all().filter(Q(is_delete=False)) if user.is_overall else models.AgendaModel.objects.all().filter(Q(author=user), Q(is_delete=False))
 
         cols = admin.AgendaAdmin.list_display
-        cols = list(cols)
+        cols = list(cols) 
         cols.remove('content')
         cols.remove('hard_copy')
+        cols.remove('is_delete')
         cols = [c.replace("_"," ").upper() for c in cols]      
                 
     elif database_name == 'Ordinance':
@@ -1260,14 +1356,16 @@ def report_generator(database_name, date_from, date_to, keyword, signature):
                         Q(Q(id__icontains=keyword) | 
                         Q(no__icontains=keyword) | 
                         Q(title__icontains=keyword) | 
-                        Q(author__icontains=keyword) |
+                        Q(author__l_name__icontains=keyword) |
+                        Q(author__f_name__icontains=keyword) |
                         Q(date_filed__icontains=keyword)))
             if signature == 'Signed Only':
                 filters = Q(Q(date_filed__range=(date_from, date_to)) & 
                             Q(Q(id__icontains=keyword) | 
                             Q(no__icontains=keyword) | 
                             Q(title__icontains=keyword) | 
-                            Q(author__icontains=keyword) |
+                            Q(author__l_name__icontains=keyword) |
+                            Q(author__f_name__icontains=keyword) |
                             Q(date_filed__icontains=keyword)) &
                             Q(is_signed=True)
                             )
@@ -1276,43 +1374,46 @@ def report_generator(database_name, date_from, date_to, keyword, signature):
                             Q(Q(id__icontains=keyword) | 
                             Q(no__icontains=keyword) | 
                             Q(title__icontains=keyword) | 
-                            Q(author__icontains=keyword) |
+                            Q(author__l_name__icontains=keyword) |
+                            Q(author__f_name__icontains=keyword) |
                             Q(date_filed__icontains=keyword)) &
                             Q(is_signed=False)
                             )
-            query = models.OrdinanceModel.objects.all().filter(filters).order_by('-id') 
+            query = models.OrdinanceModel.objects.all().filter(filters, Q(is_delete=False)).order_by('-id') if user.is_overall else models.OrdinanceModel.objects.all().filter(filters, Q(author=user), Q(is_delete=False)).order_by('-id')
               
         elif date_from and date_to:
             date_from = date_formatter('%m/%d/%Y','%Y-%m-%d %H:%M:%S.%f',date_from)
             date_to = date_formatter('%m/%d/%Y','%Y-%m-%d %H:%M:%S.%f',date_to)  
-            query = models.OrdinanceModel.objects.all().filter(Q(date_filed__range=(date_from, date_to))).order_by('-id')                    
+            query = models.OrdinanceModel.objects.all().filter(Q(date_filed__range=(date_from, date_to)), Q(is_delete=False)).order_by('-id') if user.is_overall else models.OrdinanceModel.objects.all().filter(Q(date_filed__range=(date_from, date_to)), Q(author=user), Q(is_delete=False)).order_by('-id')               
         
         elif keyword:
             filters = Q(
                 Q(id__icontains=keyword) | 
                 Q(no__icontains=keyword) | 
                 Q(title__icontains=keyword) | 
-                Q(author__icontains=keyword) |
+                Q(author__l_name__icontains=keyword) |
+                Q(author__f_name__icontains=keyword) |
                 Q(date_filed__icontains=keyword)
                 )
-            query = models.OrdinanceModel.objects.all().filter(filters).order_by('-id')
+            query = models.OrdinanceModel.objects.all().filter(filters, Q(is_delete=False)).order_by('-id') if user.is_overall else models.OrdinanceModel.objects.all().filter(filters, Q(author=user), Q(is_delete=False)).order_by('-id')
  
         elif signature: 
             if signature == 'Signed Only': 
-                query = models.OrdinanceModel.objects.all().filter(Q(is_signed=True)).order_by('-id')    
+                query = models.OrdinanceModel.objects.all().filter(Q(is_signed=True), Q(is_delete=False)).order_by('-id') if user.is_overall else models.OrdinanceModel.objects.all().filter(Q(is_signed=True), Q(author=user), Q(is_delete=False)).order_by('-id')   
             elif signature == 'Unsigned Only':      
-                query = models.OrdinanceModel.objects.all().filter(Q(is_signed=False)).order_by('-id')    
+                query = models.OrdinanceModel.objects.all().filter(Q(is_signed=False), Q(is_delete=False)).order_by('-id') if user.is_overall else models.OrdinanceModel.objects.all().filter(Q(is_signed=False), Q(author=user), Q(is_delete=False)).order_by('-id')   
             else:
-                query = models.OrdinanceModel.objects.all()       
+                query = models.OrdinanceModel.objects.all().filter(Q(is_delete=False)) if user.is_overall else models.OrdinanceModel.objects.all().filter(Q(author=user), Q(is_delete=False))       
         
         else:
-            query = models.OrdinanceModel.objects.all() 
+            query = models.OrdinanceModel.objects.all().filter(Q(is_delete=False)) if user.is_overall else models.OrdinanceModel.objects.all().filter(Q(author=user), Q(is_delete=False)) 
         cols = admin.OrdinanceAdmin.list_display
         cols = list(cols)
         cols.remove('content')
         cols.remove('hard_copy')
         cols.remove('agenda_fk')
         cols.remove('is_public')
+        cols.remove('is_delete')
         cols = [c.replace("_"," ").upper() for c in cols]  
     
     elif database_name == 'Resolution':
@@ -1323,14 +1424,16 @@ def report_generator(database_name, date_from, date_to, keyword, signature):
                         Q(Q(id__icontains=keyword) | 
                         Q(no__icontains=keyword) | 
                         Q(title__icontains=keyword) | 
-                        Q(author__icontains=keyword) |
+                        Q(author__l_name__icontains=keyword) |
+                        Q(author__f_name__icontains=keyword) |
                         Q(date_filed__icontains=keyword)))
             if signature == 'Signed Only':
                 filters = Q(Q(date_filed__range=(date_from, date_to)) & 
                             Q(Q(id__icontains=keyword) | 
                             Q(no__icontains=keyword) | 
                             Q(title__icontains=keyword) | 
-                            Q(author__icontains=keyword) |
+                            Q(author__l_name__icontains=keyword) |
+                            Q(author__f_name__icontains=keyword) |
                             Q(date_filed__icontains=keyword)) &
                             Q(is_signed=True)
                             )
@@ -1339,43 +1442,46 @@ def report_generator(database_name, date_from, date_to, keyword, signature):
                             Q(Q(id__icontains=keyword) | 
                             Q(no__icontains=keyword) | 
                             Q(title__icontains=keyword) | 
-                            Q(author__icontains=keyword) |
+                            Q(author__l_name__icontains=keyword) |
+                            Q(author__f_name__icontains=keyword) |
                             Q(date_filed__icontains=keyword)) &
                             Q(is_signed=False)
                             )
-            query = models.ResolutionModel.objects.all().filter(filters).order_by('-id') 
+            query = models.ResolutionModel.objects.all().filter(filters, Q(is_delete=False)).order_by('-id') if user.is_overall else models.ResolutionModel.objects.all().filter(filters, Q(author=user), Q(is_delete=False)).order_by('-id') 
               
         elif date_from and date_to:
             date_from = date_formatter('%m/%d/%Y','%Y-%m-%d %H:%M:%S.%f',date_from)
             date_to = date_formatter('%m/%d/%Y','%Y-%m-%d %H:%M:%S.%f',date_to)  
-            query = models.ResolutionModel.objects.all().filter(Q(date_filed__range=(date_from, date_to))).order_by('-id')                    
+            query = models.ResolutionModel.objects.all().filter(Q(date_filed__range=(date_from, date_to)), Q(is_delete=False)).order_by('-id') if user.is_overall else models.ResolutionModel.objects.all().filter(Q(date_filed__range=(date_from, date_to)), Q(author=user), Q(is_delete=False)).order_by('-id')                   
         
         elif keyword:
             filters = Q(
                 Q(id__icontains=keyword) | 
                 Q(no__icontains=keyword) | 
                 Q(title__icontains=keyword) | 
-                Q(author__icontains=keyword) |
+                Q(author__l_name__icontains=keyword) |
+                Q(author__f_name__icontains=keyword) |
                 Q(date_filed__icontains=keyword)
                 )
-            query = models.ResolutionModel.objects.all().filter(filters).order_by('-id')
+            query = models.ResolutionModel.objects.all().filter(filters, Q(is_delete=False)).order_by('-id') if user.is_overall else models.ResolutionModel.objects.all().filter(filters, Q(author=user), Q(is_delete=False)).order_by('-id')
  
         elif signature: 
             if signature == 'Signed Only': 
-                query = models.ResolutionModel.objects.all().filter(Q(is_signed=True)).order_by('-id')    
+                query = models.ResolutionModel.objects.all().filter(Q(is_signed=True), Q(is_delete=False)).order_by('-id') if user.is_overall else models.ResolutionModel.objects.all().filter(Q(is_signed=True), Q(author=user), Q(is_delete=False)).order_by('-id') 
             elif signature == 'Unsigned Only':      
-                query = models.ResolutionModel.objects.all().filter(Q(is_signed=False)).order_by('-id')    
+                query = models.ResolutionModel.objects.all().filter(Q(is_signed=False), Q(is_delete=False)).order_by('-id') if user.is_overall else models.ResolutionModel.objects.all().filter(Q(is_signed=False), Q(author=user), Q(is_delete=False)).order_by('-id')   
             else:
-                query = models.ResolutionModel.objects.all()       
+                query = models.ResolutionModel.objects.all().filter(Q(is_delete=False)) if user.is_overall else  models.ResolutionModel.objects.all().filter(Q(author=user),Q(is_delete=False))      
         
         else:
-            query = models.ResolutionModel.objects.all() 
+            query = models.ResolutionModel.objects.all().filter(Q(is_delete=False)) if user.is_overall else  models.ResolutionModel.objects.all().filter(Q(author=user), Q(is_delete=False))    
         cols = admin.ResolutionAdmin.list_display
         cols = list(cols)
         cols.remove('content')
         cols.remove('hard_copy')
         cols.remove('agenda_fk')
-        cols.remove('is_public')
+        cols.remove('is_public') 
+        cols.remove('is_delete')
         cols = [c.replace("_"," ").upper() for c in cols]  
      
     elif database_name == 'Committee Reports (Resolution)':
@@ -1386,14 +1492,16 @@ def report_generator(database_name, date_from, date_to, keyword, signature):
                         Q(Q(id__icontains=keyword) | 
                         Q(no__icontains=keyword) | 
                         Q(title__icontains=keyword) | 
-                        Q(author__icontains=keyword) |
+                        Q(author__l_name__icontains=keyword) |
+                        Q(author__f_name__icontains=keyword) |
                         Q(date_filed__icontains=keyword)))
             if signature == 'Signed Only':
                 filters = Q(Q(date_filed__range=(date_from, date_to)) & 
                             Q(Q(id__icontains=keyword) | 
                             Q(no__icontains=keyword) | 
                             Q(title__icontains=keyword) | 
-                            Q(author__icontains=keyword) |
+                            Q(author__l_name__icontains=keyword) |
+                            Q(author__f_name__icontains=keyword) |
                             Q(date_filed__icontains=keyword)) &
                             Q(is_signed=True)
                             )
@@ -1402,42 +1510,45 @@ def report_generator(database_name, date_from, date_to, keyword, signature):
                             Q(Q(id__icontains=keyword) | 
                             Q(no__icontains=keyword) | 
                             Q(title__icontains=keyword) | 
-                            Q(author__icontains=keyword) |
+                            Q(author__l_name__icontains=keyword) |
+                            Q(author__f_name__icontains=keyword) |
                             Q(date_filed__icontains=keyword)) &
                             Q(is_signed=False)
                             )
-            query = models.CommitteeReportResolutionModel.objects.all().filter(filters).order_by('-id') 
+            query = models.CommitteeReportResolutionModel.objects.all().filter(filters, Q(is_delete=False)).order_by('-id') if user.is_overall else models.CommitteeReportResolutionModel.objects.all().filter(filters, Q(author=user), Q(is_delete=False)).order_by('-id')
               
         elif date_from and date_to:
             date_from = date_formatter('%m/%d/%Y','%Y-%m-%d %H:%M:%S.%f',date_from)
             date_to = date_formatter('%m/%d/%Y','%Y-%m-%d %H:%M:%S.%f',date_to)  
-            query = models.CommitteeReportResolutionModel.objects.all().filter(Q(date_filed__range=(date_from, date_to))).order_by('-id')                    
+            query = models.CommitteeReportResolutionModel.objects.all().filter(Q(date_filed__range=(date_from, date_to)), Q(is_delete=False)).order_by('-id') if user.is_overall else models.CommitteeReportResolutionModel.objects.all().filter(Q(date_filed__range=(date_from, date_to)), Q(author=user), Q(is_delete=False)).order_by('-id')                     
         
         elif keyword:
             filters = Q(
                 Q(id__icontains=keyword) | 
                 Q(no__icontains=keyword) | 
                 Q(title__icontains=keyword) | 
-                Q(author__icontains=keyword) |
+                Q(author__l_name__icontains=keyword) |
+                Q(author__f_name__icontains=keyword) |
                 Q(date_filed__icontains=keyword)
                 )
-            query = models.CommitteeReportResolutionModel.objects.all().filter(filters).order_by('-id')
+            query = models.CommitteeReportResolutionModel.objects.all().filter(filters, Q(is_delete=False)).order_by('-id') if user.is_overall else models.CommitteeReportResolutionModel.objects.all().filter(filters, Q(author=user), Q(is_delete=False)).order_by('-id')
  
         elif signature: 
             if signature == 'Signed Only': 
-                query = models.CommitteeReportResolutionModel.objects.all().filter(Q(is_signed=True)).order_by('-id')    
+                query = models.CommitteeReportResolutionModel.objects.all().filter(Q(is_signed=True), Q(is_delete=False)).order_by('-id') if user.is_overall else models.CommitteeReportResolutionModel.objects.all().filter(Q(is_signed=True), Q(author=user), Q(is_delete=False)).order_by('-id')    
             elif signature == 'Unsigned Only':      
-                query = models.CommitteeReportResolutionModel.objects.all().filter(Q(is_signed=False)).order_by('-id')    
+                query = models.CommitteeReportResolutionModel.objects.all().filter(Q(is_signed=False), Q(is_delete=False)).order_by('-id') if user.is_overall else models.CommitteeReportResolutionModel.objects.all().filter(Q(is_signed=False), Q(author=user), Q(is_delete=False)).order_by('-id')    
             else:
-                query = models.CommitteeReportResolutionModel.objects.all()       
+                query = models.CommitteeReportResolutionModel.objects.all().filter(Q(is_delete=False)) if user.is_overall else models.CommitteeReportResolutionModel.objects.all().filter(Q(author=user), Q(is_delete=False))      
         
         else:
-            query = models.CommitteeReportResolutionModel.objects.all() 
+            query = models.CommitteeReportResolutionModel.objects.all().filter(Q(is_delete=False)) if user.is_overall else models.CommitteeReportResolutionModel.objects.all().filter(Q(author=user), Q(is_delete=False))     
         cols = admin.CommitteeReportResolutionAdmin.list_display
         cols = list(cols)
         cols.remove('content')
         cols.remove('hard_copy')
         cols.remove('resolution_committee_report_fk') 
+        cols.remove('is_delete') 
         cols = [c.replace("_"," ").upper() for c in cols]   
     
     elif database_name == 'Committee Reports (Ordinance)':
@@ -1449,14 +1560,16 @@ def report_generator(database_name, date_from, date_to, keyword, signature):
                         Q(Q(id__icontains=keyword) | 
                         Q(no__icontains=keyword) | 
                         Q(title__icontains=keyword) | 
-                        Q(author__icontains=keyword) |
+                        Q(author__l_name__icontains=keyword) |
+                        Q(author__f_name__icontains=keyword) |
                         Q(date_filed__icontains=keyword)))
             if signature == 'Signed Only':
                 filters = Q(Q(date_filed__range=(date_from, date_to)) & 
                             Q(Q(id__icontains=keyword) | 
                             Q(no__icontains=keyword) | 
                             Q(title__icontains=keyword) | 
-                            Q(author__icontains=keyword) |
+                            Q(author__l_name__icontains=keyword) |
+                            Q(author__f_name__icontains=keyword) |
                             Q(date_filed__icontains=keyword)) &
                             Q(is_signed=True)
                             )
@@ -1465,42 +1578,45 @@ def report_generator(database_name, date_from, date_to, keyword, signature):
                             Q(Q(id__icontains=keyword) | 
                             Q(no__icontains=keyword) | 
                             Q(title__icontains=keyword) | 
-                            Q(author__icontains=keyword) |
+                            Q(author__l_name__icontains=keyword) |
+                            Q(author__f_name__icontains=keyword) |
                             Q(date_filed__icontains=keyword)) &
                             Q(is_signed=False)
                             )
-            query = models.CommitteeReportOrdinanceModel.objects.all().filter(filters).order_by('-id') 
+            query = models.CommitteeReportOrdinanceModel.objects.all().filter(filters, Q(is_delete=False)).order_by('-id') if user.is_overall else models.CommitteeReportOrdinanceModel.objects.all().filter(filters, Q(author=user), Q(is_delete=False)).order_by('-id')
               
         elif date_from and date_to:
             date_from = date_formatter('%m/%d/%Y','%Y-%m-%d %H:%M:%S.%f',date_from)
             date_to = date_formatter('%m/%d/%Y','%Y-%m-%d %H:%M:%S.%f',date_to)  
-            query = models.CommitteeReportOrdinanceModel.objects.all().filter(Q(date_filed__range=(date_from, date_to))).order_by('-id')                    
+            query = models.CommitteeReportOrdinanceModel.objects.all().filter(Q(date_filed__range=(date_from, date_to)), Q(is_delete=False)).order_by('-id') if user.is_overall else models.CommitteeReportOrdinanceModel.objects.all().filter(Q(date_filed__range=(date_from, date_to)), Q(author=user), Q(is_delete=False)).order_by('-id')                    
         
         elif keyword:
             filters = Q(
                 Q(id__icontains=keyword) | 
                 Q(no__icontains=keyword) | 
                 Q(title__icontains=keyword) | 
-                Q(author__icontains=keyword) |
+                Q(author__l_name__icontains=keyword) |
+                Q(author__f_name__icontains=keyword) |
                 Q(date_filed__icontains=keyword)
                 )
-            query = models.CommitteeReportOrdinanceModel.objects.all().filter(filters).order_by('-id')
+            query = models.CommitteeReportOrdinanceModel.objects.all().filter(filters, Q(is_delete=False)).order_by('-id') if user.is_overall else models.CommitteeReportOrdinanceModel.objects.all().filter(filters, Q(author=user), Q(is_delete=False)).order_by('-id')
  
         elif signature: 
             if signature == 'Signed Only': 
-                query = models.CommitteeReportOrdinanceModel.objects.all().filter(Q(is_signed=True)).order_by('-id')    
+                query = models.CommitteeReportOrdinanceModel.objects.all().filter(Q(is_signed=True), Q(is_delete=False)).order_by('-id') if user.is_overall else models.CommitteeReportOrdinanceModel.objects.all().filter(Q(is_signed=True), Q(author=user), Q(is_delete=False)).order_by('-id')    
             elif signature == 'Unsigned Only':      
-                query = models.CommitteeReportOrdinanceModel.objects.all().filter(Q(is_signed=False)).order_by('-id')    
+                query = models.CommitteeReportOrdinanceModel.objects.all().filter(Q(is_signed=False), Q(is_delete=False)).order_by('-id') if user.is_overall else models.CommitteeReportOrdinanceModel.objects.all().filter(Q(is_signed=False), Q(author=user), Q(is_delete=False)).order_by('-id')  
             else:
-                query = models.CommitteeReportOrdinanceModel.objects.all()       
+                query = models.CommitteeReportOrdinanceModel.objects.all().filter(Q(is_delete=False)) if user.is_overall else models.CommitteeReportOrdinanceModel.objects.all().filter(Q(author=user), Q(is_delete=False))       
         
         else:
-            query = models.CommitteeReportOrdinanceModel.objects.all() 
+            query = models.CommitteeReportOrdinanceModel.objects.all().filter(Q(is_delete=False)) if user.is_overall else models.CommitteeReportOrdinanceModel.objects.all().filter(Q(author=user), Q(is_delete=False))      
         cols = admin.CommitteeReportOrdinanceAdmin.list_display
         cols = list(cols)
         cols.remove('content')
         cols.remove('hard_copy')
         cols.remove('ordinance_committee_report_fk') 
+        cols.remove('is_delete')
         cols = [c.replace("_"," ").upper() for c in cols]    
     
     elif database_name == 'Minutes of the meeting':
@@ -1512,14 +1628,16 @@ def report_generator(database_name, date_from, date_to, keyword, signature):
                         Q(Q(id__icontains=keyword) | 
                         Q(no__icontains=keyword) | 
                         Q(title__icontains=keyword) | 
-                        Q(author__icontains=keyword) |
+                        Q(author__l_name__icontains=keyword) |
+                        Q(author__f_name__icontains=keyword) |
                         Q(date_filed__icontains=keyword)))
             if signature == 'Signed Only':
                 filters = Q(Q(date_filed__range=(date_from, date_to)) & 
                             Q(Q(id__icontains=keyword) | 
                             Q(no__icontains=keyword) | 
                             Q(title__icontains=keyword) | 
-                            Q(author__icontains=keyword) |
+                            Q(author__l_name__icontains=keyword) |
+                            Q(author__f_name__icontains=keyword) |
                             Q(date_filed__icontains=keyword)) &
                             Q(is_signed=True)
                             )
@@ -1528,41 +1646,44 @@ def report_generator(database_name, date_from, date_to, keyword, signature):
                             Q(Q(id__icontains=keyword) | 
                             Q(no__icontains=keyword) | 
                             Q(title__icontains=keyword) | 
-                            Q(author__icontains=keyword) |
+                            Q(author__l_name__icontains=keyword) |
+                            Q(author__f_name__icontains=keyword) |
                             Q(date_filed__icontains=keyword)) &
                             Q(is_signed=False)
                             )
-            query = models.MOMModel.objects.all().filter(filters).order_by('-id') 
+            query = models.MOMModel.objects.all().filter(filters, Q(is_delete=False)).order_by('-id') if user.is_overall else models.MOMModel.objects.all().filter(filters, Q(author=user), Q(is_delete=False)).order_by('-id') 
               
         elif date_from and date_to:
             date_from = date_formatter('%m/%d/%Y','%Y-%m-%d %H:%M:%S.%f',date_from)
             date_to = date_formatter('%m/%d/%Y','%Y-%m-%d %H:%M:%S.%f',date_to)  
-            query = models.MOMModel.objects.all().filter(Q(date_filed__range=(date_from, date_to))).order_by('-id')                    
+            query = models.MOMModel.objects.all().filter(Q(date_filed__range=(date_from, date_to)), Q(is_delete=False)).order_by('-id') if user.is_overall else models.MOMModel.objects.all().filter(Q(date_filed__range=(date_from, date_to)), Q(author=user), Q(is_delete=False)).order_by('-id')                    
         
         elif keyword:
             filters = Q(
                 Q(id__icontains=keyword) | 
                 Q(no__icontains=keyword) | 
                 Q(title__icontains=keyword) | 
-                Q(author__icontains=keyword) |
+                Q(author__l_name__icontains=keyword) |
+                Q(author__f_name__icontains=keyword) |
                 Q(date_filed__icontains=keyword)
                 )
-            query = models.MOMModel.objects.all().filter(filters).order_by('-id')
+            query = models.MOMModel.objects.all().filter(filters, Q(is_delete=False)).order_by('-id') if user.is_overall else models.MOMModel.objects.all().filter(filters, Q(author=user), Q(is_delete=False)).order_by('-id') 
  
         elif signature: 
             if signature == 'Signed Only': 
-                query = models.MOMModel.objects.all().filter(Q(is_signed=True)).order_by('-id')    
+                query = models.MOMModel.objects.all().filter(Q(is_signed=True), Q(is_delete=False)).order_by('-id') if user.is_overall else models.MOMModel.objects.all().filter(Q(is_signed=True), Q(author=user), Q(is_delete=False)).order_by('-id')    
             elif signature == 'Unsigned Only':      
-                query = models.MOMModel.objects.all().filter(Q(is_signed=False)).order_by('-id')    
+                query = models.MOMModel.objects.all().filter(Q(is_signed=False), Q(is_delete=False)).order_by('-id') if user.is_overall else models.MOMModel.objects.all().filter(Q(is_signed=False), Q(author=user), Q(is_delete=False)).order_by('-id')     
             else:
-                query = models.MOMModel.objects.all()       
+                query = models.MOMModel.objects.all().filter(Q(is_delete=False)) if user.is_overall else models.MOMModel.objects.all().filter(Q(author=user), Q(is_delete=False))       
         
         else:
-            query = models.MOMModel.objects.all() 
+            query = models.MOMModel.objects.all().filter(Q(is_delete=False)) if user.is_overall else models.MOMModel.objects.all().filter(Q(author=user), Q(is_delete=False))       
         cols = admin.MOMAdmin.list_display
         cols = list(cols)
         cols.remove('content')
         cols.remove('hard_copy') 
+        cols.remove('is_delete') 
         cols = [c.replace("_"," ").upper() for c in cols]    
     
     return query, cols
@@ -1583,7 +1704,7 @@ def records(request, *args, **kwargs):
         query_keyword = request.GET.get('query_keyword') 
         header = request.GET.get('header') 
         signature = request.GET.get('signed_document')
-        query, cols = report_generator(database_selection, date_from, date_to, query_keyword, signature) 
+        query, cols = report_generator(database_selection, date_from, date_to, query_keyword, signature, user) 
  
     context = {
         'user': user,
@@ -1598,9 +1719,7 @@ def records(request, *args, **kwargs):
 @authorize
 def print_records(request):
     template_name = "elegislative/records/print_records.html"
-    user = get_object_or_404(models.User, email=request.user.email) 
-
-    
+    user = get_object_or_404(models.User, email=request.user.email)  
     if request.method == 'GET': 
         database_selection = request.GET.get('database_seletection') 
         report_title = request.GET.get('report_title') 
@@ -1609,7 +1728,7 @@ def print_records(request):
         query_keyword = request.GET.get('query_keyword') 
         header = request.GET.get('header') 
         signature = request.GET.get('signed_document')
-        query, cols = report_generator(database_selection, date_from, date_to, query_keyword, signature) 
+        query, cols = report_generator(database_selection, date_from, date_to, query_keyword, signature, user) 
 
     date_today = datetime.now()
     date_today = date_today.strftime('%m/%d/%Y') 
@@ -1635,7 +1754,7 @@ def print_records(request):
 def minutes_of_the_meeting(request, *args, **kwargs):
     template_name = "elegislative/minutes_of_the_meeting/minutes_of_the_meeting.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    mom = models.MOMModel.objects.all()
+    mom = models.MOMModel.objects.all().filter(Q(is_delete=False)) if user.is_overall else models.MOMModel.objects.all().filter(Q(author=user), Q(is_delete=False))
     context = {
         'user': user,
         'mom': mom,
@@ -1649,14 +1768,18 @@ def minutes_of_the_meeting(request, *args, **kwargs):
 @get_notification
 def create_minutes_of_the_meeting(request, *args, **kwargs):
     template_name = "elegislative/minutes_of_the_meeting/create_minutes_of_the_meeting.html"
-    user = get_object_or_404(models.User, email=request.user.email) 
+    user = get_object_or_404(models.User, email=request.user.email)
     
+    if user.is_view_mode:
+        raise Http404()
+		
     if request.method == 'GET':
         form = forms.MOMForm(request.GET or None)
     elif request.method == 'POST':
         form = forms.MOMForm(request.POST or None)
         if form.is_valid():
             instance = form.save(commit=False)
+            instance.author = user
             instance.save() 
             add_notification(request,'elegislative:minutes_of_the_meeting', f"MoM ({instance.no}) has been created!", settings.NOTIFICATION_TAGS[4][0])
             return HttpResponseRedirect(reverse_lazy("elegislative:minutes_of_the_meeting")) 
@@ -1675,18 +1798,25 @@ def create_minutes_of_the_meeting(request, *args, **kwargs):
 def edit_minutes_of_the_meeting(request, *args, **kwargs):
     template_name = "elegislative/minutes_of_the_meeting/edit_minutes_of_the_meeting.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    mom = get_object_or_404(models.MOMModel, id=kwargs['id'])
+    mom = get_object_or_404(models.MOMModel, Q(is_delete=False), id=kwargs['id']) if user.is_overall else get_object_or_404(models.MOMModel, Q(author=user), Q(is_delete=False), id=kwargs['id'])
+
+    if user.is_view_mode:
+        raise Http404()
+		
     if request.method == 'GET':
         form = forms.EditMOMForm(request.GET or None, instance=mom)
     elif request.method == 'POST':
         form = forms.EditMOMForm(request.POST or None, request.FILES, instance=mom)
         if form.is_valid():
-            form.save()
+            instance = form.save(commit=False)
+            instance.author = user
+            instance.save()
             return HttpResponseRedirect(reverse_lazy("elegislative:minutes_of_the_meeting")) 
 
     context = { 
         'user': user,
         'form': form,
+        'mom': mom,
         'notifications':kwargs['notifications'],
     }    
     return render(request, template_name, context)
@@ -1698,9 +1828,10 @@ def delete_minutes_of_the_meeting(request, id):
     data = dict()
     template_name = "elegislative/minutes_of_the_meeting/delete_minutes_of_the_meeting.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    mom = get_object_or_404(models.MOMModel, id=id)
+    mom = get_object_or_404(models.MOMModel, Q(is_delete=False), id=id) if user.is_overall else get_object_or_404(models.MOMModel, Q(author=user), Q(is_delete=False), id=id)
 
-
+    if user.is_view_mode:
+        raise Http404()
     if request.is_ajax():
         if request.method == 'GET':
             context = {
@@ -1709,7 +1840,9 @@ def delete_minutes_of_the_meeting(request, id):
             data['html_form'] = render_to_string(template_name, context, request)
         elif request.method == 'POST':            
             data['form_is_valid'] = True
-            mom.delete() 
+            mom.is_delete = True 
+            mom.save() 
+            # mom.delete() 
         
         return JsonResponse(data)
     else:
@@ -1721,7 +1854,7 @@ def delete_minutes_of_the_meeting(request, id):
 def print_minutes_of_the_meeting(request, id):
     template_name = "elegislative/minutes_of_the_meeting/print_minutes_of_the_meeting.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    mom = get_object_or_404(models.MOMModel, id=id)
+    mom = get_object_or_404(models.MOMModel, Q(is_delete=False), id=id)
     context = {
         'user': user,
         'mom':mom,
@@ -1741,7 +1874,7 @@ def print_minutes_of_the_meeting(request, id):
 def announcements(request, *args, **kwargs):
     template_name = "elegislative/announcements/announcements.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    announcements = models.AnnouncementModel.objects.all() 
+    announcements = models.AnnouncementModel.objects.all() if user.is_overall else models.AnnouncementModel.objects.all().filter(Q(author=user))
     context = {
         'user': user,
         'announcements': announcements,
@@ -1756,6 +1889,10 @@ def create_announcements(request):
     data = dict()
     template_name = "elegislative/announcements/create_announcement.html"
     user = get_object_or_404(models.User, email=request.user.email) 
+
+    if user.is_view_mode:
+        raise Http404()
+
     if request.is_ajax():
         if request.method == 'GET':
             form = forms.AnnouncementForm(request.GET or None)
@@ -1763,6 +1900,7 @@ def create_announcements(request):
             form = forms.AnnouncementForm(request.POST or None)
             if form.is_valid():
                 instance = form.save(commit=False)
+                instance.author = user
                 instance.save()  
                 a_response = {
                     'aid': instance.id,
@@ -1770,6 +1908,7 @@ def create_announcements(request):
                     'subject' : instance.subject,
                     'content' : instance.content,
                     'visible' : instance.visible,
+                    'author': f'{instance.author.f_name} {instance.author.l_name}',
                     'date_filed' : instance.date_filed.strftime("%b. %d, %Y, %I:%M %p"),
                     'edit_url': reverse_lazy('elegislative:edit_announcements', kwargs={'id':instance.id}),
                     'delete_url':reverse_lazy('elegislative:delete_announcements', kwargs={'id':instance.id}),
@@ -1793,7 +1932,11 @@ def edit_announcements(request, id):
     data = dict()
     template_name = "elegislative/announcements/edit_announcement.html"
     user = get_object_or_404(models.User, email=request.user.email)  
-    announcement = get_object_or_404(models.AnnouncementModel, id=id)
+    announcement = get_object_or_404(models.AnnouncementModel, id=id) if user.is_overall else get_object_or_404(models.AnnouncementModel, Q(author=user), id=id)
+    
+    if user.is_view_mode:
+        raise Http404()
+
     if request.is_ajax(): 
         if request.method == 'GET':
             form = forms.AnnouncementForm(request.GET or None, instance=announcement)
@@ -1801,11 +1944,13 @@ def edit_announcements(request, id):
             form = forms.AnnouncementForm(request.POST or None, instance=announcement)
             if form.is_valid():
                 instance = form.save(commit=False)
+                instance.author = user
                 instance.save()  
                 a_response = { 
                     'title' : instance.title,
                     'subject' : instance.subject,
                     'content' : instance.content,
+                    'author' : f'{instance.author.f_name} {instance.author.l_name}',
                     'visible' : instance.visible 
                 }
                 data['a_response'] = a_response
@@ -1828,8 +1973,11 @@ def delete_announcements(request, id):
     data = dict()
     template_name = "elegislative/announcements/delete_announcement.html"
     user = get_object_or_404(models.User, email=request.user.email) 
-    announcement = get_object_or_404(models.AnnouncementModel, id=id)
+    announcement = get_object_or_404(models.AnnouncementModel, id=id) if user.is_overall else get_object_or_404(models.AnnouncementModel, Q(author=user), id=id)
 
+    if user.is_view_mode:
+        raise Http404()
+		
     if request.is_ajax(): 
         if request.method == 'GET':
             context = {
@@ -1850,9 +1998,25 @@ def delete_announcements(request, id):
 """
 
 """
+[START] -> Messages features
+"""
+@login_required 
+@authorize 
+@get_notification
+def messages(request, *args, **kwargs):
+    pass
+"""
+[END] -> Messages features
+"""
+
+"""
 [START] -> OLD DOCUMENTS features
 """
-def old_documents(request):
+@login_required
+@roles(is_old_documents_manager=True)
+@authorize 
+@get_notification
+def old_documents(request, *args, **kwargs):
     pass
 """
 [END] -> OLD DOCUMENTS features
@@ -1862,18 +2026,124 @@ def old_documents(request):
 """
 [START] -> WebEx features
 """
-def webex(request):
+@login_required
+@roles(is_webex_manager=True)
+@authorize 
+@get_notification
+def webex(request, *args, **kwargs):
     pass
 
 """
 [END] -> WebEx features
 """
+
 """
 [START] -> Trash features
 """
-def trash(request):
-    pass
+@login_required 
+@authorize 
+@get_notification
+def trash(request, *args, **kwargs):
+    template_name = "elegislative/trash/trash.html"
+    user = get_object_or_404(models.User, email=request.user.email) 
 
+    model_list = [
+        models.AgendaModel,
+        models.ResolutionModel,
+        models.CommitteeReportResolutionModel,
+        # models.CommentsRecomendationResolutionModel,
+        models.OrdinanceModel,
+        models.CommitteeReportOrdinanceModel,
+        # models.CommentsRecomendationOrdinanceModel,
+        models.MOMModel, 
+    ]
+    queryset = [query.objects.all().filter(Q(is_delete=True)) for query in model_list]
+
+ 
+
+    # for q in queryset:
+    #     if q:
+    #         for a in q:
+    #             print(a.id)
+
+    context = {
+        'user': user, 
+        'notifications':kwargs['notifications'],
+        'queryset': queryset,
+    }    
+    return render(request, template_name, context)
+
+
+@login_required
+@authorize
+def trash_delete(request, *args, **kwargs):
+    data = dict()
+    template_name = "elegislative/trash/trash_delete.html"
+    user = get_object_or_404(models.User, email=request.user.email) 
+
+    model_dictionary = {
+        "AgendaModel": models.AgendaModel,
+        "ResolutionModel": models.ResolutionModel,
+        "CommitteeReportResolutionModel": models.CommitteeReportResolutionModel,
+        "OrdinanceModel": models.OrdinanceModel,
+        "CommitteeReportOrdinanceModel": models.CommitteeReportOrdinanceModel,
+        "MOMModel": models.MOMModel,
+    }
+    if request.is_ajax(): 
+        if request.method == 'GET':  
+            context = {
+                'user': user,     
+            }
+            data['html_form'] = render_to_string(template_name, context, request) 
+        elif request.method == 'POST': 
+            json_request = json.loads(request.body)
+            container = json_request["container"]
+            for array in container:
+                table = array[0]
+                uid = array[1] 
+                record = get_object_or_404(model_dictionary[table], Q(is_delete=True), id=uid) if user.is_overall else get_object_or_404(model_dictionary[table], Q(is_delete=True), Q(author=user), id=uid)
+                record.delete()
+            data['status'] = True
+        
+        return JsonResponse(data)         
+    else:
+        raise Http404()
+
+@login_required
+@authorize
+def restore_deleted(request, *args, **kwargs):
+    data = dict()
+    template_name = "elegislative/trash/trash_restore.html"
+    user = get_object_or_404(models.User, email=request.user.email) 
+
+    model_dictionary = {
+        "AgendaModel": models.AgendaModel,
+        "ResolutionModel": models.ResolutionModel,
+        "CommitteeReportResolutionModel": models.CommitteeReportResolutionModel,
+        "OrdinanceModel": models.OrdinanceModel,
+        "CommitteeReportOrdinanceModel": models.CommitteeReportOrdinanceModel,
+        "MOMModel": models.MOMModel,
+    }
+    if request.is_ajax(): 
+        if request.method == 'GET':  
+            context = {
+                'user': user,     
+            }
+            data['html_form'] = render_to_string(template_name, context, request) 
+        elif request.method == 'POST': 
+            json_request = json.loads(request.body)
+            container = json_request["container"] 
+            for array in container:
+                table = array[0]
+                uid = array[1] 
+                record = get_object_or_404(model_dictionary[table], Q(is_delete=True), id=uid) if user.is_overall else get_object_or_404(model_dictionary[table], Q(is_delete=True), Q(author=user), id=uid)
+                record.is_delete = False
+                record.save()
+            data['status'] = True
+        
+        return JsonResponse(data)         
+    else:
+        raise Http404()
 """
 [END] -> Trash features
 """

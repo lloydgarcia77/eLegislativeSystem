@@ -85,7 +85,7 @@
 <body class="hold-transition skin-blue sidebar-mini">
     <div class="wrapper"> 
         
-        {%  if request.user.is_authenticated and request.user.is_staff and request.user.is_active  %} 
+        {%  if request.user.is_authenticated and request.user.is_active  %} 
             {% if user %} 
                 {% block body_block %}
 

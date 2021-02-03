@@ -88,7 +88,7 @@ e-Legislative Resolutions
                                     <td>{{r.id}}</td>
                                     <td>{{r.no}}</td>
                                     <td>{{r.title}}</td> 
-                                    <td>{{r.author}}</td>
+                                    <td>{{r.author.f_name}} {{r.author.l_name}}</td>
                                     <td>{{r.version}}</td>
                                     <td>{{r.status}}</td>
                                     <td> 
@@ -107,12 +107,15 @@ e-Legislative Resolutions
                                                 <span class="sr-only">Toggle Dropdown</span>
                                             </button>
                                             <ul class="dropdown-menu" role="menu">
-                                                <li><a href="{% url 'elegislative:edit_resolution' r.id %}">Edit</a></li>   
-                                                <li><a href="{% url 'elegislative:delete_resolution' r.id %}" class="delete">Delete</a></li>   
-                                                <li class="divider"></li>                                                
-                                                <li><a href="{% url 'elegislative:create_committee_resolution_reports' r.id %}">Committee Report</a></li>   
-                                                <li><a href="{% url 'elegislative:print_resolution' r.id %}" target="_blank">Preview/Print</a></li>                                                     
-
+                                                {% if user.is_view_mode %}
+                                                    <li><a href="{% url 'elegislative:print_resolution' r.id %}" target="_blank">Preview/Print</a></li>     
+                                                {% else %}
+                                                    <li><a href="{% url 'elegislative:edit_resolution' r.id %}">Edit</a></li>   
+                                                    <li><a href="{% url 'elegislative:delete_resolution' r.id %}" class="delete">Delete</a></li>   
+                                                    <li class="divider"></li>                                                
+                                                    <li><a href="{% url 'elegislative:create_committee_resolution_reports' r.id %}">Committee Report</a></li>   
+                                                    <li><a href="{% url 'elegislative:print_resolution' r.id %}" target="_blank">Preview/Print</a></li>     
+                                                {% endif %} 
                                             </ul>
                                         </div>
                                     </td>

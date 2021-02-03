@@ -68,4 +68,10 @@ urlpatterns = [
     path('create-announcements/', views.create_announcements, name="create_announcements"),    
     path('edit-announcements/<int:id>', views.edit_announcements, name="edit_announcements"),    
     path('delete-announcements/<int:id>', views.delete_announcements, name="delete_announcements"),    
+
+    # trash
+    path('trash/', views.trash, name="trash"),    
+    path('trash/trash-delete', views.trash_delete, name="trash_delete"),    
+    path('trash/trash-restore', views.restore_deleted, name="restore_deleted"),    
+
 ]
