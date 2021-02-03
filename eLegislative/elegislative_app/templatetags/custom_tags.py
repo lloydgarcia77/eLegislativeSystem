@@ -1,4 +1,5 @@
 from django import template
+import random
 # https://docs.djangoproject.com/en/3.1/howto/custom-template-tags/
 
 
@@ -20,6 +21,31 @@ def model_name(value):
     value = value.__class__.__name__
     return value
 
+@register.simple_tag
+def random_tags():
+    tags = [
+        'info',
+        'danger',
+        'success',
+        'warning',
+        'primary'
+    ]
+
+    return random.choice(tags)
+
+
+@register.filter
+def model_source(value):
+    value = value.__class__.__name__
+    model_dictionary = {
+        "AgendaModel": "Agenda",
+        "ResolutionModel": "Resolution",
+        "CommitteeReportResolutionModel": "Committee Reports Resolution",
+        "OrdinanceModel": "Ordinance",
+        "CommitteeReportOrdinanceModel": "Committee Reports Ordinance",
+        "MOMModel": "Minutes of the Meeting",
+    }
+    return model_dictionary[value]
 
 @register.simple_tag 
 def compute_percentage(*args):

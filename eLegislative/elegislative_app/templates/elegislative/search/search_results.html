@@ -50,7 +50,7 @@ e-Legislative Search Results
                         <ul class="pagination pagination-sm no-margin pull-right"> 
                             {% if query_records.has_previous %}
                             <li class="page-item"><a class="page-link" href="{{base_url}}&page=1">&laquo;</a></li>
-                            <li class="page-item"><a class="page-link" href="{{base_url}}&page={{ query_records.previous_page_number }}">&#60;</a></li>
+                            <li class="page-item"><a class="page-link " href="{{base_url}}&page={{ query_records.previous_page_number }}">&#60;</a></li>
                             {% endif %}
 
                             {% if query_records.number|add:'-4' > 1%}
@@ -96,20 +96,35 @@ e-Legislative Search Results
                                     <span class="label label-danger">{{b.is_signed}}</span> 
                                 </p> 
                                 {% if b|model_name == 'AgendaModel' %}
-                                <a href="{% url 'elegislative:edit_agenda_page' b.id %}" class="btn btn-primary btn-xs">Read more</a>  
+                                    {% if request.user.is_arocc_manager %} 
+                                        <a href="{% url 'elegislative:edit_agenda_page' b.id %}" class="btn btn-primary btn-xs">Read more</a>  
+                                    {% endif %}
                                 {% elif b|model_name == 'ResolutionModel' %} 
-                                <a href="{% url 'elegislative:edit_resolution' b.id %}" class="btn btn-primary btn-xs">Read more</a>  
+                                    {% if request.user.is_arocc_manager %}
+                                        <a href="{% url 'elegislative:edit_resolution' b.id %}" class="btn btn-primary btn-xs">Read more</a>   
+                                    {% endif %} 
                                 {% elif b|model_name == 'CommitteeReportResolutionModel' %} 
-                                <a href="{% url 'elegislative:edit_committee_resolution_reports' b.id %}" class="btn btn-primary btn-xs">Read more</a>  
+                                    {% if request.user.is_arocc_manager %}
+                                        <a href="{% url 'elegislative:edit_committee_resolution_reports' b.id %}" class="btn btn-primary btn-xs">Read more</a>  
+                                    {% endif %} 
                                 {% elif b|model_name == 'OrdinanceModel' %} 
-                                <a href="{% url 'elegislative:edit_ordinance' b.id %}" class="btn btn-primary btn-xs">Read more</a>  
+                                    {% if request.user.is_arocc_manager %}
+                                        <a href="{% url 'elegislative:edit_ordinance' b.id %}" class="btn btn-primary btn-xs">Read more</a>  
+                                    {% endif %} 
                                 {% elif b|model_name == 'CommitteeReportOrdinanceModel' %} 
-                                <a href="{% url 'elegislative:edit_committee_ordinance_reports' b.id %}" class="btn btn-primary btn-xs">Read more</a>  
+                                    {% if request.user.is_arocc_manager %}
+                                        <a href="{% url 'elegislative:edit_committee_ordinance_reports' b.id %}" class="btn btn-primary btn-xs">Read more</a> 
+                                    {% endif %}  
                                 {% elif b|model_name == 'MOMModel' %} 
-                                <a href="{% url 'elegislative:edit_minutes_of_the_meeting' b.id %}" class="btn btn-primary btn-xs">Read more</a>  
+                                    {% if request.user.is_mom_manager %}
+                                        <a href="{% url 'elegislative:edit_minutes_of_the_meeting' b.id %}" class="btn btn-primary btn-xs">Read more</a> 
+                                    {% endif %} 
                                 {% elif b|model_name == 'AnnouncementModel' %} 
-                                <a href="{% url 'elegislative:announcements'%}" class="btn btn-primary btn-xs">Read more</a>  
+                                    {% if request.user.is_announcement_manager %}
+                                        <a href="{% url 'elegislative:announcements'%}" class="btn btn-primary btn-xs">Read more</a> 
+                                    {% endif %} 
                                 {% endif %}
+                                <!-- WebEx and Old documents -->
                                     
                           
                             </li>   
