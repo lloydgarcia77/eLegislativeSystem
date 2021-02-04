@@ -354,9 +354,16 @@ class MessagesModel(models.Model):
     sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="message_sender_fk")
     receiver = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="message_receiver_fk")
     subject = models.CharField(max_length=250)
-    content = models.TextField()
-    is_sent = models.BooleanField(default=False)
+    content = models.TextField() 
     is_read = models.BooleanField(default=False)
+    date_filed = models.DateTimeField(auto_now=True)
+
+
+class SentMessagesModel(models.Model):
+    sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="sent_message_sender_fk")
+    receiver = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="sent_message_receiver_fk")
+    subject = models.CharField(max_length=250)
+    content = models.TextField() 
     date_filed = models.DateTimeField(auto_now=True)
 
 # Messages

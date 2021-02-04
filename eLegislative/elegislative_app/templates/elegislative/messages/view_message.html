@@ -1,0 +1,57 @@
+{% extends 'elegislative/messages/create_message.html' %}
+
+ {% block content_header %}
+<h1>
+View Message
+<small>View private message</small>
+</h1>
+{% endblock content_header %}
+
+{% block content_current_page %}
+View message
+{% endblock content_current_page %} 
+
+
+{% block content %}
+<div class="box box-primary">
+    <div class="box-header with-border">
+        <i class="fa fa-text-width"></i>
+        <h3 class="box-title">View Message</h3>
+    </div>
+    <div class="box-body">
+        <div class="col-md-12">
+            <div class="form-group">
+                <label>From:</label>
+                <input type="text" class="form-control" placeholder="From" value="{{message.sender}}" disabled>
+            </div>
+            <div class="form-group">
+                <label>Subject:</label>
+                <input type="text" class="form-control" placeholder="Subject" value="{{message.subject}}" disabled>
+            </div>
+            <div class="form-group"> 
+                <div class="box box-default box-solid">
+                    <div class="box-header with-border">
+                        <i class="fa fa-text-width"></i>
+                        <h3 class="box-title">Content</h3> 
+                        <div class="box-tools pull-right"> 
+                            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                            </button> 
+                            <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                        </div>
+                    </div> 
+                    <div class="box-body">
+                    
+                        {% autoescape off %}
+                        {{message.content}}
+                        {% endautoescape %}
+                    </div> 
+                </div>
+            </div>
+        </div>      
+    </div>
+    <div class="box-footer"> 
+        <a href="{% url 'elegislative:messages' %}" class="btn btn-default"><i class="fa fa-times"></i> Back</a> 
+    </div>
+
+</div> 
+{% endblock content %}

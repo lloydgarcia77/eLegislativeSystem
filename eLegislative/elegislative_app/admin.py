@@ -110,10 +110,19 @@ admin.site.register(models.NotificationsModel, NotificationsAdmin)
 
 
 class MessagesAdmin(ImportExportModelAdmin):
-    list_display = ("id", "sender", "receiver", "subject", "content", "is_read", "is_sent", "date_filed")
-    list_editable = ( "sender", "receiver", "subject", "content", "is_read", "is_sent",)
+    list_display = ("id", "sender", "receiver", "subject", "content", "is_read", "date_filed")
+    list_editable = ( "sender", "receiver", "subject", "content", "is_read",)
     list_per_page = 10
     search_field = ("id", "sender", "receiver", "subject", "content", )
     list_filter = ("sender", "receiver")
 
 admin.site.register(models.MessagesModel, MessagesAdmin)
+
+class SentMessagesAdmin(ImportExportModelAdmin):
+    list_display = ("id", "sender", "receiver", "subject", "content", "date_filed")
+    list_editable = ( "sender", "receiver", "subject", "content",)
+    list_per_page = 10
+    search_field = ("id", "sender", "receiver", "subject", "content", )
+    list_filter = ("sender", "receiver")
+
+admin.site.register(models.SentMessagesModel, SentMessagesAdmin)

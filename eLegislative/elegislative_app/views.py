@@ -2005,10 +2005,12 @@ def delete_announcements(request, id):
 def messages_manager(request, *args, **kwargs):
     template_name = "elegislative/messages/messages.html"
     user = get_object_or_404(models.User, email=request.user.email) 
+    unread_messages_count = models.MessagesModel.objects.all().filter(Q(receiver=user),Q(is_read=False)).count()
     inbox = models.MessagesModel.objects.all().filter(Q(receiver=user))
     context = {
         'user': user, 
         'inbox': inbox,
+        'unread_messages_count': unread_messages_count,
         'notifications':kwargs['notifications'], 
     }    
     return render(request, template_name, context)
@@ -2019,6 +2021,7 @@ def messages_manager(request, *args, **kwargs):
 def create_message(request, *args, **kwargs):
     template_name = "elegislative/messages/create_message.html"
     user = get_object_or_404(models.User, email=request.user.email) 
+    unread_messages_count = models.MessagesModel.objects.all().filter(Q(receiver=user),Q(is_read=False)).count()
     reciepients = models.User.objects.all().filter(~Q(email=user),Q(is_active=True))  
     if request.method == 'GET':
         form = forms.MessageForm(request.GET or None)
@@ -2036,12 +2039,38 @@ def create_message(request, *args, **kwargs):
                     subject=subject,
                     content=content, 
                 ) 
+                models.SentMessagesModel.objects.create(
+                    sender=user,
+                    receiver=receiver,
+                    subject=subject,
+                    content=content, 
+                ) 
             return HttpResponseRedirect(reverse_lazy("elegislative:messages"))   
 
     context = {
         'user': user, 
         'form': form,
         'reciepients': reciepients,
+        'unread_messages_count': unread_messages_count,
+        'notifications':kwargs['notifications'], 
+    }    
+    return render(request, template_name, context)
+
+
+@login_required 
+@authorize 
+@get_notification
+def view_message(request, *args, **kwargs):
+    template_name = "elegislative/messages/view_message.html"
+    user = get_object_or_404(models.User, email=request.user.email)  
+    message = get_object_or_404(models.MessagesModel, Q(receiver=user), id=kwargs['id'])
+    message.is_read = True
+    message.save()  
+    unread_messages_count = models.MessagesModel.objects.all().filter(Q(receiver=user),Q(is_read=False)).count()
+    context = {
+        'message': message,
+        'user': user,  
+        'unread_messages_count': unread_messages_count,
         'notifications':kwargs['notifications'], 
     }    
     return render(request, template_name, context)

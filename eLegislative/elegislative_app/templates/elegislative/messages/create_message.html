@@ -3,13 +3,19 @@
 {% load custom_tags %}
 {% load humanize %} 
 {% block title %}
-e-Legislative Trash
+e-Legislative Message
 {% endblock title%}
 
 
 {% block additional_css %}
   <!-- Select2 -->
   <link rel="stylesheet" href="{% static 'bower_components/select2/dist/css/select2.min.css' %}">
+  <style>
+    .message-content{
+         resize: vertical;
+         /*resize: horizontal*/
+    }
+  </style>
 {% endblock additional_css %}
 
 {% block nav_dashboard %}
@@ -42,14 +48,20 @@ e-Legislative Trash
 {% block main_content %} 
 <div class="content-wrapper">
     <section class="content-header">
+        {% block content_header %}
         <h1>
         Create Message
         <small>Send private message</small>
         </h1>
+        {% endblock content_header %}
         <ol class="breadcrumb">
         <li><a href="{% url 'elegislative:dashboard_page' %}"><i class="fa fa-dashboard"></i> Dashboard</a></li>
         <li><a href="{% url 'elegislative:messages' %}">Messages</a></li>
-        <li class="active">Create new message</li>
+        <li class="active">
+        {% block content_current_page %}
+        Create new message
+        {% endblock content_current_page %} 
+        </li>
         </ol>
     </section>
     <section class="content">
@@ -68,8 +80,13 @@ e-Legislative Trash
                   </div>
                   <div class="box-body no-padding">
                     <ul class="nav nav-pills nav-stacked">
-                      <li class="active"><a href="#"><i class="fa fa-inbox"></i> Inbox
-                        <span class="label label-primary pull-right">12</span></a></li>
+                      <li class="active"><a href="{% url 'elegislative:messages' %}"><i class="fa fa-inbox"></i> Inbox
+                        {% if unread_messages_count > 0 %} 
+                        <span class="label label-primary pull-right">
+                          {{unread_messages_count|intcomma}}
+                        </span>
+                        {% endif %} 
+                        </a></li>
                       <li><a href="#"><i class="fa fa-envelope-o"></i> Sent</a></li> 
                     </ul>
                   </div>
@@ -78,6 +95,7 @@ e-Legislative Trash
            
               </div>
             <div class="col-md-9">
+            {% block content %}
                 <form method="POST">
                     {% csrf_token %}
                     {% if form.errors %}
@@ -119,6 +137,7 @@ e-Legislative Trash
 
                     </div> 
                 </form>
+            {% endblock content %}
             </div>
         </div>
     </section>

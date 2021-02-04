@@ -77,5 +77,6 @@ urlpatterns = [
     # Messages
     path('messages/', views.messages_manager, name="messages"),    
     path('messages/create-message', views.create_message, name="create_message"),
+    path('messages/view-message/<int:id>/', views.view_message, name="view_message"),
 
 ]
