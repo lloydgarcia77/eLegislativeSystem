@@ -350,4 +350,13 @@ class NotificationsModel(models.Model):
     def __str__(self):
         return str(self.message)
 
+class MessagesModel(models.Model):
+    sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="message_sender_fk")
+    receiver = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="message_receiver_fk")
+    subject = models.CharField(max_length=250)
+    content = models.TextField()
+    is_sent = models.BooleanField(default=False)
+    is_read = models.BooleanField(default=False)
+    date_filed = models.DateTimeField(auto_now=True)
+
 # Messages

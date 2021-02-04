@@ -712,4 +712,25 @@ class AnnouncementForm(forms.ModelForm):
             'required': 'required',
         }
  
+class MessageForm(forms.ModelForm):
+    class Meta:
+        model = models.MessagesModel
+        exclude = ("sender", "receiver", "is_read", "is_sent", "date_filed")
+    
+    def __init__(self, *args, **kwargs):
+        super(MessageForm, self).__init__(*args, **kwargs)
+
+        self.fields['subject'].widget.attrs = {
+            'type': 'text',
+            'class': 'form-control',
+            'placeholder': 'Subject',
+            'required': 'required',
+        }
+
+        self.fields['content'].widget.attrs = { 
+            'id': 'compose_textarea',
+            'class': 'form-control', 
+            'style': 'height: 300px',
+            'required': 'required',
+        }
 

@@ -1,6 +1,6 @@
 from django.http import JsonResponse, Http404, HttpResponseRedirect, HttpResponse
-from django.urls import reverse, reverse_lazy
-from django.contrib import messages
+from django.urls import reverse, reverse_lazy 
+
 from django.contrib.auth import authenticate, login, logout
 from django.db.models import Q
 from django.shortcuts import render, get_object_or_404
@@ -29,7 +29,7 @@ from django.core.exceptions import FieldDoesNotExist, FieldError
 
 # Pagination
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger 
-
+from django.contrib import messages 
 # Create your views here.
 
 # key id encryption
@@ -130,8 +130,7 @@ def register_page(request):
             regForm.is_staff = False
             regForm.is_superuser = False
             regForm.save()
-            messages.success(
-                request, "You have successfully registered, please try to login.")
+            messages.success(request, "You have successfully registered, please try to login.")
             return HttpResponseRedirect(reverse("login"))
 
         else:
@@ -2003,8 +2002,50 @@ def delete_announcements(request, id):
 @login_required 
 @authorize 
 @get_notification
-def messages(request, *args, **kwargs):
-    pass
+def messages_manager(request, *args, **kwargs):
+    template_name = "elegislative/messages/messages.html"
+    user = get_object_or_404(models.User, email=request.user.email) 
+    inbox = models.MessagesModel.objects.all().filter(Q(receiver=user))
+    context = {
+        'user': user, 
+        'inbox': inbox,
+        'notifications':kwargs['notifications'], 
+    }    
+    return render(request, template_name, context)
+
+@login_required 
+@authorize 
+@get_notification
+def create_message(request, *args, **kwargs):
+    template_name = "elegislative/messages/create_message.html"
+    user = get_object_or_404(models.User, email=request.user.email) 
+    reciepients = models.User.objects.all().filter(~Q(email=user),Q(is_active=True))  
+    if request.method == 'GET':
+        form = forms.MessageForm(request.GET or None)
+    elif request.method == 'POST':
+        form = forms.MessageForm(request.POST or None)
+        if form.is_valid():
+            receivers = request.POST.getlist("receivers", False) 
+            for r in receivers:
+                receiver = get_object_or_404(models.User, email=r) 
+                content = form.cleaned_data.get("content")
+                subject = form.cleaned_data.get("subject")
+                models.MessagesModel.objects.create(
+                    sender=user,
+                    receiver=receiver,
+                    subject=subject,
+                    content=content, 
+                ) 
+            return HttpResponseRedirect(reverse_lazy("elegislative:messages"))   
+
+    context = {
+        'user': user, 
+        'form': form,
+        'reciepients': reciepients,
+        'notifications':kwargs['notifications'], 
+    }    
+    return render(request, template_name, context)
+
 """
 [END] -> Messages features
 """
@@ -2058,14 +2099,7 @@ def trash(request, *args, **kwargs):
         models.MOMModel, 
     ]
     queryset = [query.objects.all().filter(Q(is_delete=True)) for query in model_list]
-
  
-
-    # for q in queryset:
-    #     if q:
-    #         for a in q:
-    #             print(a.id)
-
     context = {
         'user': user, 
         'notifications':kwargs['notifications'],
