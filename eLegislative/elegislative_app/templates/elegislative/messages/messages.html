@@ -1,0 +1,165 @@
+{% extends 'elegislative/dashboard.html' %}
+{% load static %}
+{% load custom_tags %}
+{% load humanize %} 
+{% block title %}
+e-Legislative Messages
+{% endblock title%}
+
+<!-- CSS -->
+{% block additional_css %}
+<!-- DataTables -->
+<link rel="stylesheet" href="{% static 'bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css' %}">
+<link rel="stylesheet" href="{% static 'bower_components/datatables.net/css/select.dataTables.min.css' %}"> 
+<style>
+    table td{
+        text-align: center; 
+        vertical-align: middle !important; 
+    }
+    table .message-content{
+      white-space: nowrap; 
+      max-width: 200px; 
+      overflow: hidden;
+      text-overflow: ellipsis; 
+    }
+ 
+</style>
+{% endblock additional_css %}
+<!-- navigation -->
+{% block nav_dashboard %}
+<li class="treeview">
+    <a href="{% url 'elegislative:dashboard_page' %}" >
+    <i class="fa fa-dashboard" ></i> <span>Dashboard</span>
+    <span class="pull-right-container">
+        <i class="fa fa-angle-left pull-right"></i>
+    </span>
+    </a>
+    <ul class="treeview-menu">
+    <li class="active"><a href="{% url 'elegislative:dashboard_page' %}"><i class="fa fa-circle-o"></i> Dashboard</a></li> 
+    </ul>
+</li>
+{% endblock nav_dashboard %}
+
+
+{% block nav_messages %}
+<li class="active">
+  <a href="{% url 'elegislative:messages' %}" data-toggle="tooltip" title="Messages">
+    <i class="fa fa-envelope"></i> <span>Messages</span>
+    <span class="pull-right-container">
+      <small class="label pull-right bg-green"></small>
+    </span>
+  </a>
+</li>
+{% endblock nav_messages %}
+
+
+{% block main_content %} 
+<div class="content-wrapper">
+    <section class="content-header">
+        <h1>
+        Messages
+        <small>Manage messages</small>
+        </h1>
+        <ol class="breadcrumb">
+        <li><a href="{% url 'elegislative:dashboard_page' %}"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Messages</li>
+        </ol>
+    </section>
+    <section class="content">
+        <div class="row">
+          <div class="col-md-3">
+            <a href="{% url 'elegislative:create_message' %}" class="btn btn-primary btn-block margin-bottom">Compose</a>
+  
+            <div class="box box-solid">
+              <div class="box-header with-border">
+                <h3 class="box-title">Folders</h3>
+  
+                <div class="box-tools">
+                  <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="box-body no-padding">
+                <ul class="nav nav-pills nav-stacked">
+                  <li class="active"><a href="#"><i class="fa fa-inbox"></i> Inbox
+                    <span class="label label-primary pull-right">12</span></a></li>
+                  <li><a href="#"><i class="fa fa-envelope-o"></i> Sent</a></li> 
+                </ul>
+              </div>
+              <!-- /.box-body -->
+            </div>
+       
+          </div>
+          <!-- /.col -->
+          <div class="col-md-9">
+            <div class="box box-primary">
+              <div class="box-header with-border">
+                <h3 class="box-title">Inbox</h3>
+  
+              </div>
+              <!-- /.box-header -->
+              <div class="box-body">
+                <table id="table_inbox" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th ></th>
+                            <th>ID</th> 
+                            <th>No</th> 
+                            <th>Title</th>   
+                            <th ></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                      
+                      {% for i in inbox %}
+                      <tr>
+                          <td class="select-checkbox"></td>
+                          <td><a href="">{{i.sender}}</a></td> 
+                          <td class="message-content"><b>{{i.subject}}</b> - {{i.content|striptags}}</td> 
+                          <td>{% custom_data_format i.date_filed %}</td> 
+                          <th>
+                            <a href="" class="btn btn-default btn-xs" data-toggle="tooltip" title="View">
+                              <i class="fa fa-eye"></i>
+                            </a>
+                          </th>
+                      </tr>
+                      {% endfor %}
+                        
+                      
+                    </tbody>
+                </table>
+        
+              </div>
+              <!-- /.box-body -->
+              <div class="box-footer no-padding">
+                <div class="mailbox-controls">
+ 
+                    <div class="btn-group">
+                      <button type="button" class="btn btn-default btn-sm"><i class="fa fa-trash-o"></i></button>
+                      <button type="button" class="btn btn-default btn-sm"><i class="fa fa-square-o"></i></button> 
+                    </div>
+             
+                  </div>
+              </div>
+            </div>
+            <!-- /. box -->
+          </div>
+          <!-- /.col -->
+        </div>
+        <!-- /.row -->
+      </section>
+
+</div>
+
+{% endblock main_content %}  
+
+{% block additional_js %}
+
+
+<!-- DataTables -->
+<script src="{% static 'bower_components/datatables.net/js/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'bower_components/datatables.net/js/dataTables.select.min.js' %}"></script>
+<script src="{% static 'bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js' %}"></script>
+<script src="{% static 'js/messages.js' %}"></script>
+
+{% endblock additional_js %}

@@ -74,4 +74,8 @@ urlpatterns = [
     path('trash/trash-delete', views.trash_delete, name="trash_delete"),    
     path('trash/trash-restore', views.restore_deleted, name="restore_deleted"),    
 
+    # Messages
+    path('messages/', views.messages_manager, name="messages"),    
+    path('messages/create-message', views.create_message, name="create_message"),
+
 ]
