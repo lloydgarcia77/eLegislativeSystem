@@ -2075,6 +2075,30 @@ def view_message(request, *args, **kwargs):
     }    
     return render(request, template_name, context)
 
+@login_required
+@authorize
+def delete_messages(request, *args, **kwargs):
+    data = dict()
+    template_name = "elegislative/messages/delete_message.html"
+    user = get_object_or_404(models.User, email=request.user.email) 
+    if request.is_ajax(): 
+        if request.method == 'GET':  
+            context = {
+                'user': user,     
+            }
+            data['html_form'] = render_to_string(template_name, context, request) 
+        elif request.method == 'POST': 
+            json_request = json.loads(request.body)
+            id_list = json_request["id_list"]
+            for item in id_list:
+                message = get_object_or_404(models.MessagesModel, id=int(item))
+                message.delete()
+            data['status'] = True
+        
+        return JsonResponse(data)     
+    else:
+        raise Http404()
+
 """
 [END] -> Messages features
 """
