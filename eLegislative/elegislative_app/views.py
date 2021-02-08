@@ -2007,13 +2007,16 @@ def messages_manager(request, *args, **kwargs):
     user = get_object_or_404(models.User, email=request.user.email) 
     unread_messages_count = models.MessagesModel.objects.all().filter(Q(receiver=user),Q(is_read=False)).count()
     inbox = models.MessagesModel.objects.all().filter(Q(receiver=user))
+    sent_messages = models.SentMessagesModel.objects.all().filter(Q(sender=user))
     context = {
         'user': user, 
         'inbox': inbox,
         'unread_messages_count': unread_messages_count,
+        'sent_messages': sent_messages,
         'notifications':kwargs['notifications'], 
     }    
     return render(request, template_name, context)
+
 
 @login_required 
 @authorize 
@@ -2023,6 +2026,7 @@ def create_message(request, *args, **kwargs):
     user = get_object_or_404(models.User, email=request.user.email) 
     unread_messages_count = models.MessagesModel.objects.all().filter(Q(receiver=user),Q(is_read=False)).count()
     reciepients = models.User.objects.all().filter(~Q(email=user),Q(is_active=True))  
+    sent_messages = models.SentMessagesModel.objects.all().filter(Q(sender=user))
     if request.method == 'GET':
         form = forms.MessageForm(request.GET or None)
     elif request.method == 'POST':
@@ -2053,6 +2057,7 @@ def create_message(request, *args, **kwargs):
         'reciepients': reciepients,
         'unread_messages_count': unread_messages_count,
         'notifications':kwargs['notifications'], 
+        'sent_messages': sent_messages,
     }    
     return render(request, template_name, context)
 
@@ -2063,6 +2068,7 @@ def create_message(request, *args, **kwargs):
 def view_message(request, *args, **kwargs):
     template_name = "elegislative/messages/view_message.html"
     user = get_object_or_404(models.User, email=request.user.email)  
+    sent_messages = models.SentMessagesModel.objects.all().filter(Q(sender=user))
     message = get_object_or_404(models.MessagesModel, Q(receiver=user), id=kwargs['id'])
     message.is_read = True
     message.save()  
@@ -2071,9 +2077,11 @@ def view_message(request, *args, **kwargs):
         'message': message,
         'user': user,  
         'unread_messages_count': unread_messages_count,
-        'notifications':kwargs['notifications'], 
+        'notifications':kwargs['notifications'],
+        'sent_messages': sent_messages, 
     }    
     return render(request, template_name, context)
+
 
 @login_required
 @authorize
@@ -2098,6 +2106,31 @@ def delete_messages(request, *args, **kwargs):
         return JsonResponse(data)     
     else:
         raise Http404()
+
+
+@login_required 
+@authorize 
+@get_notification
+def sent_messages(request, *args, **kwargs):
+    template_name = "elegislative/messages/sent_messages.html"
+    user = get_object_or_404(models.User, email=request.user.email) 
+    unread_messages_count = models.MessagesModel.objects.all().filter(Q(receiver=user),Q(is_read=False)).count()
+    sent_messages = models.SentMessagesModel.objects.all().filter(Q(sender=user))
+    context = {
+        'user': user,  
+        'unread_messages_count': unread_messages_count,
+        'sent_messages': sent_messages,
+        'notifications':kwargs['notifications'], 
+    }    
+    return render(request, template_name, context)
+
+
+@login_required 
+@authorize 
+@get_notification
+def view_sent_messages(request, *args, **kwargs):
+    template_name = "elegislative/messages/view_sent_messaage.html"
+    user = get_object_or_404(models.User, email=request.user.email)
 
 """
 [END] -> Messages features

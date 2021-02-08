@@ -87,7 +87,13 @@ e-Legislative Message
                         </span>
                         {% endif %} 
                         </a></li>
-                      <li><a href="#"><i class="fa fa-envelope-o"></i> Sent</a></li> 
+                        <li><a href="{% url 'elegislative:sent_messages' %}"><i class="fa fa-envelope-o"></i> Sent
+                            {% if sent_messages.count > 0 %} 
+                            <span class="label label-primary pull-right">
+                              {{sent_messages.count|intcomma}}
+                            </span>
+                            {% endif %}
+                        </a></li> 
                     </ul>
                   </div>
                   <!-- /.box-body -->
