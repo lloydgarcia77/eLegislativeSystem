@@ -89,7 +89,7 @@ e-Legislative Sent Message
                     {% endif %}
                     </a>
                     </li>
-                    <li><a href="{% url 'elegislative:sent_messages' %}"><i class="fa fa-envelope-o"></i> Sent
+                    <li class="active"><a href="{% url 'elegislative:sent_messages' %}"><i class="fa fa-envelope-o"></i> Sent
                       {% if sent_messages.count > 0 %} 
                       <span class="label label-primary pull-right">
                         {{sent_messages.count|intcomma}}
@@ -126,12 +126,11 @@ e-Legislative Sent Message
                       {% for i in sent_messages %}
                       <tr>
                           <td class="select-checkbox" data-id="{{i.id}}"></td> 
-                          <td><a href="">{{i.receiver}}</a></td> 
+                          <td><a href="{% url 'elegislative:view_sent_messages' i.id %}">{{i.receiver}}</a></td> 
                           <td class="message-content"><b>{{i.subject}}</b> - {{i.content|striptags}}</td> 
-                          <td>{% custom_data_format i.date_filed %}</td> 
-
+                          <td>{% custom_data_format i.date_filed %}</td>  
                           <th>
-                            <a href="" class="btn btn-default btn-xs" data-toggle="tooltip" title="View">
+                            <a href="{% url 'elegislative:view_sent_messages' i.id %}" class="btn btn-default btn-xs" data-toggle="tooltip" title="View">
                               <i class="fa fa-eye"></i>
                             </a>
                           </th>
@@ -149,7 +148,7 @@ e-Legislative Sent Message
  
                     <div class="btn-group">
                       <button type="button" class="btn btn-default btn-sm" id="btn-select-all"><i class="fa fa-square-o"></i></button> 
-                      <button type="button" class="btn btn-default btn-sm" id="btn-delete" data-url=""><i class="fa fa-trash-o"></i></button> 
+                      <button type="button" class="btn btn-default btn-sm" id="btn-delete" data-url="{% url 'elegislative:delete_sent_messages' %}"><i class="fa fa-trash-o"></i></button> 
                     </div>
              
                   </div>

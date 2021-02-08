@@ -2099,7 +2099,7 @@ def delete_messages(request, *args, **kwargs):
             json_request = json.loads(request.body)
             id_list = json_request["id_list"]
             for item in id_list:
-                message = get_object_or_404(models.MessagesModel, id=int(item))
+                message = get_object_or_404(models.MessagesModel, Q(receive=user),id=int(item))
                 message.delete()
             data['status'] = True
         
@@ -2131,7 +2131,42 @@ def sent_messages(request, *args, **kwargs):
 def view_sent_messages(request, *args, **kwargs):
     template_name = "elegislative/messages/view_sent_messaage.html"
     user = get_object_or_404(models.User, email=request.user.email)
+    unread_messages_count = models.MessagesModel.objects.all().filter(Q(receiver=user),Q(is_read=False)).count()
+    sent_messages = models.SentMessagesModel.objects.all().filter(Q(sender=user))
+    message = get_object_or_404(models.SentMessagesModel, Q(sender=user), id=kwargs['id'])
+    context = {
+        'user': user,  
+        'unread_messages_count': unread_messages_count,
+        'sent_messages': sent_messages,
+        'message': message,
+        'notifications':kwargs['notifications'], 
+    }    
+    return render(request, template_name, context)
 
+
+@login_required
+@authorize
+def delete_sent_messages(request, *args, **kwargs):
+    data = dict()
+    template_name = "elegislative/messages/delete_sent_message.html"
+    user = get_object_or_404(models.User, email=request.user.email) 
+    if request.is_ajax(): 
+        if request.method == 'GET':  
+            context = {
+                'user': user,     
+            }
+            data['html_form'] = render_to_string(template_name, context, request) 
+        elif request.method == 'POST': 
+            json_request = json.loads(request.body)
+            id_list = json_request["id_list"]
+            for item in id_list:
+                message = get_object_or_404(models.SentMessagesModel, Q(sender=user), id=int(item))
+                message.delete()
+            data['status'] = True
+        
+        return JsonResponse(data)     
+    else:
+        raise Http404()
 """
 [END] -> Messages features
 """

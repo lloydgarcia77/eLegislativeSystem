@@ -80,7 +80,7 @@ e-Legislative Message
                   </div>
                   <div class="box-body no-padding">
                     <ul class="nav nav-pills nav-stacked">
-                      <li class="active"><a href="{% url 'elegislative:messages' %}"><i class="fa fa-inbox"></i> Inbox
+                      <li><a href="{% url 'elegislative:messages' %}"><i class="fa fa-inbox"></i> Inbox
                         {% if unread_messages_count > 0 %} 
                         <span class="label label-primary pull-right">
                           {{unread_messages_count|intcomma}}

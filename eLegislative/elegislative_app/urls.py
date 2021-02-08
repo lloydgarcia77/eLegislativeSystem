@@ -79,6 +79,8 @@ urlpatterns = [
     path('messages/create-message', views.create_message, name="create_message"),
     path('messages/view-message/<int:id>/', views.view_message, name="view_message"),
     path('messages/delete-message', views.delete_messages, name="delete_messages"),    
-    path('messages/sent-message', views.sent_messages, name="sent_messages"),    
-
+    path('messages/sent-message', views.sent_messages, name="sent_messages"),   
+    path('messages/view-sent-message/<int:id>', views.view_sent_messages, name="view_sent_messages"),   
+    path('messages/delete-sent-message', views.delete_sent_messages, name="delete_sent_messages"),
+ 
 ]
