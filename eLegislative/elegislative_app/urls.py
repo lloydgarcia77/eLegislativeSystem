@@ -82,5 +82,10 @@ urlpatterns = [
     path('messages/sent-message', views.sent_messages, name="sent_messages"),   
     path('messages/view-sent-message/<int:id>', views.view_sent_messages, name="view_sent_messages"),   
     path('messages/delete-sent-message', views.delete_sent_messages, name="delete_sent_messages"),
- 
+
+    # Webex
+    path('webex/', views.webex, name="webex"), 
+    path('webex/add-link', views.add_webex_link, name="add_webex_link"), 
+    path('webex/edit-link/<int:id>', views.edit_webex_link, name="edit_webex_link"), 
+    path('webex/delete-link/<int:id>', views.delete_webex_link, name="delete_webex_link"), 
 ]

@@ -358,6 +358,8 @@ class MessagesModel(models.Model):
     is_read = models.BooleanField(default=False)
     date_filed = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return str(self.receiver)
 
 class SentMessagesModel(models.Model):
     sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="sent_message_sender_fk")
@@ -366,4 +368,26 @@ class SentMessagesModel(models.Model):
     content = models.TextField() 
     date_filed = models.DateTimeField(auto_now=True)
 
-# Messages
+    def __str__(self):
+        return str(self.sender)
+
+ 
+PROTOCOL = (
+    ('http://','http://'),
+    ('https://','https://'),
+    ('ftp://','ftp://'),
+    ('news://','news://'),
+    ('<other>','<other>'),
+)
+
+
+class WebExModel(models.Model):
+    url = models.URLField(max_length = 200) 
+    display_text = models.CharField(max_length=250)
+    protcol = models.CharField(max_length=50, choices=PROTOCOL, default=PROTOCOL[0][0])
+    remarks = models.CharField(max_length=250)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, related_name="webex_user_fk")
+    date_filed = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return str(self.display_text)

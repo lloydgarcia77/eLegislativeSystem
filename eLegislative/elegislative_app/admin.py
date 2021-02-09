@@ -126,3 +126,13 @@ class SentMessagesAdmin(ImportExportModelAdmin):
     list_filter = ("sender", "receiver")
 
 admin.site.register(models.SentMessagesModel, SentMessagesAdmin)
+
+
+class WebExAdmin(ImportExportModelAdmin):
+    list_display = ("id", "url", "display_text", "protcol", "remarks", "author", "date_filed")
+    list_editable = ( "url", "display_text", "protcol", "remarks", "author",)
+    list_per_page = 10
+    search_field = ("id", "url", "display_text", "protcol", "remarks","author",)
+    list_filter = ("protcol", "author",)
+
+admin.site.register(models.WebExModel, WebExAdmin)

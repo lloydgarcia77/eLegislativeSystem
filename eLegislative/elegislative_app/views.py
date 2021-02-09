@@ -2193,6 +2193,59 @@ def old_documents(request, *args, **kwargs):
 @authorize 
 @get_notification
 def webex(request, *args, **kwargs):
+    template_name = "elegislative/webex/webex.html"
+    user = get_object_or_404(models.User, email=request.user.email) 
+    webex = models.WebExModel.objects.all() if user.is_overall else models.WebExModel.objects.all().filter(Q(author=user))
+    context = {
+        'user': user,   
+        'webex': webex,
+        'sent_messages': sent_messages,
+        'notifications':kwargs['notifications'], 
+    }    
+    return render(request, template_name, context)
+
+
+@login_required
+@roles(is_webex_manager=True)
+@authorize 
+@get_notification
+def add_webex_link(request, *args, **kwargs):
+    data = dict()
+    template_name = "elegislative/webex/add_webex_link.html"
+    user = get_object_or_404(models.User, email=request.user.email) 
+    if request.is_ajax(): 
+        if request.method == 'GET':  
+            form = forms.WebExForm(request.GET or None)
+            context = {
+                'user': user,     
+                'form': form,
+            }
+            data['html_form'] = render_to_string(template_name, context, request) 
+        elif request.method == 'POST': 
+            form = forms.WebExForm(request.POST or None)
+            if form.is_valid():
+                instance = form.save(commit=False)
+                instance.author = user
+                instance.save()
+                data['form_is_valid'] = True
+        
+        return JsonResponse(data)     
+    else:
+        raise Http404()
+
+
+@login_required
+@roles(is_webex_manager=True)
+@authorize 
+@get_notification
+def edit_webex_link(request, *args, **kwargs):
+    pass
+
+@login_required
+@roles(is_webex_manager=True)
+@authorize 
+@get_notification
+def delete_webex_link(request, *args, **kwargs):
     pass
 
 """

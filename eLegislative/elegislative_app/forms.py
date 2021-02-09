@@ -734,3 +734,38 @@ class MessageForm(forms.ModelForm):
             'required': 'required',
         }
 
+class WebExForm(forms.ModelForm):
+    class Meta:
+        model = models.WebExModel
+        exclude = ("date_filed","author",)
+
+    def __init__(self, *args, **kwargs):
+        super(WebExForm, self).__init__(*args, **kwargs)
+
+        self.fields['url'].widget.attrs = {
+            'type': 'text',
+            'class': 'form-control',
+            'placeholder': 'url',
+            'required': 'required',
+        }
+
+        self.fields['protcol'].widget.attrs = {
+            'type': 'text',
+            'class': 'form-control select2',
+            'placeholder': 'Protocol',
+            'style': 'width: 100%',
+        }
+
+        self.fields['display_text'].widget.attrs = {
+            'type': 'text',
+            'class': 'form-control',
+            'placeholder': 'Display Text',
+            'required': 'required',
+        }
+
+        self.fields['remarks'].widget.attrs = {
+            'type': 'text',
+            'class': 'form-control',
+            'placeholder': 'Remarks',
+            'required': 'required',
+        }
