@@ -286,7 +286,7 @@ e-Legislative Dashboard
       {% if request.user.is_webex_manager %}
         {% block nav_webex %}
         <li>
-          <a href="" data-toggle="tooltip" title="Webex Links">
+          <a href="{% url 'elegislative:webex' %}" data-toggle="tooltip" title="Webex Links">
             <i class="fa fa-external-link"></i> <span>Webex Links</span>
             <span class="pull-right-container">
               <small class="label pull-right bg-green"></small>
@@ -295,6 +295,7 @@ e-Legislative Dashboard
         </li>
         {% endblock nav_webex %}
       {% endif %}
+      
       {% block nav_trash %}
       <li>
         <a href="{% url 'elegislative:trash' %}" data-toggle="tooltip" title="Trash">
