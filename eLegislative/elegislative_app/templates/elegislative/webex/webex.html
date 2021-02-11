@@ -104,12 +104,12 @@ e-Legislative WebEx Links
                                         <td>{{w.protcol}}</td>
                                         <td>{{w.remarks}}</td>
                                         <td>{{w.author.f_name}} {{w.author.l_name}}</td>
-                                        <td>{{w.date_filed}}</td>
+                                        <td>{% custom_data_format w.date_filed%}</td>
                                         <td>
                                             <div class="btn-group">
-                                                <button type="button" class="btn btn-warning btn-flat" data-toggle="tooltip" title="Edit" data-url="{% url 'elegislative:edit_webex_link' w.id %}"><i class="fa fa-edit"></i></button>
-                                                <button type="button" class="btn btn-danger btn-flat" data-toggle="tooltip" title="Delete" data-url="{% url 'elegislative:delete_webex_link' w.id %}"><i class="fa fa-trash"></i></button>                                                
-                                              </div>
+                                                <button type="button" class="btn btn-warning btn-flat btn-edit" data-toggle="tooltip" title="Edit" data-url="{% url 'elegislative:edit_webex_link' w.id %}"><i class="fa fa-edit"></i></button>
+                                                <button type="button" class="btn btn-danger btn-flat btn-delete" data-toggle="tooltip" title="Delete" data-url="{% url 'elegislative:delete_webex_link' w.id %}"><i class="fa fa-trash"></i></button>                                                
+                                            </div>
                                         </td>
                                     </tr>
                                 {% endfor %}

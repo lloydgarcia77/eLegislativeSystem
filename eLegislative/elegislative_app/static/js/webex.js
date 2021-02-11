@@ -47,29 +47,36 @@ $(document).ready(function () {
             },
             success: (data) => {
                 if(data.form_is_valid){
-                    // let concern_date_dict = data.concern_date_dict;
-                    // let id  = concern_date_dict["id"];
-                    // let subject  = concern_date_dict["subject"];
-                    // let date_filed  = concern_date_dict["date_filed"];
-                    // let edit_url  = concern_date_dict["edit_url"];
-                    // let delete_url  = concern_date_dict["delete_url"];
-                    // let view_url  = concern_date_dict["view_url"];
-                    // let myJSON = JSON.stringify(concern_date_dict,undefined, 4); 
+                    let webex = data.webex;
+                    let id  = webex["id"];
+                    let url  = webex["url"];
+                    let display_text  = webex["display_text"];
+                    let protocol  = webex["protocol"];
+                    let remarks  = webex["remarks"];
+                    let author  = webex["author"];
+                    let date_filed  = webex["date_filed"];
+                    let eurl  = webex["eurl"];
+                    let durl  = webex["durl"];
+                    let json_webex = JSON.stringify(webex,undefined, 4); 
+                 
                     $("#modal-default").modal('hide');
-                    // table.row.add([
-                    //     `<span class="badge bg-red">${id}</span> `,
-                    //     `<span class="label label-info">${subject}</span>`,
-                    //     `<span class="label label-default">${date_filed}</span> `,
-                    //     `
-                    //     <div class="text-center"> 
-                    //     <div class="btn-group">
-                    //     <button type="button" class="btn btn-danger btn-delete" data-toggle="tooltip" title="Delete" data-url="${delete_url}"><i class="fa fa-fw fa-trash"></i></button>                    
-                    //     <button type="button" class="btn btn-warning btn-view" data-toggle="tooltip" title="View" data-url="${view_url}"><i class="fa fa-fw fa-eye"></i></button>
-                    //     <button type="button" class="btn btn-info btn-edit" data-toggle="tooltip" title="Edit" data-url="${edit_url}"><i class="fa fa-fw fa-pencil-square-o"></i></button>
-                    //     </div>
-                    //     </div>
-                    //     `
-                    // ]).draw(false);
+                    table.row.add([
+                        `${id}`,
+                        `<a href="${url}" target="_blank">${url}</a>`,
+                        `${display_text}`,
+                        `${protocol}`,
+                        `${remarks}`,
+                        `${author}`,
+                        `${date_filed}`, 
+                        `
+                        <div class="text-center"> 
+                        <div class="btn-group">
+                        <button type="button" class="btn btn-warning btn-flat btn-edit" data-toggle="tooltip" title="Edit" data-url="${eurl}"><i class="fa fa-edit"></i></button>
+                        <button type="button" class="btn btn-danger btn-flat btn-delete" data-toggle="tooltip" title="Delete" data-url="${durl}"><i class="fa fa-trash"></i></button>                                                
+                         </div>
+                        </div>
+                        `
+                    ]).draw(false);
                 }else{
                     $("#modal-default .modal-content").html(data.html_form);
                 }
@@ -84,4 +91,118 @@ $(document).ready(function () {
         });
         return false;
     });
+ 
+    $("#table_webex").on('click', ".btn-edit", function(e){
+        e.preventDefault();
+        let url = $(this).attr("data-url");
+        let row = $(this).closest('tr');  
+        $.ajax({
+            url: url,
+            type: 'GET',
+            dataType: 'json',
+            beforeSend: () => { 
+                $("#modal-default").data('tr',row).modal("show");
+            },
+            success: (data) => {
+                $("#modal-default .modal-content").html(data.html_form);
+                $('#modal-default .select2').select2();
+            },
+            complete: (data) => {
+
+            },
+            error: (data) => {
+
+            }
+        }); 
+
+        return false;
+    });
+
+    $("#modal-default").on("submit",".edit-webex-link", function(e){
+        e.preventDefault();
+        let form = $(this); 
+        let row = $("#modal-default").data('tr'); 
+
+        $.ajax({
+            url: form.attr("data-url"),
+            data: form.serialize(),
+            cache: false,
+            type: form.attr("method"),
+            dataType: 'json',
+            success: (data) => {
+                if(data.form_is_valid){  
+                    let webex = data.webex; 
+                    let url  = webex["url"];
+                    let display_text  = webex["display_text"];
+                    let protocol  = webex["protocol"];
+                    let remarks  = webex["remarks"];
+                    let author  = webex["author"];
+           
+                    $("#modal-default").modal("hide");
+                    let row_data = table.row(row).data();
+                    row_data[1] = `<a href="${url}" target="_blank">${url}</a>`;
+                    row_data[2] = `${display_text}`;
+                    row_data[3] = `${protocol}`;
+                    row_data[4] = `${remarks}`;
+                    row_data[5] = `${author}`;
+
+                    //https://legacy.datatables.net/ref
+                    $('#table_webex').dataTable().fnUpdate(row_data,row,undefined,false); 
+                }else{
+                    $("#modal-form .modal-content").html(data.html_form);
+                }
+            }
+        });
+
+        return false;
+    });
+    $("#table_webex").on('click', ".btn-delete", function(e){
+        e.preventDefault(); 
+        let url = $(this).attr("data-url");
+        let row = $(this).closest('tr'); 
+        //table.row(row).remove().draw(); 
+        $.ajax({
+            url: url,
+            type: 'GET',
+            dataType: 'json',
+            beforeSend: () => {
+                //$("#modal-default").modal("show");
+                $("#modal-default").data('tr',row).modal("show");
+            },
+            success: (data) => {
+                $("#modal-default .modal-content").html(data.html_form);
+            },
+            complete: (data) => {
+
+            },
+            error: (data) => {
+
+            }
+        });
+
+        return false;
+    });
+    $("#modal-default").on("submit",".delete-webex-link", function(e){
+        e.preventDefault();
+        let form = $(this); 
+        let row = $("#modal-default").data('tr');
+        
+        $.ajax({
+            url: form.attr("data-url"),
+            data: form.serialize(),
+            cache: false,
+            type: form.attr("method"),
+            dataType: 'json',
+            success: (data) => {
+                if(data.form_is_valid){  
+                    $("#modal-default").modal("hide");
+                    table.row(row).remove().draw();    
+                }else{
+                    $("#modal-form .modal-content").html(data.html_form);
+                }
+            }
+        });
+        return false;
+    });
+
 });

@@ -87,5 +87,9 @@ urlpatterns = [
     path('webex/', views.webex, name="webex"), 
     path('webex/add-link', views.add_webex_link, name="add_webex_link"), 
     path('webex/edit-link/<int:id>', views.edit_webex_link, name="edit_webex_link"), 
-    path('webex/delete-link/<int:id>', views.delete_webex_link, name="delete_webex_link"), 
+    path('webex/delete-link/<int:id>', views.delete_webex_link, name="delete_webex_link"),
+
+    # Old Documents
+    path('old-documents/', views.old_documents, name="old_documents"), 
+    path('old-documents/upload-documents/', views.upload_old_documents, name="upload_old_documents"), 
 ]

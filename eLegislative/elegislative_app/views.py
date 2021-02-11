@@ -32,6 +32,8 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib import messages 
 # Create your views here.
 
+import os
+
 # key id encryption
 def encrypt_key(txt):
 
@@ -2179,7 +2181,50 @@ def delete_sent_messages(request, *args, **kwargs):
 @authorize 
 @get_notification
 def old_documents(request, *args, **kwargs):
-    pass
+    template_name = "elegislative/old_documents/old_documents.html"
+    user = get_object_or_404(models.User, email=request.user.email) 
+    
+    old_documents = models.OldDocumentsModel.objects.all()
+
+    context = {
+        'user': user,    
+        'old_documents': old_documents,
+        'notifications':kwargs['notifications'], 
+    }    
+    return render(request, template_name, context)
+
+@login_required
+@roles(is_old_documents_manager=True)
+@authorize 
+@get_notification
+def upload_old_documents(request, *args, **kwargs):
+    template_name = "elegislative/old_documents/upload_documents.html"
+    user = get_object_or_404(models.User, email=request.user.email) 
+    
+    if request.method == 'GET':
+        pass
+    elif request.method == 'POST':
+        
+        f = request.FILES['file']    
+        fname = f.name # Gives name 
+        fcontent_type = f.content_type # Gives Content type text/html etc
+        fsize = f.size # Gives file's size in byte
+        kb = f.size * 0.001 # kb
+        mb = kb * 0.001 # ml
+        # f.read() # Reads file 
+        data = request.POST.get('data', False)
+        data = json.loads(data)
+        year = data['year']
+        remarks = data['remarks'] 
+        old_document = models.OldDocumentsModel(files=f,name=fname,size=fsize,content_type=fcontent_type,year=year,remarks=remarks)
+        old_document.save()
+
+    context = {
+        'user': user,    
+        'notifications':kwargs['notifications'], 
+    }    
+    return render(request, template_name, context)
+
 """
 [END] -> OLD DOCUMENTS features
 """
@@ -2198,8 +2243,7 @@ def webex(request, *args, **kwargs):
     webex = models.WebExModel.objects.all() if user.is_overall else models.WebExModel.objects.all().filter(Q(author=user))
     context = {
         'user': user,   
-        'webex': webex,
-        'sent_messages': sent_messages,
+        'webex': webex, 
         'notifications':kwargs['notifications'], 
     }    
     return render(request, template_name, context)
@@ -2227,6 +2271,19 @@ def add_webex_link(request, *args, **kwargs):
                 instance = form.save(commit=False)
                 instance.author = user
                 instance.save()
+                webex = {
+                    'id': instance.id,
+                    'url': instance.url,
+                    'display_text': instance.display_text,
+                    'protocol': instance.protcol,
+                    'remarks': instance.remarks,
+                    'author': f'{instance.author.f_name} {instance.author.l_name}',
+                    'date_filed': str(instance.date_filed.strftime("%b. %d, %Y, %I:%M %p")),
+                    'eurl': str(reverse_lazy('elegislative:edit_webex_link', kwargs={'id':instance.id})),
+                    'durl': str(reverse_lazy('elegislative:delete_webex_link', kwargs={'id':instance.id})),
+                }
+                webex = json.dumps(webex)
+                data['webex'] = json.loads(webex)
                 data['form_is_valid'] = True
         
         return JsonResponse(data)     
@@ -2239,14 +2296,62 @@ def add_webex_link(request, *args, **kwargs):
 @authorize 
 @get_notification
 def edit_webex_link(request, *args, **kwargs):
-    pass
+    data = dict()
+    template_name = "elegislative/webex/edit_webex_link.html"
+    user = get_object_or_404(models.User, email=request.user.email) 
+    webex_link = get_object_or_404(models.WebExModel, id=kwargs['id']) if user.is_overall else get_object_or_404(models.WebExModel, Q(author=user), id=kwargs['id'])
+    if request.is_ajax(): 
+        if request.method == 'GET':  
+            form = forms.WebExForm(request.GET or None, instance=webex_link)
+            context = {
+                'user': user,     
+                'webex_link': webex_link,
+                'form': form,
+            }
+            data['html_form'] = render_to_string(template_name, context, request) 
+        elif request.method == 'POST': 
+            form = forms.WebExForm(request.POST or None, instance=webex_link)
+            if form.is_valid():
+                instance = form.save(commit=False) 
+                instance.save()
+                webex = { 
+                    'url': instance.url,
+                    'display_text': instance.display_text,
+                    'protocol': instance.protcol,
+                    'remarks': instance.remarks,
+                    'author': f'{instance.author.f_name} {instance.author.l_name}', 
+                }
+                webex = json.dumps(webex)
+                data['webex'] = json.loads(webex)
+                data['form_is_valid'] = True
+        
+        return JsonResponse(data)     
+    else:
+        raise Http404()
 
 @login_required
 @roles(is_webex_manager=True)
 @authorize 
 @get_notification
 def delete_webex_link(request, *args, **kwargs):
-    pass
+    data = dict()
+    template_name = "elegislative/webex/delete_webex_link.html"
+    user = get_object_or_404(models.User, email=request.user.email) 
+    webex_link = get_object_or_404(models.WebExModel, id=kwargs['id']) if user.is_overall else get_object_or_404(models.WebExModel, Q(author=user), id=kwargs['id'])
+    if request.is_ajax(): 
+        if request.method == 'GET':   
+            context = {
+                'user': user,     
+                'webex_link': webex_link, 
+            }
+            data['html_form'] = render_to_string(template_name, context, request) 
+        elif request.method == 'POST':   
+            webex_link.delete()
+            data['form_is_valid'] = True
+        
+        return JsonResponse(data)     
+    else:
+        raise Http404()
 
 """
 [END] -> WebEx features

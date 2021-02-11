@@ -391,3 +391,18 @@ class WebExModel(models.Model):
 
     def __str__(self):
         return str(self.display_text)
+
+
+class OldDocumentsModel(models.Model):
+    
+    files = models.FileField(upload_to='files/%Y/%m/%d')
+    name = models.CharField(max_length=250)
+    size = models.CharField(max_length=250)
+    content_type = models.CharField(max_length=250)
+    # last_modified_date = models.CharField(max_length=250) 
+    year = models.CharField(max_length=250)
+    remarks = models.CharField(max_length=250)
+    date_uploaded = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name

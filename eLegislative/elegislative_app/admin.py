@@ -136,3 +136,13 @@ class WebExAdmin(ImportExportModelAdmin):
     list_filter = ("protcol", "author",)
 
 admin.site.register(models.WebExModel, WebExAdmin)
+
+
+class OldDocumentsAdmin(ImportExportModelAdmin):
+    list_display = ("id", "files", "name", "size", "content_type", "year", "remarks", "date_uploaded")
+    list_editable = ( "files", "name", "size", "content_type", "year", "remarks",)
+    list_per_page = 10
+    search_field = ("id", "files", "name", "size", "content_type", "year", "remarks",)
+    list_filter = ("year", "content_type",)
+
+admin.site.register(models.OldDocumentsModel, OldDocumentsAdmin)

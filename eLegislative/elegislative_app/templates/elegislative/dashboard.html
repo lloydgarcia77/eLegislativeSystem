@@ -273,7 +273,7 @@ e-Legislative Dashboard
       {% if request.user.is_old_documents_manager %}
         {% block nav_old_documents %}
         <li>
-          <a href="" data-toggle="tooltip" title="Old Documents">
+          <a href="{% url 'elegislative:old_documents' %}" data-toggle="tooltip" title="Old Documents">
             <i class="fa fa-book"></i> <span>Old Documents</span>
             <span class="pull-right-container">
               <small class="label pull-right bg-green"></small>
