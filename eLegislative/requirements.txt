@@ -1,0 +1,21 @@
+django
+gunicorn
+django-heroku
+dj-database-url
+whitenoise 
+bcrypt
+django[argon2]
+django-crispy-forms
+pillow
+django-import-export
+pip3 install mysqlclient 
+requests 
+django python-dotenv
+python-decouple
+django-multiselectfield
+cryptography
+pylint-django 
+djangorestframework
+pygments    
+django-3-jet 
+django-cleanup 
