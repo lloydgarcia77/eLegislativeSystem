@@ -10,7 +10,7 @@ pillow
 django-import-export
 mysqlclient 
 requests 
-django python-dotenv
+django-python-dotenv
 python-decouple
 django-multiselectfield
 cryptography
