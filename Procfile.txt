@@ -1,0 +1,1 @@
+web: gunicorn elegislative_app.wsgi --log-file -
