@@ -88,12 +88,12 @@ e-Legislative Old Documents
                                     <th>#</th>
                                     <th>File</th>
                                     <th>Name</th> 
-                                    <th>Size</th> 
+                                    <th>Size(byte)</th> 
                                     <th>C-Type</th>   
                                     <th>Year</th>
                                     <th>Remarks</th>
                                     <th>Date Uploaded</th>
-                                    <th>Download</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -101,14 +101,14 @@ e-Legislative Old Documents
                                 <tr>
                                     <td class="select-checkbox" data-id="{{o.id}}"></td>
                                     <td>{{o.id}}</td>
-                                    <td><a href="{{o.files.url}}" data-toggle="tooltip" title="{{o.files.file}}">{{o.files.url}}</a></td>
+                                    <td><a href="{{o.files.url}}" >{{o.files.url}}</a></td>
                                     <td>{{o.name}}</td>
                                     <td>{{o.size}}</td>
                                     <td>{{o.content_type}}</td>
                                     <td>{{o.year}}</td>
                                     <td>{{o.remarks}}</td>
                                     <td>{{o.date_uploaded}}</td>
-                                    <td><a href="{{o.files.url}}" download>{{o.files}}</a></td>
+                                    <td><a href="{{o.files.url}}" download data-toggle="tooltip" title="download">download</a></td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -118,7 +118,7 @@ e-Legislative Old Documents
                         <div class="mailbox-controls"> 
                             <div class="btn-group">
                               <button type="button" class="btn btn-default btn-sm" id="btn-select-all"><i class="fa fa-square-o"></i></button> 
-                              <button type="button" class="btn btn-default btn-sm" id="btn-delete" data-url=""><i class="fa fa-trash-o"></i></button> 
+                              <button type="button" class="btn btn-default btn-sm" id="btn-delete" data-url="{% url 'elegislative:delete_old_documents' %}"><i class="fa fa-trash-o"></i></button> 
                             </div> 
                         </div>
                     </div>

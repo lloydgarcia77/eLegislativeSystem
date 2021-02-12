@@ -2216,14 +2216,42 @@ def upload_old_documents(request, *args, **kwargs):
         data = json.loads(data)
         year = data['year']
         remarks = data['remarks'] 
+        
         old_document = models.OldDocumentsModel(files=f,name=fname,size=fsize,content_type=fcontent_type,year=year,remarks=remarks)
         old_document.save()
+        f.close()
 
     context = {
         'user': user,    
         'notifications':kwargs['notifications'], 
     }    
     return render(request, template_name, context)
+
+@login_required
+@roles(is_old_documents_manager=True)
+@authorize 
+@get_notification
+def delete_old_documents(request, *args, **kwargs):
+    data = dict()
+    template_name = "elegislative/old_documents/delete_documents.html"
+    user = get_object_or_404(models.User, email=request.user.email) 
+    if request.is_ajax(): 
+        if request.method == 'GET':  
+            context = {
+                'user': user,     
+            }
+            data['html_form'] = render_to_string(template_name, context, request) 
+        elif request.method == 'POST':  
+            json_request = json.loads(request.body)
+            id_list = json_request["id_list"]
+            for item in id_list: 
+                old_document = get_object_or_404(models.OldDocumentsModel,  id=int(item))
+                old_document.delete()
+            data['status'] = True
+        
+        return JsonResponse(data)     
+    else:
+        raise Http404()
 
 """
 [END] -> OLD DOCUMENTS features
