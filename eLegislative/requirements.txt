@@ -8,7 +8,7 @@ django[argon2]
 django-crispy-forms
 pillow
 django-import-export
-pip3 install mysqlclient 
+mysqlclient 
 requests 
 django python-dotenv
 python-decouple
