@@ -1,1 +1,1 @@
-web: gunicorn elegislative.wsgi --log-file -
+web: gunicorn eLegislative.wsgi  
