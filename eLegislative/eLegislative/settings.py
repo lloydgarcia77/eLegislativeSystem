@@ -30,7 +30,7 @@ MEDIA_DIR = os.path.join(BASE_DIR, 'elegislative_app/media')
 SECRET_KEY = '0=8_446=toqa#ix8sv_6rtmk54ajx1paa_fp+xfz_zt_ch2+r%'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
