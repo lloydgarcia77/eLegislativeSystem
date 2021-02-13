@@ -27,16 +27,16 @@ MEDIA_DIR = os.path.join(BASE_DIR, 'elegislative_app/media')
 SECRET_KEY = '0=8_446=toqa#ix8sv_6rtmk54ajx1paa_fp+xfz_zt_ch2+r%'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['elegislativebatangas77.pythonanywhere.com']
 
 
 # Application definition
 
 INSTALLED_APPS = [
-    'jet.dashboard',
-    'jet',
+    # 'jet.dashboard',
+    # 'jet',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'elegislative_app',
     'import_export',
-    'django_cleanup', 
+    'django_cleanup',
 ]
 
 MIDDLEWARE = [
@@ -156,11 +156,14 @@ X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 STATIC_URL = '/static/'
 STATIC_ROOT = STATIC_DIR
+# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+# STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
+
 
 MEDIA_ROOT = MEDIA_DIR
 MEDIA_URL = '/media/'
 
- 
+
 LOGIN_URL = 'login'
 LOGOUT_URL = 'logout'
 LOGIN_REDIRECT_URL = 'login'
@@ -175,7 +178,7 @@ MESSAGE_TAGS = {
 }
 # -------Using Gmail
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587 
+EMAIL_PORT = 587
 EMAIL_HOST_USER = 'lloydgarcia77@gmail.com'
 EMAIL_HOST_PASSWORD = 'LloydQueen77'
 EMAIL_USE_TLS = True

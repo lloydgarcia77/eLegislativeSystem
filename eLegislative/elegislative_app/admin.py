@@ -1,12 +1,12 @@
-from django.contrib import admin 
+from django.contrib import admin
 from elegislative_app import models
-from import_export.admin import ImportExportModelAdmin  
+from import_export.admin import ImportExportModelAdmin
 
 admin.site.site_header = 'e-Legislative Super Administrator'
 admin.site.index_title = 'Super Administrator Page'
 admin.site.site_title = 'Super Administrator Panel'
 admin.site.site_url = "/elegislative/dashboard/"
- 
+
 admin.site.register(models.User)
 
 
@@ -26,7 +26,7 @@ class ResolutionAdmin(ImportExportModelAdmin):
     list_per_page = 10
     search_fields = ("id","no","title",)
     list_filter = ("author","status","is_signed",)
- 
+
 admin.site.register(models.ResolutionModel, ResolutionAdmin)
 
 class CommitteeReportResolutionAdmin(ImportExportModelAdmin):
@@ -35,7 +35,7 @@ class CommitteeReportResolutionAdmin(ImportExportModelAdmin):
     list_per_page = 10
     search_fields = ("id","no","title",)
     list_filter = ("author","status","is_signed",)
- 
+
 admin.site.register(models.CommitteeReportResolutionModel, CommitteeReportResolutionAdmin)
 
 class CommentsRecomendationResolutionAdmin(ImportExportModelAdmin):
@@ -44,7 +44,7 @@ class CommentsRecomendationResolutionAdmin(ImportExportModelAdmin):
     list_per_page = 10
     search_fields = ("id","commentor_resolution","message","date_filed",)
     list_filter = ("commentor_resolution",)
- 
+
 admin.site.register(models.CommentsRecomendationResolutionModel, CommentsRecomendationResolutionAdmin)
 
 
@@ -54,7 +54,7 @@ class OrdinanceAdmin(ImportExportModelAdmin):
     list_per_page = 10
     search_fields = ("id","no","title",)
     list_filter = ("author","status","is_signed",)
- 
+
 admin.site.register(models.OrdinanceModel, OrdinanceAdmin)
 
 class CommitteeReportOrdinanceAdmin(ImportExportModelAdmin):
@@ -63,7 +63,7 @@ class CommitteeReportOrdinanceAdmin(ImportExportModelAdmin):
     list_per_page = 10
     search_fields = ("id","no","title",)
     list_filter = ("author","status","is_signed",)
- 
+
 admin.site.register(models.CommitteeReportOrdinanceModel, CommitteeReportOrdinanceAdmin)
 
 
@@ -73,7 +73,7 @@ class CommentsRecomendationOrdinanceAdmin(ImportExportModelAdmin):
     list_per_page = 10
     search_fields = ("id","commentor_ordiance","message","date_filed",)
     list_filter = ("commentor_ordiance",)
- 
+
 admin.site.register(models.CommentsRecomendationOrdinanceModel, CommentsRecomendationOrdinanceAdmin)
 
 

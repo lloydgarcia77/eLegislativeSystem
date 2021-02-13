@@ -14,7 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include 
+from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from elegislative_app import views
 
@@ -28,13 +28,13 @@ handler404 = 'elegislative_app.views.error_404'
 handler500 = 'elegislative_app.views.error_500'
 
 urlpatterns = [
-    path('jet/', include('jet.urls', 'jet')),
-    path('jet/dashboard/', include('jet.dashboard.urls', 'jet-dashboard')), 
+    # path('jet/', include('jet.urls', 'jet')),
+    # path('jet/dashboard/', include('jet.dashboard.urls', 'jet-dashboard')),
     path('admin/', admin.site.urls),
 
-    # Login 
+    # Login
 
-    # Update password    
+    # Update password
     path('accounts/password_change/', auth_views.PasswordChangeView.as_view(), name='password_change'),
     path('accounts/password_change/done/', auth_views.PasswordChangeDoneView.as_view(), name='password_change_done'),
 
@@ -46,7 +46,7 @@ urlpatterns = [
     # Login and register
     path('login/', views.login_page, name="login"),
     path('logout/', auth_views.LogoutView.as_view(), name="logout"),
-    path('register/', views.register_page, name="register"), 
+    path('register/', views.register_page, name="register"),
 
     # Application
     path('elegislative/', include('elegislative_app.urls')),
