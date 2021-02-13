@@ -38,7 +38,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
-    'whitenoise.runserver_nostatic',
+    # 'whitenoise.runserver_nostatic',
     'jet.dashboard',
     'jet',
     'django.contrib.admin',
@@ -61,7 +61,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    # 'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'eLegislative.urls'
@@ -160,7 +160,8 @@ AUTH_USER_MODEL = 'elegislative_app.User'
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 STATIC_URL = '/static/'
-STATIC_ROOT = STATIC_DIR
+# STATIC_ROOT = STATIC_DIR
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 MEDIA_ROOT = MEDIA_DIR
 MEDIA_URL = '/media/'
@@ -217,7 +218,7 @@ NOTIFICATION_TAGS = (
 db_from_env = dj_database_url.config(conn_max_age=600, ssl_require=True)
 DATABASES['default'].update(db_from_env) 
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_COOKIE_AGE = 600 # set just 10 seconds to test
