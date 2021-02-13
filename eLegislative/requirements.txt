@@ -60,7 +60,7 @@ mccabe==0.6.1
 msgpack==1.0.2
 msgpack-python==0.5.6
 mysqlclient==2.0.3
-numpy==1.20.1
+numpy
 odfpy==1.4.1
 openpyxl==3.0.6
 parsel==1.6.0
