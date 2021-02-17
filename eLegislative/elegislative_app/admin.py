@@ -6,8 +6,21 @@ admin.site.site_header = 'e-Legislative Super Administrator'
 admin.site.index_title = 'Super Administrator Page'
 admin.site.site_title = 'Super Administrator Panel'
 admin.site.site_url = "/elegislative/dashboard/"
+ # Custom user model and admin
+# https://docs.djangoproject.com/en/3.0/topics/auth/customizing/#custom-users-admin-full-example
+# Change password
+# https://docs.djangoproject.com/en/3.1/topics/auth/default/
  
 admin.site.register(models.User)
+
+# class CustomUserAdmin(UserAdmin, ImportExportModelAdmin):
+#     # as an example, this custom user admin orders users by email address
+#     ordering = ('email',)
+#     list_display = ("id","password","key_id","email","image","f_name","m_name","l_name","gender","dob","age","address", "title", "date_added")
+#     add_fieldsets = ()
+# # admin.site.unregister(models.User)
+# admin.site.register(models.User, CustomUserAdmin)
+
 
 
 class AgendaAdmin(ImportExportModelAdmin):
