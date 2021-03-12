@@ -92,5 +92,11 @@ urlpatterns = [
     # Old Documents
     path('old-documents/', views.old_documents, name="old_documents"), 
     path('old-documents/upload-documents/', views.upload_old_documents, name="upload_old_documents"), 
-    path('old-documents/delete-documents/', views.delete_old_documents, name="delete_old_documents"), 
+    path('old-documents/delete-documents/', views.delete_old_documents, name="delete_old_documents"),  
+    
+    # Audio Recording
+    path('audio-recording/', views.audio_recording, name="audio_recording"), 
+
+    # Speech Recognition
+    path('speech-recognition/', views.speech_recognition, name="speech_recognition"), 
 ]

@@ -142,7 +142,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+# TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Singapore'
 
 DATETIME_FORMAT = '%b %d %Y %a %I:%M %p'
 
@@ -155,8 +156,7 @@ USE_TZ = False
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
-
-STATIC_URL = '/static/'
+ 
 
 AUTH_USER_MODEL = 'elegislative_app.User'
 # for jet
