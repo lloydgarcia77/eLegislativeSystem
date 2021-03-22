@@ -478,8 +478,13 @@ def search(request, *args, **kwargs):
 @authorize
 @get_notification
 def agenda_page(request, *args, **kwargs):
+<<<<<<< HEAD
     template_name = "elegislative/agenda/agenda.html"
     user = get_object_or_404(models.User, email=request.user.email)
+=======
+    template_name = "elegislative/agenda/agenda.html" 
+    user = get_object_or_404(models.User, email=request.user.email) 
+>>>>>>> a0f404c1f3694bd7b35a48cf87e9173805dc872d
     agenda = models.AgendaModel.objects.all().filter(Q(is_delete=False)) if user.is_overall else models.AgendaModel.objects.all().filter(Q(author=user), Q(is_delete=False))
     context = {
         'user': user,
@@ -2487,4 +2492,43 @@ def restore_deleted(request, *args, **kwargs):
         raise Http404()
 """
 [END] -> Trash features
+"""
+
+
+"""
+[START] -> Audio Recording features
+"""
+@login_required 
+@authorize 
+@get_notification
+def audio_recording(request, *args, **kwargs):
+    template_name = "elegislative/audio_recording/audio_recording.html"
+    user = get_object_or_404(models.User, email=request.user.email) 
+    context = {
+        'user': user, 
+        'notifications':kwargs['notifications'],
+    }    
+    return render(request, template_name, context)
+
+
+"""
+[END] -> Audio Recording features
+"""
+
+"""
+[START] -> Speech Recognition features
+"""
+@login_required 
+@authorize 
+@get_notification
+def speech_recognition(request, *args, **kwargs):
+    template_name = "elegislative/speech_recognition/speech_recognition.html"
+    user = get_object_or_404(models.User, email=request.user.email) 
+    context = {
+        'user': user, 
+        'notifications':kwargs['notifications'],
+    }    
+    return render(request, template_name, context)
+"""
+[END] -> Speech Recognition features
 """

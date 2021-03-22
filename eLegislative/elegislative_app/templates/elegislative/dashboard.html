@@ -306,7 +306,31 @@ e-Legislative Dashboard
         </a>
       </li>
       {% endblock nav_trash %}
-             
+      
+      {% block nav_speech_recognition %}
+      <li> 
+        <a href="{% url 'elegislative:speech_recognition' %}" data-toggle="tooltip" title="Speech Recognition">
+          <i class="fa fa-fw fa-file-word-o text-orange"></i> <span>Speech Recognition</span>
+          <span class="pull-right-container">
+            <small class="label pull-right bg-green"></small>
+          </span>
+        </a>
+      </li>
+      {% endblock nav_speech_recognition %}
+
+      {% block nav_audio_recording %}
+      <li>
+        <a href="{% url 'elegislative:audio_recording' %}" data-toggle="tooltip" title="Audio Recording">
+          <i class="fa fa-fw fa-file-audio-o text-green"></i> <span>Audio Recording</span>
+          <span class="pull-right-container">
+            <small class="label pull-right bg-green"></small>
+          </span>
+        </a>
+      </li>
+      {% endblock nav_audio_recording %}
+
+
+
      
     </ul>
   </section>
