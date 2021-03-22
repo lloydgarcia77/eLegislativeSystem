@@ -90,19 +90,7 @@ urlpatterns = [
     path('webex/delete-link/<int:id>', views.delete_webex_link, name="delete_webex_link"),
 
     # Old Documents
-<<<<<<< HEAD
     path('old-documents/', views.old_documents, name="old_documents"),
     path('old-documents/upload-documents/', views.upload_old_documents, name="upload_old_documents"),
     path('old-documents/delete-documents/', views.delete_old_documents, name="delete_old_documents"),
-=======
-    path('old-documents/', views.old_documents, name="old_documents"), 
-    path('old-documents/upload-documents/', views.upload_old_documents, name="upload_old_documents"), 
-    path('old-documents/delete-documents/', views.delete_old_documents, name="delete_old_documents"),  
-    
-    # Audio Recording
-    path('audio-recording/', views.audio_recording, name="audio_recording"), 
-
-    # Speech Recognition
-    path('speech-recognition/', views.speech_recognition, name="speech_recognition"), 
->>>>>>> a0f404c1f3694bd7b35a48cf87e9173805dc872d
 ]
