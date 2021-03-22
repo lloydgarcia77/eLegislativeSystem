@@ -1,6 +1,6 @@
 {% extends 'elegislative/dashboard.html' %}
 {% load static %}
-{% load humanize %} 
+{% load humanize %}
 {% block title %}
 e-Legislative Committee Reports
 {% endblock title%}
@@ -12,7 +12,7 @@ e-Legislative Committee Reports
 <link rel="stylesheet" href="{% static 'bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css' %}">
 <style>
     table td{
-        text-align: center; 
+        text-align: center;
         vertical-align: middle !important;
     }
 </style>
@@ -29,7 +29,7 @@ e-Legislative Committee Reports
     </span>
     </a>
     <ul class="treeview-menu">
-    <li class="active"><a href="{% url 'elegislative:dashboard_page' %}"><i class="fa fa-circle-o"></i> Dashboard</a></li> 
+    <li class="active"><a href="{% url 'elegislative:dashboard_page' %}"><i class="fa fa-circle-o"></i> Dashboard</a></li>
     </ul>
 </li>
 {% endblock nav_dashboard %}
@@ -47,7 +47,7 @@ e-Legislative Committee Reports
 {% endblock nav_com_rep %}
 
 
-{% block main_content %} 
+{% block main_content %}
 <div class="content-wrapper">
     <section class="content-header">
         <h1>
@@ -65,26 +65,26 @@ e-Legislative Committee Reports
                 <div class="box">
                     <div class="box-header with-border">
                         <h3 class="box-title">Committee Reports <b>Resolution</b> Table</h3>
-                       
-                     
+
+
                     </div>
                     <div class="box-body">
                         <table id="table_committee_report_resolution" class="table table-bordered table-striped">
                             <thead>
                                 <tr>
-                                    <th class="text-center" style="width: 10%;">ID</th> 
-                                    <th class="text-center" style="width: 10%;">No</th> 
+                                    <th class="text-center" style="width: 10%;">ID</th>
+                                    <th class="text-center" style="width: 10%;">No</th>
                                     <th class="text-center" style="width: 20%;">Title</th>
                                     <th class="text-center" style="width: 15%;">Author</th>
                                     <th class="text-center" style="width: 10%;">Version</th>
                                     <th class="text-center" style="width: 10%;">Status</th>
                                     <th class="text-center" style="width: 5%;">Signed</th>
-                                    <th class="text-center" style="width: 10%;"> Date Filed</th>                                
+                                    <th class="text-center" style="width: 10%;"> Date Filed</th>
                                     <th class="text-center" style="width: 10%;"></th>
                                 </tr>
                             </thead>
                             <tbody>
-                                
+
                                 {% for r in resolution %}
                                 <tr>
                                     <td>{{r.id}}</td>
@@ -94,11 +94,11 @@ e-Legislative Committee Reports
                                     <td>{{r.version}}</td>
                                     <td>{{r.status}}</td>
                                     <td>
-                                        {% if r.is_signed %}                                        
+                                        {% if r.is_signed %}
                                         <span class="label label-success">{{r.is_signed}}</span>
                                         {% else %}
                                         <span class="label label-danger">{{r.is_signed}}</span>
-                                        {% endif %} 
+                                        {% endif %}
                                     </td>
                                     <td>{{r.date_filed}}</td>
                                     <td>
@@ -110,22 +110,22 @@ e-Legislative Committee Reports
                                             </button>
                                             <ul class="dropdown-menu" role="menu">
                                                 {% if user.is_view_mode %}
-                                                <li><a href="{% url 'elegislative:print_committee_resolution_reports' r.id %}" target="_blank">Preview/Print</a></li>        
+                                                <li><a href="{% url 'elegislative:print_committee_resolution_reports' r.id %}" target="_blank">Preview/Print</a></li>
                                                 {% else %}
-                                                <li><a href="{% url 'elegislative:edit_committee_resolution_reports' r.id %}">Edit</a></li>   
-                                                <li><a href="{% url 'elegislative:delete_committee_resolution_reports' r.id %}" class="delete">Delete</a></li>   
-                                                <li class="divider"></li>                          
-                                                <li><a href="{% url 'elegislative:print_committee_resolution_reports' r.id %}" target="_blank">Preview/Print</a></li>     
-                                                {% endif %}    
+                                                <li><a href="{% url 'elegislative:edit_committee_resolution_reports' r.id %}">Edit</a></li>
+                                                <li><a href="{% url 'elegislative:delete_committee_resolution_reports' r.id %}" class="delete">Delete</a></li>
+                                                <li class="divider"></li>
+                                                <li><a href="{% url 'elegislative:print_committee_resolution_reports' r.id %}" target="_blank">Preview/Print</a></li>
+                                                {% endif %}
                                             </ul>
-                                        </div> 
+                                        </div>
 
                                     </td>
-                                </tr>                                    
+                                </tr>
                                 {% endfor %}
-                                    
-                            
-                            </tbody> 
+
+
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -135,25 +135,25 @@ e-Legislative Committee Reports
             <div class="col-xs-12">
                 <div class="box">
                     <div class="box-header with-border">
-                        <h3 class="box-title">Committee Reports <b>Ordinance</b> Table</h3> 
+                        <h3 class="box-title">Committee Reports <b>Ordinance</b> Table</h3>
                     </div>
                     <div class="box-body">
                         <table id="table_committee_report_ordinance" class="table table-bordered table-striped">
                             <thead>
                                 <tr>
-                                    <th class="text-center" style="width: 10%;">ID</th> 
-                                    <th class="text-center" style="width: 10%;">No</th> 
+                                    <th class="text-center" style="width: 10%;">ID</th>
+                                    <th class="text-center" style="width: 10%;">No</th>
                                     <th class="text-center" style="width: 20%;">Title</th>
                                     <th class="text-center" style="width: 15%;">Author</th>
                                     <th class="text-center" style="width: 10%;">Version</th>
                                     <th class="text-center" style="width: 10%;">Status</th>
                                     <th class="text-center" style="width: 5%;">Signed</th>
-                                    <th class="text-center" style="width: 10%;"> Date Filed</th>                                
+                                    <th class="text-center" style="width: 10%;"> Date Filed</th>
                                     <th class="text-center" style="width: 10%;"></th>
                                 </tr>
                             </thead>
                             <tbody>
-                                
+
                                 {% for o in ordinance %}
                                 <tr>
                                     <td>{{o.id}}</td>
@@ -163,13 +163,13 @@ e-Legislative Committee Reports
                                     <td>{{o.version}}</td>
                                     <td>{{o.status}}</td>
                                     <td>
-                                        {% if o.is_signed %}                                        
+                                        {% if o.is_signed %}
                                         <span class="label label-success">{{o.is_signed}}</span>
                                         {% else %}
                                         <span class="label label-danger">{{o.is_signed}}</span>
-                                        {% endif %} 
+                                        {% endif %}
                                     </td>
-                                    <td>{{r.date_filed}}</td>
+                                    <td>{{o.date_filed}}</td>
                                     <td>
                                         <div class="btn-group">
                                             <button type="button" class="btn btn-default btn-flat">Action</button>
@@ -179,21 +179,21 @@ e-Legislative Committee Reports
                                             </button>
                                             <ul class="dropdown-menu" role="menu">
                                                 {% if user.is_view_mode %}
-                                                <li><a href="{% url 'elegislative:print_committee_ordinance_reports' o.id %}" target="_blank">Preview/Print</a></li>  
+                                                <li><a href="{% url 'elegislative:print_committee_ordinance_reports' o.id %}" target="_blank">Preview/Print</a></li>
                                                 {% else %}
-                                                <li><a href="{% url 'elegislative:edit_committee_ordinance_reports' o.id %}">Edit</a></li>   
-                                                <li><a href="{% url 'elegislative:delete_committee_ordinance_reports' o.id %}" class="delete">Delete</a></li>   
-                                                <li class="divider"></li>                          
-                                                <li><a href="{% url 'elegislative:print_committee_ordinance_reports' o.id %}" target="_blank">Preview/Print</a></li>   
-                                                {% endif %} 
+                                                <li><a href="{% url 'elegislative:edit_committee_ordinance_reports' o.id %}">Edit</a></li>
+                                                <li><a href="{% url 'elegislative:delete_committee_ordinance_reports' o.id %}" class="delete">Delete</a></li>
+                                                <li class="divider"></li>
+                                                <li><a href="{% url 'elegislative:print_committee_ordinance_reports' o.id %}" target="_blank">Preview/Print</a></li>
+                                                {% endif %}
                                             </ul>
-                                        </div> 
+                                        </div>
 
                                     </td>
-                                </tr>          
+                                </tr>
                                 {% endfor %}
-                                    
-                            </tbody> 
+
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -201,16 +201,16 @@ e-Legislative Committee Reports
         </div>
     </section>
 </div>
-{% endblock main_content %} 
+{% endblock main_content %}
 
 <!-- Javascript -->
-   
+
 {% block additional_js %}
 
 <!-- DataTables -->
 <script src="{% static 'bower_components/datatables.net/js/jquery.dataTables.min.js' %}"></script>
-<script src="{% static 'bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js' %}"></script> 
+<script src="{% static 'bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js' %}"></script>
 <script src="{% static 'js/committee_report_resolution.js' %}"></script>
 <script src="{% static 'js/committee_report_ordinance.js' %}"></script>
-        
+
 {% endblock additional_js %}

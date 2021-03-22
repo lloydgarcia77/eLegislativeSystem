@@ -83,13 +83,27 @@ WSGI_APPLICATION = 'eLegislative.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'elegislativebata$elegislative_batangas',
+        # username when creating access from python anywhere
+        'USER': 'elegislativebata',
+        'PASSWORD': 'r00t@passw0rd77',
+        'HOST': 'elegislativebatangas77.mysql.pythonanywhere-services.com',
+        'PORT': '3306',
+        'OPTIONS': {
+            'init_command': 'SET default_storage_engine=INNODB',
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
     }
 }
-
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.mysql',
@@ -134,7 +148,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+# TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Singapore'
 
 DATETIME_FORMAT = '%b %d %Y %a %I:%M %p'
 
@@ -155,9 +170,9 @@ AUTH_USER_MODEL = 'elegislative_app.User'
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 STATIC_URL = '/static/'
-STATIC_ROOT = STATIC_DIR
-# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-# STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
+# STATIC_ROOT = STATIC_DIR
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
 
 
 MEDIA_ROOT = MEDIA_DIR
@@ -179,23 +194,13 @@ MESSAGE_TAGS = {
 # -------Using Gmail
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'lloydgarcia77@gmail.com'
-EMAIL_HOST_PASSWORD = 'LloydQueen77'
+EMAIL_HOST_USER = 'elegislativebatangas77@gmail.com'
+EMAIL_HOST_PASSWORD = 'qweQWE123!'
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 EMAIL_FROM = EMAIL_HOST_USER
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# Go Daddy
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.office365.com'
-# EMAIL_HOST_USER = 'info@lits.com.ph'
-# DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-# EMAIL_HOST_PASSWORD = '@Helios2o18'
-# EMAIL_PORT = 587
-# EMAIL_USE_SSL = False
-# EMAIL_USE_TLS = True
-# from cryptography.fernet import Fernet
-# Fernet.generate_key()
+
 ENCRYPT_KEY = b'xlNVkz4loCnsQWGmKEMjj7De5fj0d_N0_yeKxGJxDSk='
 
 
