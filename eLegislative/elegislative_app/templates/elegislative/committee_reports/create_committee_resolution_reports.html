@@ -143,8 +143,12 @@ e-Legislative Create Committee Resolution Report
         $(function () {
             //Add text editor
             //$("#compose-textarea").wysihtml5();
-            CKEDITOR.replace('compose_textarea'); 
-            CKEDITOR.config.extraPlugins = 'justify, lineheight';
+            CKEDITOR.addCss('.cke_editable p { margin: 0 !important; }');
+            CKEDITOR.replace('compose_textarea');  
+            CKEDITOR.config.extraPlugins = 'justify, lineheight, font, liststyle, colorbutton, indentblock, textindent';
+            CKEDITOR.addStylesSet('default',[
+                    {name :'Roman',element:'ol',attributes:{type:'I'}}
+                    ]);
         });
         
         //Initialize Select2 Elements
