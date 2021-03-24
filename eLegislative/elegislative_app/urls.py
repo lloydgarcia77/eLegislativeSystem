@@ -93,4 +93,7 @@ urlpatterns = [
     path('old-documents/', views.old_documents, name="old_documents"),
     path('old-documents/upload-documents/', views.upload_old_documents, name="upload_old_documents"),
     path('old-documents/delete-documents/', views.delete_old_documents, name="delete_old_documents"),
+
+    # Order of business
+    path('order-of-business/',views.order_of_business, name="order_of_business"),
 ]

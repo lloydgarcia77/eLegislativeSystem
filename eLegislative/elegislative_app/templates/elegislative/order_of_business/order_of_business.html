@@ -1,0 +1,78 @@
+{% extends 'elegislative/dashboard.html' %}
+{% load static %}
+{% load custom_tags %}
+{% load humanize %} 
+{% block title %}
+e-Legislative Manage Order Of Business
+{% endblock title%}
+
+{% block additional_css %}
+<!-- DataTables -->
+<link rel="stylesheet" href="{% static 'bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css' %}">
+
+<style>
+    table td{
+        text-align: center; 
+        vertical-align: middle !important;
+    }
+</style>
+{% endblock additional_css %}
+
+
+
+<!-- navigation -->
+{% block nav_dashboard %}
+<li class="treeview">
+    <a href="{% url 'elegislative:dashboard_page' %}" >
+    <i class="fa fa-dashboard" ></i> <span>Dashboard</span>
+    <span class="pull-right-container">
+        <i class="fa fa-angle-left pull-right"></i>
+    </span>
+    </a>
+    <ul class="treeview-menu">
+    <li class="active"><a href="{% url 'elegislative:dashboard_page' %}"><i class="fa fa-circle-o"></i> Dashboard</a></li> 
+    </ul>
+</li>
+{% endblock nav_dashboard %}
+
+
+{% block nav_order_of_business %}
+<li class="active">
+  <a href="{% url 'elegislative:order_of_business' %}">
+    <i class="fa fa-tasks"></i> <span>Order of business</span>
+    <span class="pull-right-container">
+      <small class="label pull-right bg-green"></small>
+    </span>
+  </a>
+</li>
+{% endblock nav_order_of_business %}
+
+
+{% block main_content %} 
+<div class="content-wrapper">
+    <section class="content-header">
+        <h1>
+        Order of business
+        <small>Create and manage order of business</small>
+        </h1>
+        <ol class="breadcrumb">
+        <li><a href="{% url 'elegislative:dashboard_page' %}"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Order of business</li>
+        </ol>
+    </section>
+    <section class="content">
+
+    </section>
+</div>
+{% endblock main_content %} 
+
+<!-- Javascript -->
+   
+{% block additional_js %}
+
+<!-- DataTables -->
+<script src="{% static 'bower_components/datatables.net/js/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js' %}"></script>
+<script src="{% static 'js/order_of_business.js' %}"></script> 
+ 
+{% endblock additional_js %}
