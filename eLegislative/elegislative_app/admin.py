@@ -7,6 +7,8 @@ admin.site.index_title = 'Super Administrator Page'
 admin.site.site_title = 'Super Administrator Panel'
 admin.site.site_url = "/elegislative/dashboard/"
 
+admin.site.register(models.User)
+
 class AgendaAdmin(ImportExportModelAdmin):
     list_display = ("id","no","title","version","author","is_delete","status","is_signed","hard_copy","content","date_filed")
     list_editable = ("no","title","version","author","is_delete","status","is_signed","hard_copy","content",)
