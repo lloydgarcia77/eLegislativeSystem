@@ -95,8 +95,12 @@ e-Legislative Create minutes of the meeting
 <script src="{% static 'bower_components/ckeditor/ckeditor.js' %}"></script>
 <script>
     $(document).ready(function () {
+        CKEDITOR.addCss('.cke_editable p { margin: 0 !important; }');
         CKEDITOR.replace('compose_textarea');  
-        CKEDITOR.config.extraPlugins = 'justify, lineheight';
+        CKEDITOR.config.extraPlugins = 'justify, lineheight, font, liststyle, colorbutton, indentblock, textindent';
+        CKEDITOR.addStylesSet('default',[
+                {name :'Roman',element:'ol',attributes:{type:'I'}}
+                ]);
     });
     
 </script>
