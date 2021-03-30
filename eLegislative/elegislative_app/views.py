@@ -2488,3 +2488,25 @@ def restore_deleted(request, *args, **kwargs):
 """
 [END] -> Trash features
 """
+
+
+"""
+[START] -> Order of business features
+"""
+@login_required
+@authorize
+@get_notification
+def order_of_business(request, *args, **kwargs):
+    template_name = "elegislative/order_of_business/order_of_business.html"
+    user = get_object_or_404(models.User, email=request.user.email)
+    
+    context = {
+        'user': user,
+        'notifications':kwargs['notifications'], 
+    }
+
+    return render(request, template_name, context)
+
+"""
+[END] -> Order of business features
+"""

@@ -8,113 +8,114 @@ e-Legislative Dashboard
 
 {% block body_block %}
 <header class="main-header">
-    <!-- Logo -->
-    <a href="{% url 'admin:index' %}" class="logo">
-      <!-- mini logo for sidebar mini 50x50 pixels -->
-      <span class="logo-mini"><b>e-</b>L</span>
-      <!-- logo for regular state and mobile devices -->
-      <span class="logo-lg"><b>e-</b>Legislative</span>
+  <!-- Logo -->
+  <a href="{% url 'admin:index' %}" class="logo">
+    <!-- mini logo for sidebar mini 50x50 pixels -->
+    <span class="logo-mini"><b>e-</b>L</span>
+    <!-- logo for regular state and mobile devices -->
+    <span class="logo-lg"><b>e-</b>Legislative</span>
+  </a>
+  <!-- Header Navbar: style can be found in header.less -->
+  <nav class="navbar navbar-static-top">
+    <!-- Sidebar toggle button-->
+    <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
+      <span class="sr-only">Toggle navigation</span>
     </a>
-    <!-- Header Navbar: style can be found in header.less -->
-    <nav class="navbar navbar-static-top">
-      <!-- Sidebar toggle button-->
-      <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
-        <span class="sr-only">Toggle navigation</span>
-      </a>
 
-      <div class="navbar-custom-menu">
-        <ul class="nav navbar-nav">
+    <div class="navbar-custom-menu">
+      <ul class="nav navbar-nav">
 
-          <li class="dropdown messages-menu">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
-              <i class="fa fa-bell-o"></i>
-              {% if notifications %}
-              <span class="label label-warning">
+        <li class="dropdown messages-menu">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
+            <i class="fa fa-bell-o"></i>
+            {% if notifications %}
+            <span class="label label-warning">
               {{notifications.count}}
-              </span>
-              {% endif %}
-            </a>
-            <ul class="dropdown-menu">
-              <li class="header">You have {{notifications.count}} notifications</li>
-              <li>
-                <!-- inner menu: contains the actual data -->
-                <ul class="menu">
-                  <li>
-                    {% for n in notifications %}
-                    <a href="{{n.url}}" data-url="{% url 'elegislative:delete_notification' n.id %}">
-                      <div class="pull-left">
-                        {% if n.sender.image %}
-                        <img src="{{ n.sender.image.url }}" class="img-circle" alt="User Image">
-                        {% else %}
-                        <img src="{% static 'images/150x150.png' %}" class="img-circle" alt="User Image">
-                        {% endif %}
-                      </div>
-                      <h4>
-                        {{n.sender.f_name}} {{n.sender.l_name}}
-                        <small><i class="fa fa-clock-o"></i> {% custom_date_format_simple n.date_filed %}</small>
-                      </h4>
-                      <p style="overflow: hidden; text-overflow: ellipsis;">{{n.message}}</p>
-                    </a>
-                    {% endfor %}
-                  </li>
+            </span>
+            {% endif %}
+          </a>
+          <ul class="dropdown-menu">
+            <li class="header">You have {{notifications.count}} notifications</li>
+            <li>
+              <!-- inner menu: contains the actual data -->
+              <ul class="menu">
+                <li>
+                  {% for n in notifications %}
+                  <a href="{{n.url}}" data-url="{% url 'elegislative:delete_notification' n.id %}">
+                    <div class="pull-left">
+                      {% if n.sender.image %}
+                      <img src="{{ n.sender.image.url }}" class="img-circle" alt="User Image">
+                      {% else %}
+                      <img src="{% static 'images/150x150.png' %}" class="img-circle" alt="User Image">
+                      {% endif %}
+                    </div>
+                    <h4>
+                      {{n.sender.f_name}} {{n.sender.l_name}}
+                      <small><i class="fa fa-clock-o"></i> {% custom_date_format_simple n.date_filed %}</small>
+                    </h4>
+                    <p style="overflow: hidden; text-overflow: ellipsis;">{{n.message}}</p>
+                  </a>
+                  {% endfor %}
+                </li>
 
-                </ul>
-              </li>
-              <li class="footer"><a data-url="{% url 'elegislative:delete_all_notifications' %}" id="see-all-messages">See All Messages</a></li>
-            </ul>
-          </li>
+              </ul>
+            </li>
+            <li class="footer"><a data-url="{% url 'elegislative:delete_all_notifications' %}" id="see-all-messages">See
+                All Messages</a></li>
+          </ul>
+        </li>
 
 
 
-          <!-- User Account: style can be found in dropdown.less -->
-          <li class="dropdown user user-menu">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+        <!-- User Account: style can be found in dropdown.less -->
+        <li class="dropdown user user-menu">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+            {% if user.image %}
+            <img src="{{ user.image.url }}" class="user-image" alt="User Image">
+            {% else %}
+            <img src="{% static 'images/150x150.png' %}" class="user-image" alt="User Image">
+            {% endif %}
+            <span class="hidden-xs">{{user.f_name}} {{user.l_name}}</span>
+          </a>
+          <ul class="dropdown-menu">
+            <!-- User image -->
+            <li class="user-header">
               {% if user.image %}
-              <img src="{{ user.image.url }}" class="user-image" alt="User Image">
+              <img src="{{ user.image.url }}" class="img-circle" alt="User Image">
               {% else %}
-              <img src="{% static 'images/150x150.png' %}" class="user-image" alt="User Image">
+              <img src="{% static 'images/150x150.png' %}" class="img-circle" alt="User Image">
               {% endif %}
-              <span class="hidden-xs">{{user.f_name}} {{user.l_name}}</span>
-            </a>
-            <ul class="dropdown-menu">
-              <!-- User image -->
-              <li class="user-header">
-                {% if user.image %}
-                <img src="{{ user.image.url }}" class="img-circle" alt="User Image">
-                {% else %}
-                <img src="{% static 'images/150x150.png' %}" class="img-circle" alt="User Image">
-                {% endif %}
 
-                <p>
-                  {{user.f_name}} {{user.l_name}}
-                  <small>Member since {{user.date_added|date:'M d, Y'}}</small>
-                </p>
-              </li>
-              <!-- Menu Body -->
-              <li class="user-body">
-              </li>
-              <!-- Menu Footer-->
-              <li class="user-footer">
-                <div class="pull-left">
-                  <a href="{% url 'password_change' %}" class="btn btn-default btn-flat">Change Password</a>
-                </div>
-                <div class="pull-right">
-                  <a href="{% url 'logout' %}" class="btn btn-default btn-flat">Sign out</a>
-                </div>
-              </li>
-            </ul>
-          </li>
-          <!-- Control Sidebar Toggle Button -->
-          <li>
-            <a href="#" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a>
-          </li>
-        </ul>
-      </div>
-    </nav>
+              <p>
+                {{user.f_name}} {{user.l_name}}
+                <small>Member since {{user.date_added|date:'M d, Y'}}</small>
+              </p>
+            </li>
+            <!-- Menu Body -->
+            <li class="user-body">
+            </li>
+            <!-- Menu Footer-->
+            <li class="user-footer">
+              <div class="pull-left">
+                <a href="{% url 'password_change' %}" class="btn btn-default btn-flat">Change Password</a>
+              </div>
+              <div class="pull-right">
+                <a href="{% url 'logout' %}" class="btn btn-default btn-flat">Sign out</a>
+              </div>
+            </li>
+          </ul>
+        </li>
+        <!-- Control Sidebar Toggle Button -->
+        <li>
+          <a href="#" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a>
+        </li>
+      </ul>
+    </div>
+  </nav>
 </header>
 
 
- <!-- Left side column. contains the logo and sidebar -->
+<!-- Left side column. contains the logo and sidebar -->
 <aside class="main-sidebar">
   <!-- sidebar: style can be found in sidebar.less -->
   <section class="sidebar">
@@ -138,9 +139,9 @@ e-Legislative Dashboard
       <div class="input-group">
         <input type="text" name="q" class="form-control" placeholder="Search..." value="{{request.GET.q}}" required>
         <span class="input-group-btn">
-              <button type="submit" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
-              </button>
-            </span>
+          <button type="submit" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
+          </button>
+        </span>
       </div>
     </form>
     <!-- /.search form -->
@@ -150,113 +151,126 @@ e-Legislative Dashboard
 
       {% block nav_dashboard %}
       <li class="active treeview">
-        <a href="{% url 'elegislative:dashboard_page' %}" >
-          <i class="fa fa-dashboard" ></i> <span>Dashboard</span>
+        <a href="{% url 'elegislative:dashboard_page' %}">
+          <i class="fa fa-dashboard"></i> <span>Dashboard</span>
           <span class="pull-right-container">
             <i class="fa fa-angle-left pull-right"></i>
           </span>
         </a>
         <ul class="treeview-menu">
-          <li class="active"><a href="{% url 'elegislative:dashboard_page' %}"><i class="fa fa-circle-o"></i> Dashboard</a></li>
+          <li class="active"><a href="{% url 'elegislative:dashboard_page' %}"><i class="fa fa-circle-o"></i>
+              Dashboard</a></li>
         </ul>
       </li>
       {% endblock nav_dashboard %}
 
+      {% block nav_order_of_business %}
+      <li>
+        <a href="{% url 'elegislative:order_of_business' %}">
+          <i class="fa fa-tasks"></i> <span>Order of business</span>
+          <span class="pull-right-container">
+            <small class="label pull-right bg-green"></small>
+          </span>
+        </a>
+      </li>
+      {% endblock nav_order_of_business %}
+
       {% if request.user.is_arocc_manager %}
-        {% block nav_agenda %}
-        <li>
-          <a href="{% url 'elegislative:agenda_page' %}">
-            <i class="fa fa-hand-o-right"></i> <span>Agenda</span>
-            <span class="pull-right-container">
-              <small class="label pull-right bg-green"></small>
-            </span>
-          </a>
-        </li>
-        {% endblock nav_agenda %}
+      {% block nav_agenda %}
+      <li>
+        <a href="{% url 'elegislative:agenda_page' %}">
+          <i class="fa fa-hand-o-right"></i> <span>Agenda</span>
+          <span class="pull-right-container">
+            <small class="label pull-right bg-green"></small>
+          </span>
+        </a>
+      </li>
+      {% endblock nav_agenda %}
 
 
-        {% block nav_resolution %}
-        <li>
-          <a href="{% url 'elegislative:resolution' %}">
-            <i class="fa fa-hand-rock-o"></i> <span>Resolution</span>
-            <span class="pull-right-container">
-              <small class="label pull-right bg-green"></small>
-            </span>
-          </a>
-        </li>
-        {% endblock nav_resolution %}
+      {% block nav_resolution %}
+      <li>
+        <a href="{% url 'elegislative:resolution' %}">
+          <i class="fa fa-hand-rock-o"></i> <span>Resolution</span>
+          <span class="pull-right-container">
+            <small class="label pull-right bg-green"></small>
+          </span>
+        </a>
+      </li>
+      {% endblock nav_resolution %}
 
-        {% block nav_oridnance %}
-        <li>
-          <a href="{% url 'elegislative:ordinance_page' %}">
-            <i class="fa fa-balance-scale"></i> <span>Ordinances</span>
-            <span class="pull-right-container">
-              <small class="label pull-right bg-green"></small>
-            </span>
-          </a>
-        </li>
-        {% endblock nav_oridnance %}
+      {% block nav_oridnance %}
+      <li>
+        <a href="{% url 'elegislative:ordinance_page' %}">
+          <i class="fa fa-balance-scale"></i> <span>Ordinances</span>
+          <span class="pull-right-container">
+            <small class="label pull-right bg-green"></small>
+          </span>
+        </a>
+      </li>
+      {% endblock nav_oridnance %}
 
-        {% block nav_com_rec %}
-        <li>
-          <a href="{% url 'elegislative:comments_and_recommendation' %}" data-toggle="tooltip" title="Comments & Recommendation">
-            <i class="fa fa-files-o"></i> <span>Commt & Rec.</span>
-            <span class="pull-right-container">
-              <small class="label pull-right bg-green"></small>
-            </span>
-          </a>
-        </li>
-        {% endblock nav_com_rec %}
+      {% block nav_com_rec %}
+      <li>
+        <a href="{% url 'elegislative:comments_and_recommendation' %}" data-toggle="tooltip"
+          title="Comments & Recommendation">
+          <i class="fa fa-files-o"></i> <span>Commt & Rec.</span>
+          <span class="pull-right-container">
+            <small class="label pull-right bg-green"></small>
+          </span>
+        </a>
+      </li>
+      {% endblock nav_com_rec %}
 
-        {% block nav_com_rep %}
-        <li>
-          <a href="{% url 'elegislative:committee_reports' %}">
-            <i class="fa fa-file-text-o"></i> <span>Committee Reports</span>
-            <span class="pull-right-container">
-              <small class="label pull-right bg-green"></small>
-            </span>
-          </a>
-        </li>
-        {% endblock nav_com_rep %}
+      {% block nav_com_rep %}
+      <li>
+        <a href="{% url 'elegislative:committee_reports' %}">
+          <i class="fa fa-file-text-o"></i> <span>Committee Reports</span>
+          <span class="pull-right-container">
+            <small class="label pull-right bg-green"></small>
+          </span>
+        </a>
+      </li>
+      {% endblock nav_com_rep %}
       {% endif %}
 
       {% if request.user.is_mom_manager %}
-        {% block nav_mom %}
-        <li>
-          <a href="{% url 'elegislative:minutes_of_the_meeting' %}" data-toggle="tooltip" title="Minutes of the meeting">
-            <i class="fa fa-comments"></i> <span>Min. of the meeting</span>
-            <span class="pull-right-container">
-              <small class="label pull-right bg-green"></small>
-            </span>
-          </a>
-        </li>
-        {% endblock nav_mom %}
+      {% block nav_mom %}
+      <li>
+        <a href="{% url 'elegislative:minutes_of_the_meeting' %}" data-toggle="tooltip" title="Minutes of the meeting">
+          <i class="fa fa-comments"></i> <span>Min. of the meeting</span>
+          <span class="pull-right-container">
+            <small class="label pull-right bg-green"></small>
+          </span>
+        </a>
+      </li>
+      {% endblock nav_mom %}
       {% endif %}
 
       {% if request.user.is_records_manager %}
-        {% block records %}
-        <li>
-          <a href="{% url 'elegislative:records' %}" data-toggle="tooltip" title="Records">
-            <i class="fa fa-gavel"></i> <span>Records</span>
-            <span class="pull-right-container">
-              <small class="label pull-right bg-green"></small>
-            </span>
-          </a>
-        </li>
-        {% endblock records %}
+      {% block records %}
+      <li>
+        <a href="{% url 'elegislative:records' %}" data-toggle="tooltip" title="Records">
+          <i class="fa fa-gavel"></i> <span>Records</span>
+          <span class="pull-right-container">
+            <small class="label pull-right bg-green"></small>
+          </span>
+        </a>
+      </li>
+      {% endblock records %}
       {% endif %}
 
       {% if request.user.is_announcement_manager %}
-        {% block nav_announcements %}
-        <li>
-          <a href="{% url 'elegislative:announcements' %}" data-toggle="tooltip" title="Announcement">
-            <i class="fa fa-volume-up"></i> <span>Announcements</span>
-            <span class="pull-right-container">
-              <small class="label pull-right bg-green"></small>
-            </span>
-          </a>
-        </li>
-        {% endblock nav_announcements %}
+      {% block nav_announcements %}
+      <li>
+        <a href="{% url 'elegislative:announcements' %}" data-toggle="tooltip" title="Announcement">
+          <i class="fa fa-volume-up"></i> <span>Announcements</span>
+          <span class="pull-right-container">
+            <small class="label pull-right bg-green"></small>
+          </span>
+        </a>
+      </li>
+      {% endblock nav_announcements %}
       {% endif %}
 
       {% block nav_messages %}
@@ -271,29 +285,29 @@ e-Legislative Dashboard
       {% endblock nav_messages %}
 
       {% if request.user.is_old_documents_manager %}
-        {% block nav_old_documents %}
-        <li>
-          <a href="{% url 'elegislative:old_documents' %}" data-toggle="tooltip" title="Old Documents">
-            <i class="fa fa-book"></i> <span>Old Documents</span>
-            <span class="pull-right-container">
-              <small class="label pull-right bg-green"></small>
-            </span>
-          </a>
-        </li>
-        {% endblock nav_old_documents %}
+      {% block nav_old_documents %}
+      <li>
+        <a href="{% url 'elegislative:old_documents' %}" data-toggle="tooltip" title="Old Documents">
+          <i class="fa fa-book"></i> <span>Old Documents</span>
+          <span class="pull-right-container">
+            <small class="label pull-right bg-green"></small>
+          </span>
+        </a>
+      </li>
+      {% endblock nav_old_documents %}
       {% endif %}
 
       {% if request.user.is_webex_manager %}
-        {% block nav_webex %}
-        <li>
-          <a href="{% url 'elegislative:webex' %}" data-toggle="tooltip" title="Webex Links">
-            <i class="fa fa-external-link"></i> <span>Webex Links</span>
-            <span class="pull-right-container">
-              <small class="label pull-right bg-green"></small>
-            </span>
-          </a>
-        </li>
-        {% endblock nav_webex %}
+      {% block nav_webex %}
+      <li>
+        <a href="{% url 'elegislative:webex' %}" data-toggle="tooltip" title="Webex Links">
+          <i class="fa fa-external-link"></i> <span>Webex Links</span>
+          <span class="pull-right-container">
+            <small class="label pull-right bg-green"></small>
+          </span>
+        </a>
+      </li>
+      {% endblock nav_webex %}
       {% endif %}
 
       {% block nav_trash %}
@@ -322,23 +336,24 @@ e-Legislative Dashboard
 {% block main_content %}
 <!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
-<!-- Content Header (Page header) -->
-<section class="content-header">
+  <!-- Content Header (Page header) -->
+  <section class="content-header">
     <h1>
-    Dashboard
-    <small>Summary</small>
+      Dashboard
+      <small>Summary</small>
     </h1>
     <ol class="breadcrumb">
-    <li><a href="{% url 'elegislative:dashboard_page' %}"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+      <li><a href="{% url 'elegislative:dashboard_page' %}"><i class="fa fa-dashboard"></i> Dashboard</a></li>
     </ol>
-</section>
+  </section>
 
-<!-- Main content -->
-<section class="content">
+  <!-- Main content -->
+  <section class="content">
     <div class="row">
       <div class="col-md-3 col-sm-6 col-xs-12">
         <div class="info-box">
-          <a href="{% url 'elegislative:agenda_page' %}"><span class="info-box-icon bg-aqua"><i class="fa fa-envelope-o"></i></span></a>
+          <a href="{% url 'elegislative:agenda_page' %}"><span class="info-box-icon bg-aqua"><i
+                class="fa fa-envelope-o"></i></span></a>
 
 
           <div class="info-box-content">
@@ -352,7 +367,8 @@ e-Legislative Dashboard
       <!-- /.col -->
       <div class="col-md-3 col-sm-6 col-xs-12">
         <div class="info-box">
-          <a href="{% url 'elegislative:resolution' %}"><span class="info-box-icon bg-green"><i class="fa  fa-file-o"></i></span></a>
+          <a href="{% url 'elegislative:resolution' %}"><span class="info-box-icon bg-green"><i
+                class="fa  fa-file-o"></i></span></a>
           <div class="info-box-content">
             <span class="info-box-text">Resolution</span>
             <span class="info-box-number">{{resolution.count|intcomma}}</span>
@@ -364,7 +380,8 @@ e-Legislative Dashboard
       <!-- /.col -->
       <div class="col-md-3 col-sm-6 col-xs-12">
         <div class="info-box">
-          <a href="{% url 'elegislative:ordinance_page' %}"><span class="info-box-icon bg-yellow"><i class="fa fa-files-o"></i></span></a>
+          <a href="{% url 'elegislative:ordinance_page' %}"><span class="info-box-icon bg-yellow"><i
+                class="fa fa-files-o"></i></span></a>
           <div class="info-box-content">
             <span class="info-box-text">Ordinance</span>
             <span class="info-box-number">{{ordinance.count|intcomma}}</span>
@@ -376,7 +393,8 @@ e-Legislative Dashboard
       <!-- /.col -->
       <div class="col-md-3 col-sm-6 col-xs-12">
         <div class="info-box">
-          <a href="{% url 'elegislative:comments_and_recommendation' %}"><span class="info-box-icon bg-red"><i class="fa fa-table"></i></span></a>
+          <a href="{% url 'elegislative:comments_and_recommendation' %}"><span class="info-box-icon bg-red"><i
+                class="fa fa-table"></i></span></a>
           <div class="info-box-content">
             <span class="info-box-text">Minutes of the meeting</span>
             <span class="info-box-number">{{mom.count|intcomma}}</span>
@@ -389,182 +407,190 @@ e-Legislative Dashboard
     </div>
 
     <div class="row">
-        <div class="col-md-4 col-sm-6 col-xs-12">
-          <div class="info-box bg-yellow">
-            <span class="info-box-icon"><i class="fa fa-check"></i></span>
+      <div class="col-md-4 col-sm-6 col-xs-12">
+        <div class="info-box bg-yellow">
+          <span class="info-box-icon"><i class="fa fa-check"></i></span>
 
-            <div class="info-box-content">
-              <span class="info-box-text">Signed Documents</span>
-              <span class="info-box-number">{{signed|intcomma}}</span>
+          <div class="info-box-content">
+            <span class="info-box-text">Signed Documents</span>
+            <span class="info-box-number">{{signed|intcomma}}</span>
 
-              <div class="progress">
-                <div class="progress-bar" style="width: {% compute_percentage signed unsigned %}%"></div>
-              </div>
-              <span class="progress-description">
-                {% compute_percentage signed unsigned%}% of overall documents
-                  </span>
+            <div class="progress">
+              <div class="progress-bar" style="width: {% compute_percentage signed unsigned %}%"></div>
             </div>
-            <!-- /.info-box-content -->
+            <span class="progress-description">
+              {% compute_percentage signed unsigned%}% of overall documents
+            </span>
           </div>
+          <!-- /.info-box-content -->
         </div>
-        <!-- /.col -->
-        <div class="col-md-4 col-sm-6 col-xs-12">
-            <div class="info-box bg-green">
-              <span class="info-box-icon"><i class="fa fa-times"></i></span>
+      </div>
+      <!-- /.col -->
+      <div class="col-md-4 col-sm-6 col-xs-12">
+        <div class="info-box bg-green">
+          <span class="info-box-icon"><i class="fa fa-times"></i></span>
 
-              <div class="info-box-content">
-                <span class="info-box-text">Unsigned Documents</span>
-                <span class="info-box-number">{{unsigned|intcomma}}</span>
+          <div class="info-box-content">
+            <span class="info-box-text">Unsigned Documents</span>
+            <span class="info-box-number">{{unsigned|intcomma}}</span>
 
-                <div class="progress">
-                  <div class="progress-bar" style="width: {% compute_percentage unsigned signed %}%"></div>
-                </div>
-                <span class="progress-description">
-                  {% compute_percentage unsigned signed %}% of overall documents
-                    </span>
-              </div>
-              <!-- /.info-box-content -->
+            <div class="progress">
+              <div class="progress-bar" style="width: {% compute_percentage unsigned signed %}%"></div>
             </div>
+            <span class="progress-description">
+              {% compute_percentage unsigned signed %}% of overall documents
+            </span>
+          </div>
+          <!-- /.info-box-content -->
         </div>
-        <!-- /.col -->
-        <div class="col-md-4 col-sm-6 col-xs-12">
-            <div class="info-box bg-red">
-              <span class="info-box-icon"><i class="fa fa-thumbs-o-up"></i></span>
+      </div>
+      <!-- /.col -->
+      <div class="col-md-4 col-sm-6 col-xs-12">
+        <div class="info-box bg-red">
+          <span class="info-box-icon"><i class="fa fa-thumbs-o-up"></i></span>
 
-              <div class="info-box-content">
-                <span class="info-box-text">Approved Documents</span>
-                <span class="info-box-number">{{approved|intcomma}}</span>
+          <div class="info-box-content">
+            <span class="info-box-text">Approved Documents</span>
+            <span class="info-box-number">{{approved|intcomma}}</span>
 
-                <div class="progress">
-                  <div class="progress-bar" style="width: {% compute_percentage approved denied pending uncategorized%}%"></div>
-                </div>
-                <span class="progress-description">
-                  {% compute_percentage approved denied pending uncategorized%}% of overall documents
-                    </span>
+            <div class="progress">
+              <div class="progress-bar" style="width: {% compute_percentage approved denied pending uncategorized%}%">
               </div>
-              <!-- /.info-box-content -->
             </div>
+            <span class="progress-description">
+              {% compute_percentage approved denied pending uncategorized%}% of overall documents
+            </span>
+          </div>
+          <!-- /.info-box-content -->
         </div>
+      </div>
     </div>
 
     <div class="row">
-        <div class="col-md-4 col-sm-6 col-xs-12">
-          <div class="info-box bg-aqua">
-            <span class="info-box-icon"><i class="fa fa-thumbs-o-down"></i></span>
+      <div class="col-md-4 col-sm-6 col-xs-12">
+        <div class="info-box bg-aqua">
+          <span class="info-box-icon"><i class="fa fa-thumbs-o-down"></i></span>
 
-            <div class="info-box-content">
-              <span class="info-box-text">Denied Documents</span>
-              <span class="info-box-number">{{denied|intcomma}}</span>
+          <div class="info-box-content">
+            <span class="info-box-text">Denied Documents</span>
+            <span class="info-box-number">{{denied|intcomma}}</span>
 
-              <div class="progress">
-                <div class="progress-bar" style="width: {% compute_percentage denied approved pending uncategorized%}%"></div>
+            <div class="progress">
+              <div class="progress-bar" style="width: {% compute_percentage denied approved pending uncategorized%}%">
               </div>
-              <span class="progress-description">
-                {% compute_percentage denied approved pending uncategorized%}% of overall documents
-                  </span>
             </div>
-            <!-- /.info-box-content -->
+            <span class="progress-description">
+              {% compute_percentage denied approved pending uncategorized%}% of overall documents
+            </span>
           </div>
+          <!-- /.info-box-content -->
         </div>
-        <div class="col-md-4 col-sm-6 col-xs-12">
-          <div class="info-box bg-navy">
-            <span class="info-box-icon"><i class="fa fa-files-o"></i></span>
+      </div>
+      <div class="col-md-4 col-sm-6 col-xs-12">
+        <div class="info-box bg-navy">
+          <span class="info-box-icon"><i class="fa fa-files-o"></i></span>
 
-            <div class="info-box-content">
-              <span class="info-box-text">Pending Documents</span>
-              <span class="info-box-number">{{pending|intcomma}}</span>
+          <div class="info-box-content">
+            <span class="info-box-text">Pending Documents</span>
+            <span class="info-box-number">{{pending|intcomma}}</span>
 
-              <div class="progress">
-                <div class="progress-bar" style="width: {% compute_percentage pending denied approved uncategorized%}%"></div>
+            <div class="progress">
+              <div class="progress-bar" style="width: {% compute_percentage pending denied approved uncategorized%}%">
               </div>
-              <span class="progress-description">
-                {% compute_percentage pending denied approved uncategorized%}% of overall documents
-                  </span>
             </div>
-            <!-- /.info-box-content -->
+            <span class="progress-description">
+              {% compute_percentage pending denied approved uncategorized%}% of overall documents
+            </span>
           </div>
+          <!-- /.info-box-content -->
         </div>
-        <div class="col-md-4 col-sm-6 col-xs-12">
-          <div class="info-box bg-purple">
-            <span class="info-box-icon"><i class="fa fa-question"></i></span>
+      </div>
+      <div class="col-md-4 col-sm-6 col-xs-12">
+        <div class="info-box bg-purple">
+          <span class="info-box-icon"><i class="fa fa-question"></i></span>
 
-            <div class="info-box-content">
-              <span class="info-box-text">Uncategorized Documents</span>
-              <span class="info-box-number">{{uncategorized|intcomma}}</span>
+          <div class="info-box-content">
+            <span class="info-box-text">Uncategorized Documents</span>
+            <span class="info-box-number">{{uncategorized|intcomma}}</span>
 
-              <div class="progress">
-                <div class="progress-bar" style="width: {% compute_percentage uncategorized pending denied approved %}%"></div>
+            <div class="progress">
+              <div class="progress-bar" style="width: {% compute_percentage uncategorized pending denied approved %}%">
               </div>
-              <span class="progress-description">
-                  {% compute_percentage uncategorized pending denied approved %}% of overall documents
-              </span>
             </div>
-            <!-- /.info-box-content -->
+            <span class="progress-description">
+              {% compute_percentage uncategorized pending denied approved %}% of overall documents
+            </span>
           </div>
+          <!-- /.info-box-content -->
         </div>
+      </div>
     </div>
 
 
     <!-- Small boxes (Stat box) -->
     <div class="row">
       <div class="col-lg-3 col-xs-6">
-          <!-- small box -->
-          <div class="small-box bg-aqua">
+        <!-- small box -->
+        <div class="small-box bg-aqua">
           <div class="inner">
-              <h3>{{cr_ord.count|intcomma}}</h3>
+            <h3>{{cr_ord.count|intcomma}}</h3>
 
-              <p>Committee Reports (Ordinance)</p>
+            <p>Committee Reports (Ordinance)</p>
           </div>
           <div class="icon">
-              <i class="fa fa-microphone"></i>
+            <i class="fa fa-microphone"></i>
           </div>
-          <a href="{% url 'elegislative:committee_reports' %}" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
-          </div>
+          <a href="{% url 'elegislative:committee_reports' %}" class="small-box-footer">More info <i
+              class="fa fa-arrow-circle-right"></i></a>
+        </div>
       </div>
       <!-- ./col -->
       <div class="col-lg-3 col-xs-6">
-          <!-- small box -->
-          <div class="small-box bg-green">
+        <!-- small box -->
+        <div class="small-box bg-green">
           <div class="inner">
-              <h3>{{cr_res.count|intcomma}}</h3>
+            <h3>{{cr_res.count|intcomma}}</h3>
 
-              <p>Committee Report (Resolution)</p>
+            <p>Committee Report (Resolution)</p>
           </div>
           <div class="icon">
-              <i class="fa  fa-microphone-slash"></i>
+            <i class="fa  fa-microphone-slash"></i>
           </div>
-          <a href="{% url 'elegislative:committee_reports' %}" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
-          </div>
+          <a href="{% url 'elegislative:committee_reports' %}" class="small-box-footer">More info <i
+              class="fa fa-arrow-circle-right"></i></a>
+        </div>
       </div>
       <!-- ./col -->
       <div class="col-lg-3 col-xs-6">
-          <!-- small box -->
-          <div class="small-box bg-yellow">
+        <!-- small box -->
+        <div class="small-box bg-yellow">
           <div class="inner">
-              <h3>{{announcement.count|intcomma}}</h3>
+            <h3>{{announcement.count|intcomma}}</h3>
 
-              <p>Announcements</p>
+            <p>Announcements</p>
           </div>
           <div class="icon">
-              <i class="fa fa-commenting"></i>
+            <i class="fa fa-commenting"></i>
           </div>
-          <a href="{% url 'elegislative:announcements' %}" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
-          </div>
+          <a href="{% url 'elegislative:announcements' %}" class="small-box-footer">More info <i
+              class="fa fa-arrow-circle-right"></i></a>
+        </div>
       </div>
       <!-- ./col -->
       <div class="col-lg-3 col-xs-6">
-          <!-- small box -->
-          <div class="small-box bg-red">
+        <!-- small box -->
+        <div class="small-box bg-red">
           <div class="inner">
-              <h3>{{com_rec_total|intcomma}}</h3>
+            <h3>{{com_rec_total|intcomma}}</h3>
 
-              <p>Comments & Recommendation</p>
+            <p>Comments & Recommendation</p>
           </div>
           <div class="icon">
-              <i class="fa fa-wechat"></i>
+            <i class="fa fa-wechat"></i>
           </div>
-          <a href="{% url 'elegislative:comments_and_recommendation' %}" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
-          </div>
+          <a href="{% url 'elegislative:comments_and_recommendation' %}" class="small-box-footer">More info <i
+              class="fa fa-arrow-circle-right"></i></a>
+        </div>
       </div>
       <!-- ./col -->
     </div>
@@ -577,7 +603,8 @@ e-Legislative Dashboard
           <div class="box-header with-border">
             <h3 class="box-title">{{a.title}}</h3>
             <div class="box-tools pull-right">
-              <span data-toggle="tooltip" title="" class="badge bg-green" data-original-title="Author">{{a.author.f_name}} {{a.author.l_name}}</span>
+              <span data-toggle="tooltip" title="" class="badge bg-green"
+                data-original-title="Author">{{a.author.f_name}} {{a.author.l_name}}</span>
               <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
               </button>
               <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
@@ -595,171 +622,170 @@ e-Legislative Dashboard
       {% endfor %}
     </div>
 
-</section>
-<!-- /.content -->
+  </section>
+  <!-- /.content -->
 </div>
 {% endblock main_content %}
-  <!-- /.content-wrapper -->
-  <footer class="main-footer">
-    <div class="pull-right hidden-xs">
-      <b>Version</b> 0.0.1
+<!-- /.content-wrapper -->
+<footer class="main-footer">
+  <div class="pull-right hidden-xs">
+    <b>Version</b> 0.0.1
+  </div>
+  <strong>Copyright &copy; 2014-2019 <a href="#">e-Legislative System</a>.</strong> All rights
+  reserved.
+</footer>
+
+<!-- Control Sidebar -->
+<aside class="control-sidebar control-sidebar-dark" style="display: none;">
+  <!-- Create the tabs -->
+  <ul class="nav nav-tabs nav-justified control-sidebar-tabs">
+    <li><a href="#control-sidebar-home-tab" data-toggle="tab"><i class="fa fa-home"></i></a></li>
+    <li><a href="#control-sidebar-settings-tab" data-toggle="tab"><i class="fa fa-gears"></i></a></li>
+  </ul>
+  <!-- Tab panes -->
+  <div class="tab-content">
+    <!-- Home tab content -->
+    <div class="tab-pane" id="control-sidebar-home-tab">
+
+
     </div>
-    <strong>Copyright &copy; 2014-2019 <a href="#">e-Legislative System</a>.</strong> All rights
-    reserved.
-  </footer>
+    <!-- /.tab-pane -->
+    <!-- Stats tab content -->
+    <div class="tab-pane" id="control-sidebar-stats-tab">Stats Tab Content</div>
+    <!-- /.tab-pane -->
+    <!-- Settings tab content -->
+    <div class="tab-pane" id="control-sidebar-settings-tab">
+      <form method="post">
+        <h3 class="control-sidebar-heading">General Settings</h3>
 
-   <!-- Control Sidebar -->
-   <aside class="control-sidebar control-sidebar-dark" style="display: none;">
-    <!-- Create the tabs -->
-      <ul class="nav nav-tabs nav-justified control-sidebar-tabs">
-        <li><a href="#control-sidebar-home-tab" data-toggle="tab"><i class="fa fa-home"></i></a></li>
-        <li><a href="#control-sidebar-settings-tab" data-toggle="tab"><i class="fa fa-gears"></i></a></li>
-      </ul>
-      <!-- Tab panes -->
-      <div class="tab-content">
-        <!-- Home tab content -->
-        <div class="tab-pane" id="control-sidebar-home-tab">
+        <div class="form-group">
+          <label class="control-sidebar-subheading">
+            Report panel usage
+            <input type="checkbox" class="pull-right" checked>
+          </label>
 
-
+          <p>
+            Some information about this general settings option
+          </p>
         </div>
-        <!-- /.tab-pane -->
-        <!-- Stats tab content -->
-        <div class="tab-pane" id="control-sidebar-stats-tab">Stats Tab Content</div>
-        <!-- /.tab-pane -->
-        <!-- Settings tab content -->
-        <div class="tab-pane" id="control-sidebar-settings-tab">
-          <form method="post">
-            <h3 class="control-sidebar-heading">General Settings</h3>
+        <!-- /.form-group -->
 
-            <div class="form-group">
-              <label class="control-sidebar-subheading">
-                Report panel usage
-                <input type="checkbox" class="pull-right" checked>
-              </label>
+        <div class="form-group">
+          <label class="control-sidebar-subheading">
+            Allow mail redirect
+            <input type="checkbox" class="pull-right" checked>
+          </label>
 
-              <p>
-                Some information about this general settings option
-              </p>
-            </div>
-            <!-- /.form-group -->
-
-            <div class="form-group">
-              <label class="control-sidebar-subheading">
-                Allow mail redirect
-                <input type="checkbox" class="pull-right" checked>
-              </label>
-
-              <p>
-                Other sets of options are available
-              </p>
-            </div>
-            <!-- /.form-group -->
-
-            <div class="form-group">
-              <label class="control-sidebar-subheading">
-                Expose author name in posts
-                <input type="checkbox" class="pull-right" checked>
-              </label>
-
-              <p>
-                Allow the user to show his name in blog posts
-              </p>
-            </div>
-            <!-- /.form-group -->
-
-            <h3 class="control-sidebar-heading">Chat Settings</h3>
-
-            <div class="form-group">
-              <label class="control-sidebar-subheading">
-                Show me as online
-                <input type="checkbox" class="pull-right" checked>
-              </label>
-            </div>
-            <!-- /.form-group -->
-
-            <div class="form-group">
-              <label class="control-sidebar-subheading">
-                Turn off notifications
-                <input type="checkbox" class="pull-right">
-              </label>
-            </div>
-            <!-- /.form-group -->
-
-            <div class="form-group">
-              <label class="control-sidebar-subheading">
-                Delete chat history
-                <a href="javascript:void(0)" class="text-red pull-right"><i class="fa fa-trash-o"></i></a>
-              </label>
-            </div>
-            <!-- /.form-group -->
-          </form>
+          <p>
+            Other sets of options are available
+          </p>
         </div>
-        <!-- /.tab-pane -->
+        <!-- /.form-group -->
+
+        <div class="form-group">
+          <label class="control-sidebar-subheading">
+            Expose author name in posts
+            <input type="checkbox" class="pull-right" checked>
+          </label>
+
+          <p>
+            Allow the user to show his name in blog posts
+          </p>
+        </div>
+        <!-- /.form-group -->
+
+        <h3 class="control-sidebar-heading">Chat Settings</h3>
+
+        <div class="form-group">
+          <label class="control-sidebar-subheading">
+            Show me as online
+            <input type="checkbox" class="pull-right" checked>
+          </label>
+        </div>
+        <!-- /.form-group -->
+
+        <div class="form-group">
+          <label class="control-sidebar-subheading">
+            Turn off notifications
+            <input type="checkbox" class="pull-right">
+          </label>
+        </div>
+        <!-- /.form-group -->
+
+        <div class="form-group">
+          <label class="control-sidebar-subheading">
+            Delete chat history
+            <a href="javascript:void(0)" class="text-red pull-right"><i class="fa fa-trash-o"></i></a>
+          </label>
+        </div>
+        <!-- /.form-group -->
+      </form>
+    </div>
+    <!-- /.tab-pane -->
+  </div>
+</aside>
+
+<!-- Modals -->
+<div class="modal fade" id="modal-default">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Loading Form Modal&hellip;</h4>
       </div>
-    </aside>
-
-  <!-- Modals -->
-  <div class="modal fade" id="modal-default">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">Loading Form Modal&hellip;</h4>
-            </div>
-            <div class="modal-body">
-                <p>Loading Content&hellip;</p>
-            </div>
-            <!-- <div class="modal-footer">
+      <div class="modal-body">
+        <p>Loading Content&hellip;</p>
+      </div>
+      <!-- <div class="modal-footer">
                 <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
                 <button type="button" class="btn btn-primary">Save changes</button>
             </div> -->
-        </div>
-        <!-- /.modal-content -->
     </div>
-    <!-- /.modal-dialog -->
+    <!-- /.modal-content -->
   </div>
+  <!-- /.modal-dialog -->
+</div>
 
-  <div class="modal modal-danger fade" id="modal-danger">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">×</span></button>
-          <h4 class="modal-title">Danger Modal</h4>
-        </div>
-        <div class="modal-body">
-          <p>One fine body…</p>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-outline pull-left" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-outline">Save changes</button>
-        </div>
+<div class="modal modal-danger fade" id="modal-danger">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span></button>
+        <h4 class="modal-title">Danger Modal</h4>
       </div>
-      <!-- /.modal-content -->
+      <div class="modal-body">
+        <p>One fine body…</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline pull-left" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-outline">Save changes</button>
+      </div>
     </div>
-    <!-- /.modal-dialog -->
+    <!-- /.modal-content -->
   </div>
+  <!-- /.modal-dialog -->
+</div>
 
-  <div class="modal modal-info fade" id="modal-info">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">×</span></button>
-                <h4 class="modal-title">Info Modal</h4>
-              </div>
-              <div class="modal-body">
-                <p>One fine body…</p>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-outline pull-left" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-outline">Save changes</button>
-              </div>
-            </div>
-            <!-- /.modal-content -->
-          </div>
-          <!-- /.modal-dialog -->
-        </div>
+<div class="modal modal-info fade" id="modal-info">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span></button>
+        <h4 class="modal-title">Info Modal</h4>
+      </div>
+      <div class="modal-body">
+        <p>One fine body…</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline pull-left" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-outline">Save changes</button>
+      </div>
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
+</div>
 {% endblock body_block %}
-
