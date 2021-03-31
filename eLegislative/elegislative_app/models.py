@@ -14,7 +14,8 @@ import traceback
 import os
 
 from django.conf import settings
-
+from django.utils.text import slugify
+from django.urls import reverse
 def encrypt_key(txt):
 
     """Encrypt objects"""
@@ -371,7 +372,31 @@ class SentMessagesModel(models.Model):
     def __str__(self):
         return str(self.sender)
 
- 
+class OrderOfBusiness(models.Model):
+    no = models.CharField(max_length=50, unique=True)
+    slug = models.SlugField(max_length=200, blank=True, null=True, unique=True)
+    title = models.CharField(max_length=255)
+    version = models.CharField(max_length=100)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, related_name="order_of_business_user_fk")
+    is_delete = models.BooleanField(default=False)
+    status = models.CharField(max_length=100, choices=STATUS_LIST, default=STATUS_LIST[0][0])
+    is_signed = models.BooleanField(default=False)
+    hard_copy = models.FileField(upload_to='documents/%Y/%m/%d', verbose_name="hard copy", blank=True, null=True, validators=[file_validator_pdf])
+    content = models.TextField()
+    date_filed = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ('-id',)
+    
+    def __str__(self):
+        return self.no
+    
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.no)
+        super(OrderOfBusiness, self).save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return reverse("elegislative:edit_order_of_business", args=[self.slug,])
 PROTOCOL = (
     ('http://','http://'),
     ('https://','https://'),

@@ -1,7 +1,7 @@
 {% extends 'elegislative/dashboard.html' %}
 {% load static %}
 {% load custom_tags %}
-{% load humanize %} 
+{% load humanize %}
 {% block title %}
 e-Legislative Manage Order Of Business
 {% endblock title%}
@@ -11,10 +11,10 @@ e-Legislative Manage Order Of Business
 <link rel="stylesheet" href="{% static 'bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css' %}">
 
 <style>
-    table td{
-        text-align: center; 
-        vertical-align: middle !important;
-    }
+  table td {
+    text-align: center;
+    vertical-align: middle !important;
+  }
 </style>
 {% endblock additional_css %}
 
@@ -23,15 +23,16 @@ e-Legislative Manage Order Of Business
 <!-- navigation -->
 {% block nav_dashboard %}
 <li class="treeview">
-    <a href="{% url 'elegislative:dashboard_page' %}" >
-    <i class="fa fa-dashboard" ></i> <span>Dashboard</span>
+  <a href="{% url 'elegislative:dashboard_page' %}">
+    <i class="fa fa-dashboard"></i> <span>Dashboard</span>
     <span class="pull-right-container">
-        <i class="fa fa-angle-left pull-right"></i>
+      <i class="fa fa-angle-left pull-right"></i>
     </span>
-    </a>
-    <ul class="treeview-menu">
-    <li class="active"><a href="{% url 'elegislative:dashboard_page' %}"><i class="fa fa-circle-o"></i> Dashboard</a></li> 
-    </ul>
+  </a>
+  <ul class="treeview-menu">
+    <li class="active"><a href="{% url 'elegislative:dashboard_page' %}"><i class="fa fa-circle-o"></i> Dashboard</a>
+    </li>
+  </ul>
 </li>
 {% endblock nav_dashboard %}
 
@@ -48,31 +49,111 @@ e-Legislative Manage Order Of Business
 {% endblock nav_order_of_business %}
 
 
-{% block main_content %} 
+{% block main_content %}
 <div class="content-wrapper">
-    <section class="content-header">
-        <h1>
-        Order of business
-        <small>Create and manage order of business</small>
-        </h1>
-        <ol class="breadcrumb">
-        <li><a href="{% url 'elegislative:dashboard_page' %}"><i class="fa fa-dashboard"></i> Dashboard</a></li>
-        <li class="active">Order of business</li>
-        </ol>
-    </section>
-    <section class="content">
+  <section class="content-header">
+    <h1>
+      Order of business
+      <small>Create and manage order of business</small>
+    </h1>
+    <ol class="breadcrumb">
+      <li><a href="{% url 'elegislative:dashboard_page' %}"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+      <li class="active">Order of business</li>
+    </ol>
+  </section>
+  <section class="content">
+    <div class="row">
+      <div class="col-xs-12">
+        <div class="box">
+          <div class="box-header with-border">
+            <h3 class="box-title">Order of business table</h3>
+            {% if not user.is_view_mode %}
+            <div class="box-tools">
+              <ul class="pagination pagination-sm no-margin pull-right">
+                <li><a href="{% url 'elegislative:create_order_of_business' %}" data-toggle="tooltip"
+                    title="Create new order of business"><i class="fa fa-fw fa-plus"></i>Create new order of
+                    business</a></li>
+              </ul>
+            </div>
+            {% endif %} 
+          </div>
+          <div class="box-body">
+            <table id="table_order_of_business" class="table table-bordered table-striped">
+              <thead>
+                <tr>
+                  <th class="text-center" style="width: 10%;">ID</th>
+                  <th class="text-center" style="width: 10%;">No</th>
+                  <th class="text-center" style="width: 20%;">Title</th>
+                  <th class="text-center" style="width: 15%;">Author</th>
+                  <th class="text-center" style="width: 10%;">Version</th>
+                  <th class="text-center" style="width: 10%;">Status</th>
+                  <th class="text-center" style="width: 5%;">Signed</th>
+                  <th class="text-center" style="width: 10%;"> Date Filed</th>
+                  <th class="text-center" style="width: 10%;"></th>
+                </tr>
+              </thead>
+              <tbody>
 
-    </section>
+                {% for l in object_list %}
+                <tr>
+                  <td>{{l.id}}</td>
+                  <td>{{l.no}}</td>
+                  <td>{{l.title}}</td>
+                  <td>{{l.author.f_name}} {{l.author.l_name}}</td>
+                  <td>{{l.version}}</td>
+                  <td>{{l.status}}</td>
+                  <td>
+                    {% if l.is_signed %}
+                    <span class="label label-success">{{l.is_signed}}</span>
+                    {% else %}
+                    <span class="label label-danger">{{l.is_signed}}</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% custom_data_format l.date_filed%}
+                  </td>
+                  <td>
+                    <div class="btn-group">
+                      <button type="button" class="btn btn-default btn-flat">Action</button>
+                      <button type="button" class="btn btn-default btn-flat dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
+                        <span class="caret"></span>
+                        <span class="sr-only">Toggle Dropdown</span>
+                      </button>
+
+                      <ul class="dropdown-menu" role="menu">
+                          {% if user.is_view_mode %}
+                              <li><a href="{% url 'elegislative:print_order_of_business' l.slug %}" target="_blank">Preview/Print</a></li>   
+                          {% else %}
+                              <li><a href="{{l.get_absolute_url}}">Edit</a></li>
+                              <li><a href="{% url 'elegislative:delete_order_of_business' l.slug %}" class="delete">Delete</a></li> 
+                              <li class="divider"></li>                                                
+                              <li><a href="{% url 'elegislative:print_order_of_business' l.slug %}" target="_blank">Preview/Print</a></li>    
+                          {% endif %} 
+                      </ul>
+                  </div>
+                  </td>
+                </tr>
+                {% endfor %}
+
+
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
 </div>
-{% endblock main_content %} 
+{% endblock main_content %}
 
 <!-- Javascript -->
-   
+
 {% block additional_js %}
 
 <!-- DataTables -->
 <script src="{% static 'bower_components/datatables.net/js/jquery.dataTables.min.js' %}"></script>
 <script src="{% static 'bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js' %}"></script>
-<script src="{% static 'js/order_of_business.js' %}"></script> 
- 
+<script src="{% static 'js/order_of_business.js' %}"></script>
+
 {% endblock additional_js %}

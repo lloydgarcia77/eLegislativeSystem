@@ -769,3 +769,80 @@ class WebExForm(forms.ModelForm):
             'placeholder': 'Remarks',
             'required': 'required',
         }
+
+class OrderOfBusinessForm(forms.ModelForm):
+    class Meta:
+        model = models.OrderOfBusiness
+        exclude = ("slug", "date_filed","status","is_signed","hard_copy")
+    
+    def __init__(self, *args, **kwargs):
+        super(OrderOfBusinessForm, self).__init__(*args, **kwargs)
+
+        self.fields['no'].widget.attrs = {
+            'type': 'text',
+            'class': 'form-control',
+            'placeholder': 'Order of business #',
+            'required': 'required',
+        }
+
+        self.fields['title'].widget.attrs = {
+            'type': 'text',
+            'class': 'form-control',
+            'placeholder': 'Title',
+            'required': 'required',
+        }
+
+        self.fields['version'].widget.attrs = {
+            'type': 'text',
+            'class': 'form-control',
+            'placeholder': 'Version',
+            'required': 'required',
+        } 
+
+        self.fields['content'].widget.attrs = { 
+            'id': 'compose_textarea',
+            'class': 'form-control', 
+            'style': 'height: 300px',
+            'required': 'required',
+        }
+
+class OrderOfBusinessEditForm(forms.ModelForm):
+    class Meta:
+        model = models.OrderOfBusiness
+        exclude = ("slug", "date_filed",)
+    
+    def __init__(self, *args, **kwargs):
+        super(OrderOfBusinessEditForm, self).__init__(*args, **kwargs)
+
+        self.fields['no'].widget.attrs = {
+            'type': 'text',
+            'class': 'form-control',
+            'placeholder': 'Order of business #',
+            'required': 'required',
+        }
+
+        self.fields['title'].widget.attrs = {
+            'type': 'text',
+            'class': 'form-control',
+            'placeholder': 'Title',
+            'required': 'required',
+        }
+
+        self.fields['version'].widget.attrs = {
+            'type': 'text',
+            'class': 'form-control',
+            'placeholder': 'Version',
+            'required': 'required',
+        } 
+
+        self.fields['content'].widget.attrs = { 
+            'id': 'compose_textarea',
+            'class': 'form-control', 
+            'style': 'height: 300px',
+            'required': 'required',
+        }
+
+        self.fields['status'].widget.attrs = { 
+            'class': 'form-control select2', 
+            'style': 'width: 100%', 
+        }

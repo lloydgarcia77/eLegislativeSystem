@@ -2500,13 +2500,113 @@ def order_of_business(request, *args, **kwargs):
     template_name = "elegislative/order_of_business/order_of_business.html"
     user = get_object_or_404(models.User, email=request.user.email)
     
+    object_list = models.OrderOfBusiness.objects.all()
+
     context = {
         'user': user,
         'notifications':kwargs['notifications'], 
+        'object_list': object_list,
     }
 
     return render(request, template_name, context)
 
+@login_required
+@authorize
+@get_notification
+def create_order_of_business(request, *args, **kwargs):
+    template_name = "elegislative/order_of_business/create_order_of_business.html"
+    user = get_object_or_404(models.User, email=request.user.email)
+    if user.is_view_mode:
+        raise Http404()
+    if request.method == 'GET':
+        form = forms.OrderOfBusinessForm(request.GET or None)
+    elif request.method == 'POST':
+        form = forms.OrderOfBusinessForm(request.POST or None)
+        if form.is_valid():
+            instance = form.save(commit=False)
+            instance.author = user
+            instance.save()
+            add_notification(request,'elegislative:order_of_business', f"Order of business ({instance.no}) has been created!", settings.NOTIFICATION_TAGS[1][0])
+            return HttpResponseRedirect(reverse_lazy("elegislative:order_of_business"))
+    context = {
+        'user': user,
+        'notifications':kwargs['notifications'], 
+        'form': form,
+    }
+
+    return render(request, template_name, context)
+
+@login_required
+@authorize
+@get_notification
+def edit_order_of_business(request, *args, **kwargs):
+    template_name = "elegislative/order_of_business/edit_order_of_business.html"
+    user = get_object_or_404(models.User, email=request.user.email)
+    oob = get_object_or_404(models.OrderOfBusiness, slug=kwargs['slug'])
+    if user.is_view_mode:
+        raise Http404()
+    
+    if request.method == 'GET':
+        form = forms.OrderOfBusinessEditForm(request.GET or None, instance=oob)
+    elif request.method == 'POST':
+        form = forms.OrderOfBusinessEditForm(request.POST or None, request.FILES, instance=oob)
+        if form.is_valid():
+            instance = form.save(commit=False)
+            instance.author = user
+            instance.save()
+            return HttpResponseRedirect(reverse_lazy("elegislative:order_of_business")) 
+
+
+    context = {
+        'user': user,
+        'notifications':kwargs['notifications'], 
+        'form': form,
+        'oob': oob,
+    }
+
+    return render(request, template_name, context)
+
+@login_required
+@authorize
+@get_notification
+def delete_order_of_business(request, *args, **kwargs):
+    data = dict()
+    template_name = "elegislative/order_of_business/delete_order_of_business.html"
+    user = get_object_or_404(models.User, email=request.user.email)
+    oob = get_object_or_404(models.OrderOfBusiness, slug=kwargs['slug'])
+    if user.is_view_mode:
+        raise Http404()
+    if request.is_ajax():
+        if request.method == 'GET': 
+            context = {
+                'oob': oob,
+            }
+
+            data['html_form'] = render_to_string(template_name, context, request)
+        elif request.method == 'POST':
+            data['form_is_valid'] = True
+            # agenda.is_delete = True
+            # agenda.save()
+            oob.delete()
+        return JsonResponse(data)
+    else:
+        raise Http404()
+ 
+
+@login_required
+@authorize
+@get_notification
+def print_order_of_business(request, *args, **kwargs):
+    template_name = "elegislative/order_of_business/print_order_of_business.html"
+    user = get_object_or_404(models.User, email=request.user.email)
+    oob = get_object_or_404(models.OrderOfBusiness, slug=kwargs['slug'])
+    context = {
+        'user': user,
+        'notifications':kwargs['notifications'], 
+        'oob': oob,
+    }
+
+    return render(request, template_name, context)
 """
 [END] -> Order of business features
 """

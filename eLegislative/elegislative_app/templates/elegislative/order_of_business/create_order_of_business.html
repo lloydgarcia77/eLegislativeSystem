@@ -1,0 +1,114 @@
+{% extends 'elegislative/dashboard.html' %}
+{% load static %}
+{% load custom_tags %}
+{% load humanize %}
+{% block title %}
+e-Legislative Create Order Of Business
+{% endblock title%}
+
+{% block nav_dashboard %}
+<li class="treeview">
+    <a href="{% url 'elegislative:dashboard_page' %}">
+        <i class="fa fa-dashboard"></i> <span>Dashboard</span>
+        <span class="pull-right-container">
+            <i class="fa fa-angle-left pull-right"></i>
+        </span>
+    </a>
+    <ul class="treeview-menu">
+        <li class="active"><a href="{% url 'elegislative:dashboard_page' %}"><i class="fa fa-circle-o"></i>
+                Dashboard</a>
+        </li>
+    </ul>
+</li>
+{% endblock nav_dashboard %}
+
+
+{% block nav_order_of_business %}
+<li class="active">
+    <a href="{% url 'elegislative:order_of_business' %}">
+        <i class="fa fa-tasks"></i> <span>Order of business</span>
+        <span class="pull-right-container">
+            <small class="label pull-right bg-green"></small>
+        </span>
+    </a>
+</li>
+{% endblock nav_order_of_business %}
+
+
+
+{% block main_content %}
+
+<div class="content-wrapper">
+    <section class="content-header">
+        <h1>
+            Order of business
+            <small>Create new order of business</small>
+        </h1>
+        <ol class="breadcrumb">
+            <li><a href="{% url 'elegislative:dashboard_page' %}"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+            <li><a href="{% url 'elegislative:order_of_business' %}"> Order of business</a></li>
+            <li class="active">Order of business</li>
+        </ol>
+    </section>
+    <section class="content">
+        <form method="POST">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-12">
+                    {% if form.errors %}
+                        <div class="callout callout-danger"> 
+                            <h4>Oops! Form Error!</h4>
+                            <p><strong>Please fix the error and try to save again!</strong></p>
+                            <p></p>
+                            {{form.errors}} 
+                        </div> 
+                    {% endif %}
+                    <div class="box box-primary">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">Compose new order of business</h3>
+                        </div>
+                        <div class="box-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group"> 
+                                        {{form.no}}
+                                    </div> 
+                                    <div class="form-group">
+                                        {{form.title}}
+                                    </div> 
+                                </div>  
+                                <div class="col-md-6"> 
+                                    <div class="form-group">
+                                        {{form.version}}
+                                    </div> 
+                             
+                                </div> 
+                                <div class="col-md-12"> 
+                                    <div class="form-group">
+                                        {{form.content}} 
+                                    </div>
+                                </div>
+                
+                            </div> 
+                        </div>
+                          <!-- Box Footer -->
+                          <div class="box-footer">
+                            <div class="pull-right"> 
+                                <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Save</button>
+                            </div>
+                            <a href="{% url 'elegislative:order_of_business' %}" class="btn btn-default"><i class="fa fa-times"></i> Cancel</a> 
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </section>
+</div>
+{% endblock main_content %}
+
+
+{% block additional_js %}
+<!-- CK Editor -->
+<script src="{% static 'bower_components/ckeditor/ckeditor.js' %}"></script>
+<script src="{% static 'js/ck_editor_settings.js' %}"></script>
+{% endblock additional_js %}

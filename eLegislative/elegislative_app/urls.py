@@ -96,4 +96,8 @@ urlpatterns = [
 
     # Order of business
     path('order-of-business/',views.order_of_business, name="order_of_business"),
+    path('order-of-business/create', views.create_order_of_business, name="create_order_of_business"),
+    path('order-of-business/edit/<slug:slug>', views.edit_order_of_business, name="edit_order_of_business"),
+    path('order-of-business/delete/<slug:slug>', views.delete_order_of_business, name="delete_order_of_business"),
+    path('order-of-business/print/<slug:slug>', views.print_order_of_business, name="print_order_of_business"),
 ]

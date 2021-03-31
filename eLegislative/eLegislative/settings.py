@@ -173,8 +173,8 @@ AUTH_USER_MODEL = 'elegislative_app.User'
 # for jet
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
-STATIC_URL = '/static/'
-STATIC_ROOT = STATIC_DIR
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_URL = '/static/' 
 # STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
 
@@ -195,10 +195,12 @@ MESSAGE_TAGS = {
     messages.ERROR: 'alert-danger',
 }
 # -------Using Gmail
+# https://accounts.google.com/DisplayUnlockCaptcha
+# If you encounter all creds working but SMTPAutheticationError -> use the link above to allow captcha
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'elegislativebatangas77@gmail.com'
-EMAIL_HOST_PASSWORD = 'qweQWE123!'
+EMAIL_HOST_USER = 'lloydgarcia77@gmail.com'
+EMAIL_HOST_PASSWORD = 'LloydQueen77'
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 EMAIL_FROM = EMAIL_HOST_USER
